@@ -1,0 +1,264 @@
+<?php
+
+     include "connection.php";
+     include "navbar.php";
+
+?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+     <meta charset="UTF-8">
+     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+     <title>Books</title>
+     <style type="text/css">
+          .sarch {
+               text-align:right;
+          }
+
+
+
+body {
+  font-family: "Lato", sans-serif;
+  transition: background-color .5s;
+}
+
+.sidenav {
+  height: 100%;
+  margin-top: 100px; /* Adjusted to avoid overlap with navbar */
+  width: 0;
+  position: fixed;
+  z-index: 1;
+  top: 0;
+  left: 0;
+  background-color: #c19f9f;
+  overflow-x: hidden;
+  transition: 0.5s;
+  padding-top: 60px;
+  
+}
+
+.sidenav a {
+  padding: 8px 8px 8px 32px;
+  text-decoration: none;
+  font-size: 25px;
+  color:#000000;
+  display: block;
+  transition: 0.3s;
+}
+
+.sidenav a:hover {
+  color: #f1f1f1;
+}
+
+.sidenav .closebtn {
+  position: absolute;
+  top: 0;
+  right: 25px;
+  font-size: 36px;
+  margin-left: 50px;
+}
+
+#main {
+  transition: margin-left .5s;
+  padding: 16px;
+}
+
+@media screen and (max-height: 450px) {
+  .sidenav {padding-top: 15px;}
+  .sidenav a {font-size: 18px;}
+}
+
+.h:hover { 
+     width:100%;
+     height:50px;
+     background-color:#48968f;
+     
+}
+
+     </style>
+</head>
+<body> 
+
+<!-- ___________________________Side Nav___________________________ -->
+
+<div id="mySidenav" class="sidenav">
+  <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
+     <div style="text-align: center; font-size:20px;">
+
+          <?php
+          
+               if(isset($_SESSION['login_user'])) {
+                     
+                    echo "<img class='img-circle profile_img' height=100 width=100 src='images/".$_SESSION['pic']." '>  ";
+                    echo "<br> <br>";
+                    echo "Welcome,  ". $_SESSION['login_user'] . "!";
+               }
+               ?>
+     </div>
+
+  <div class="h"> <a href="books.php"> Books </a> </div>
+  <div class="h"> <a href="request.php">Book Request</a> </div>
+  <div class="h"> <a href="issue_info.php">Issue Information</a> </div>
+  <div class="h"> <a href="expired.php">Expired Books</a> </div>
+  
+</div>
+
+<div id="main">
+
+  <span style="font-size:30px;cursor:pointer" onclick="openNav()">&#9776; open</span>
+
+
+<script>
+function openNav() {
+  document.getElementById("mySidenav").style.width = "300px";
+  document.getElementById("main").style.marginLeft = "300px";
+  document.body.style.backgroundColor = "rgba(0,0,0,0.4)";
+}
+
+function closeNav() {
+  document.getElementById("mySidenav").style.width = "0";
+  document.getElementById("main").style.marginLeft= "0";
+  document.body.style.backgroundColor = "white";
+}
+</script>
+
+
+
+<!--____________________________search bar___________________________-->
+
+     <div class="sarch">
+          <form class="navbar-form" action="" method="post" name="form1">
+
+                    <input class="form-control" type="text" class="form-control" name="search" placeholder="Search for books..." required>
+                    <button type="submit" name="submit" class="btn btn-default" style="background: #b8adad";> <span class="glyphicon glyphicon-search"></span> Search</button>
+
+          </form>
+     </div>
+
+     <!-- _______________________________request boook _________________________________ -->
+    
+     <div class="sarch">
+          <form class="navbar-form" action="" method="post" name="form1">
+
+               <input class="form-control" type="text" class="form-control" name="bid" placeholder="Enter Book ID to Request book" required>
+               <button type="submit" name="submit1" class="btn btn-default" style="background: #b8adad";>  Request </button>
+
+          </form>
+     </div>
+     <h2> List of Books </h2>
+     <?php
+
+          // --------------- search query------------
+     if(isset($_POST['submit'])) {
+          // $q = $_POST['search'];
+          $q = mysqli_query($db, "SELECT * FROM books WHERE names LIKE '%$_POST[search]%' OR authors LIKE '%$_POST[search]%' OR department LIKE '%$_POST[search]%'");
+               if( mysqli_num_rows($q) == 0) 
+                    // If search query returns results, display them
+                    echo "Sorry, no results found for your search.";
+               else {
+                     echo "<table class='table table-bordered table-hover' > ";
+     echo "<tr style='background-color: #b8adad;'>";
+     echo "<th>"; echo "ID"; echo "</th>"; 
+     echo "<th>"; echo "Book Name"; echo "</th>"; 
+     echo "<th>"; echo "Authors"; echo "</th>"; 
+     echo "<th>"; echo "Edition"; echo "</th>"; 
+     echo "<th>"; echo "Status"; echo "</th>"; 
+     echo "<th>"; echo "Quantity"; echo "</th>"; 
+     echo "<th>"; echo "Department"; echo "</th>";
+     echo "</tr>"; 
+
+     while($row = mysqli_fetch_assoc($q)) {
+          echo "<tr>";
+          echo "<td>"; echo $row['bid']; echo "</td>";
+          echo "<td>"; echo $row['names']; echo "</td>";
+          echo "<td>"; echo $row['authors']; echo "</td>";
+          echo "<td>"; echo $row['edition']; echo "</td>";
+          echo "<td>"; echo $row['status']; echo "</td>";
+          echo "<td>"; echo $row['quantity']; echo "</td>";
+          echo "<td>"; echo $row['department']; echo "</td>";
+          echo "</tr>";
+     }
+     echo "</table>";
+               }
+      }
+
+else {
+
+
+     $res=mysqli_query($db,"SELECT * FROM books");
+     //table header
+     echo "<table class='table table-bordered table-hover' > ";
+     echo "<tr style='background-color: #b8adad;'>";
+     echo "<th>"; echo "ID"; echo "</th>"; 
+     echo "<th>"; echo "Book Name"; echo "</th>"; 
+     echo "<th>"; echo "Authors"; echo "</th>"; 
+     echo "<th>"; echo "Edition"; echo "</th>"; 
+     echo "<th>"; echo "Status"; echo "</th>"; 
+     echo "<th>"; echo "Quantity"; echo "</th>"; 
+     echo "<th>"; echo "Department"; echo "</th>";
+     echo "</tr>"; 
+
+     while($row = mysqli_fetch_assoc($res)) {
+          echo "<tr>";
+          echo "<td>"; echo $row['bid']; echo "</td>";
+          echo "<td>"; echo $row['names']; echo "</td>";
+          echo "<td>"; echo $row['authors']; echo "</td>";
+          echo "<td>"; echo $row['edition']; echo "</td>";
+          echo "<td>"; echo $row['status']; echo "</td>";
+          echo "<td>"; echo $row['quantity']; echo "</td>";
+          echo "<td>"; echo $row['department']; echo "</td>";
+          echo "</tr>";
+     }
+     echo "</table>";
+}
+
+if(isset($_POST['submit1'])) {
+     if(isset($_SESSION['login_user'])) {
+          $sql1= mysqli_query($db, "SELECT * FROM books WHERE bid = '$_POST[bid]';");
+          $row1=mysqli_fetch_assoc($sql1);
+          $count1= mysqli_num_rows($sql1);
+          if  ($count1!=0) {
+
+$check = mysqli_query($db, "SELECT * FROM issue_book WHERE username='$_SESSION[login_user]' AND bid='$_POST[bid]'");
+if(mysqli_num_rows($check) > 0) {
+    ?>
+    <script type="text/javascript">
+        alert("You have already requested this book.");
+        window.location = "books.php";
+    </script>
+    <?php
+    exit(); 
+}
+
+          mysqli_query($db, "INSERT INTO issue_book VALUES ('$_SESSION[login_user]','$_POST[bid]','','', '')");
+         ?>
+          <script type="text/javascript">
+               window.location= "request.php";
+               alert("Book request has been sent successfully.");
+          </script>
+
+<?php
+          }
+          else {
+                     ?>
+          <script type="text/javascript">
+               alert("The book is not listed in library.");
+               window.location= "books.php";
+          </script>
+<?php
+          }
+     }
+     else {
+          ?>
+          <script type="text/javascript">
+               alert("Please login to request a book.");
+          </script>
+
+<?php
+
+     }
+}
+     ?>
+     </div>
+</body>
+</html>
