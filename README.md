@@ -1,12 +1,14 @@
 # Smart Library Management System
 
-A comprehensive web-based library management system built with PHP and MySQL that helps efficiently manage library resources, users, and operations. This system is designed to streamline library operations, enhance user experience, and provide efficient management of library resources in educational institutions.
+A comprehensive web-based library management system built with PHP and MySQL that helps efficiently manage library resources, users, and operations. This system streamlines library operations and enhances user experience in educational institutions.
 
 ## Developer Contact Information
 
-- **LinkedIn**: [Tonmoy Sarker](https://www.linkedin.com/in/tonmoyy/)
-- **Facebook**: [Tonmoy Sarker](https://www.facebook.com/realtonmoysarker)
-- **Email**: tonmoy4451@gmail.com
+### Tonmoy Sarker Sourav
+
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-0077B5?style=flat&logo=linkedin)](https://www.linkedin.com/in/tonmoyy/) 
+[![Facebook](https://img.shields.io/badge/Facebook-1877F2?style=flat&logo=facebook&logoColor=white)](https://www.facebook.com/realtonmoysarker)
+[![Email](https://img.shields.io/badge/Email-D14836?style=flat&logo=gmail&logoColor=white)](mailto:tonmoy4451@gmail.com)
 
 ## Features
 
@@ -14,166 +16,109 @@ A comprehensive web-based library management system built with PHP and MySQL tha
 - **Dual User System**: 
   - Separate interfaces for administrators and students
   - Role-based access control
-  - Customized dashboards for different user types
-  - Session management and security
+  - Basic session management
 
-- **Secure Registration**: 
-  - Email verification system for students with OTP (One-Time Password)
-  - Username validation to prevent conflicts and admin impersonation
-  - Secure password management with encryption
-  - Duplicate email and roll number prevention
-  - Profile picture upload capability
+- **Registration System**: 
+  - Email verification with OTP
+  - Username validation
+  - Basic profile setup
+  - Student roll number verification
 
 - **Profile Management**: 
-  - Users can edit their personal information
-  - Update profile pictures
+  - Edit personal information
+  - Update profile picture
   - Modify contact details
-  - Change account credentials
-  - View account activity history
 
 - **Password Recovery**: 
-  - Built-in password recovery system
-  - Secure password reset mechanism
+  - Basic password reset system
   - Email-based recovery process
-  - User verification before password reset
 
 ### Admin Features
 1. **User Management**
-   - Comprehensive student account management
-   - Approve/reject student registrations with email notifications
-   - Monitor student activities and borrowing history
-   - View and manage user profiles
-   - Block/unblock user accounts
+   - View and manage student accounts
+   - Approve/reject student registrations
+   - Monitor borrowing history
    - Reset user passwords
-   - Track user login activities
 
 2. **Book Management**
-   - Add new books with detailed information
+   - Add new books with details:
      - Title, Author, Edition
      - ISBN number
-     - Category/Genre
-     - Publication details
+     - Category
      - Number of copies
-   - Update book information and status in real-time
-   - Track book inventory and availability
-   - Manage book categories
+   - Update book information
+   - Track book inventory
    - Upload book cover images
-   - Generate book QR codes/barcodes
-   - Book status tracking (Available, Issued, Reserved, Under Maintenance)
+   - Book status tracking
 
 3. **Issue Management**
-   - Process book issue requests with automated workflows
-   - Track issued books with due dates
-   - Manage return dates and extensions
-   - Calculate and handle fines for late returns
-   - Generate issue receipts
-   - Automated overdue notifications
-   - Reserve books for students
-   - Track book return history
-   - Generate reports of issued books
+   - Process book issue requests
+   - Track issued books
+   - Manage return dates
+   - Calculate fines for late returns
+   - Track return history
 
-4. **Communication and Notifications**
-   - Receive and respond to student messages
-   - Send individual and bulk notifications to students
-   - View and manage feedback submissions
-   - Send automated reminders for:
+4. **Communication**
+   - Message system with students
+   - View feedback submissions
+   - Basic notifications for:
      - Due dates
      - Overdue books
      - Fine payments
-     - Account status updates
-   - Announcement system for library updates
 
 ### Student Features
-1. **Book Access and Search**
-   - Browse complete book catalog
-   - Advanced search functionality with multiple parameters:
+1. **Book Access**
+   - Browse book catalog
+   - Search books by:
      - Title
      - Author
      - Category
-     - ISBN
-     - Publication year
-   - Real-time book availability status
-   - Book recommendations based on interests
-   - View book details and cover images
-   - Check number of available copies
+   - View book availability
+   - View book details and covers
 
-2. **Book Operations and Management**
-   - Request books with preferred pickup dates
-   - Track current borrowed books status
-   - View upcoming return dates with countdown
-   - Request book renewal/extension
-   - Check and pay fine status
-   - Reserve books for future borrowing
-   - Get notifications for book availability
-   - Download borrowing history
+2. **Book Operations**
+   - Request books
+   - Track borrowed books
+   - View return dates
+   - Check fine status
+   - View borrowing history
 
-3. **Account Features and Dashboard**
-   - Personalized user dashboard showing:
-     - Currently borrowed books
+3. **Account Features**
+   - Dashboard showing:
+     - Current loans
      - Due dates
-     - Fine details
-     - Recent activities
-   - Complete profile customization
-     - Update personal information
-     - Change profile picture
-     - Manage contact details
-   - Interactive message system to communicate with administrators
-   - Detailed borrowing history with filters
-   - Email notifications for account activities
-   - Reading progress tracking
-   - Save favorite books and authors
+     - Fines
+   - Profile management
+   - Message system with administrators
+   - Email notifications
 
 ### Special Features
-1. **Advanced Fine Management System**
-   - Automatic calculation of overdue fines based on:
-     - Number of overdue days
-     - Book category
-     - Student category
-   - Progressive fine calculation
+1. **Fine Management**
+   - Automatic calculation of overdue fines
    - Fine payment tracking
-   - Payment history
-   - Automatic fine notifications
-   - Fine waiver management
-   - Generate fine reports
+   - Basic fine notifications
 
-2. **Comprehensive Analytics Dashboard**
-   - Real-time statistics and reports
-   - Most popular books
-   - Active borrowers
-   - Overdue analysis
-   - Fine collection reports
+2. **Basic Analytics**
+   - Book borrowing statistics
    - User activity tracking
-   - Book utilization reports
-   - Category-wise book distribution
+   - Basic reports generation
 
-3. **Modern Responsive Design**
-   - Mobile-first approach
-   - Clean and intuitive user interface
-   - Bootstrap 3.4.1 based responsive layout
-   - Cross-browser compatibility
-   - Touch-friendly interface
-   - Accessible design features
-   - Custom CSS styling
-   - Interactive UI elements
+3. **Responsive Design**
+   - Mobile-friendly interface
+   - Bootstrap 3.4.1 framework
+   - Clean and intuitive UI
 
-4. **Security Features**
-   - Protection against SQL injection
-   - XSS prevention
-   - CSRF protection
-   - Secure session management
-   - Password encryption
-   - Input validation and sanitization
-   - Role-based access control
-   - Activity logging
+4. **Security**
+   - Basic SQL injection protection
+   - Input validation
+   - Session management
+   - Password protection
 
-5. **Notification System**
-   - Email notifications
-   - Browser notifications
-   - Due date reminders
-   - Fine alerts
-   - Book availability notifications
-   - Account status updates
-   - System announcements
+5. **Notifications**
+   - Email notifications for:
+     - Due dates
+     - Registration
+     - Password reset
 
 ## Technical Requirements
 
