@@ -6,8 +6,8 @@ A comprehensive web-based library management system built with PHP and MySQL tha
 
 ### Tonmoy Sarker Sourav
 
-[![LinkedIn](https://img.shields.io/badge/LinkedIn-0077B5?style=flat&logo=linkedin)](https://www.linkedin.com/in/tonmoyy/) Tonmoy Sarker Sourav <br>
-[![Facebook](https://img.shields.io/badge/Facebook-1877F2?style=flat&logo=facebook&logoColor=white)](https://www.facebook.com/realtonmoysarker) Tonmoy Sarker Sourav <br>
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-0077B5?style=flat&logo=linkedin)](https://www.linkedin.com/in/tonmoyy/) <br>
+[![Facebook](https://img.shields.io/badge/Facebook-1877F2?style=flat&logo=facebook&logoColor=white)](https://www.facebook.com/realtonmoysarker) <br>
 [![Email](https://img.shields.io/badge/Email-D14836?style=flat&logo=gmail&logoColor=white)](mailto:tonmoy4451@gmail.com)  tonmoy4451@gmail.com
 =======
 
