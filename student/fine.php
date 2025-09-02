@@ -120,6 +120,7 @@ function closeNav() {
 <div class="container">
     
      <h2> List of Fines </h2>
+
      <?php
 // SELECT `name`, `roll`, `dept`, `phone`, `email`, `username` FROM `student`
           // --------------- search query------------
@@ -128,6 +129,10 @@ function closeNav() {
 
   $res=mysqli_query($db,"SELECT * FROM `fine` WHERE username = '$_SESSION[login_user]' AND fine > 0 ORDER BY `returned` DESC;");
      //table header
+     if(mysqli_num_rows($res)==0) {
+          echo "<h2 style='text-align: center;'> There's no fine. </h2>";
+     }
+     else {
      echo "<table class='table table-bordered table-hover' > ";
      echo "<tr style='background-color: #b8adad;'>";
      echo "<th>"; echo "Username"; echo "</th>"; 
@@ -152,7 +157,7 @@ function closeNav() {
           echo "</tr>";
      }
      echo "</table>";
-
+    }
      ?>
 </div>
 </div>
