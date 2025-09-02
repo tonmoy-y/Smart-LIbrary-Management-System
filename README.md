@@ -11,10 +11,7 @@ A comprehensive web-based library management system built with PHP and MySQL tha
 <<<<<<< HEAD
 [![Email](https://img.shields.io/badge/Email-D14836?style=flat&logo=gmail&logoColor=white)](mailto:tonmoy4451@gmail.com)  tonmoy4451@gmail.com
 =======
-
-=======
 [![Email](https://img.shields.io/badge/Email-D14836?style=flat&logo=gmail&logoColor=white)](mailto:tonmoy4451@gmail.com)  
->>>>>>> 7373355 (Update README.md)
 
 ## Features
 
