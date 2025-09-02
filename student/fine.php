@@ -126,7 +126,7 @@ function closeNav() {
      
 
 
-     $res=mysqli_query($db,"SELECT * FROM `fine` WHERE username = '$_SESSION[login_user]' ORDER BY `returned` DESC;");
+  $res=mysqli_query($db,"SELECT * FROM `fine` WHERE username = '$_SESSION[login_user]' AND fine > 0 ORDER BY `returned` DESC;");
      //table header
      echo "<table class='table table-bordered table-hover' > ";
      echo "<tr style='background-color: #b8adad;'>";
@@ -139,7 +139,9 @@ function closeNav() {
     //  echo "<th>"; echo "Department"; echo "</th>";
      echo "</tr>";  
 
-     while($row = mysqli_fetch_assoc($res)) {
+  while($row = mysqli_fetch_assoc($res)) {
+    // Safety check: skip any rows where fine is 0 or less
+    if ((float)$row['fine'] <= 0) { continue; }
            echo "<tr>";
           echo "<td>"; echo $row['username']; echo "</td>";
           echo "<td>"; echo $row['bid']; echo "</td>";

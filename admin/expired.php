@@ -94,7 +94,7 @@ body {
 }
 
 .container {
-    height: 800px;
+    height: 610px;
     background-color: black;
     opacity: 0.7;
     color: white;
@@ -102,8 +102,19 @@ body {
 }
 .scroll {
     width: 100%;
-    height: 500px;
+    height: 400px;
     overflow-y: scroll;
+}
+
+/* center the section heading and the table inside the scroll area */
+.container h2 {
+    text-align: center;
+    margin: 8px 0 18px;
+}
+
+.scroll table {
+    width: 95% !important;    /*container keep table reasonably wide but not full width */
+    margin: 0 auto !important; /* center the table horizontally */
 }
 
 th,td {
@@ -166,12 +177,12 @@ function closeNav() {
       </div>
     </form>
     <div class="srch">
-        <form class="" action="" method="post" name="form1">
-            
-            <input style="" type="text" name="username" class="form-control" placeholder="Username" required>
-            <input type="text" name="bid" class="form-control" placeholder="Book ID" required> 
-            <button type="submit" name="submit" class="btn btn-default">Submit</button>
-            
+        <form action="" method="post" class="form-inline" style="display:inline-block;">
+            <input type="text" name="search" class="form-control" placeholder="username or student name" value="<?php if(isset($_POST['search'])) echo htmlspecialchars($_POST['search']); ?>" required>
+            <div>
+              <button class="btn btn-primary" type="submit" name="search_submit" style="background-color:#b8adad; border-color:#b8adad; color:#000;">Search</button>
+              <button class="btn btn-default" type="submit" name="clear_search" title="Clear search">Reset</button>
+            </div>
         </form>
     </div>
 
@@ -191,19 +202,23 @@ $fine = 0;
             }
        }
 
-      $x= date("Y-m-d");
+  $x= date("Y-m-d");
       
-      mysqli_query($db, "INSERT INTO `fine`VALUES ('','$_POST[username]','$_POST[bid]','$x','$day','$fine','Not Paid');");
+  mysqli_query($db, "INSERT INTO `fine`VALUES ('','$_POST[username]','$_POST[bid]','$x','$day','$fine','Not Paid');");
 
 
-      $var1= '<p style="color:yellow; background-color: green;"> RETURNED </p>';
-      $sql1 = "UPDATE issue_book SET approve='$var1' WHERE username='$_POST[username]' AND bid='$_POST[bid]'";
-      mysqli_query($db, $sql1);
+  $var1= '<p style="color:yellow; background-color: green;"> RETURNED </p>';
+  $sql1 = "UPDATE issue_book SET approve='$var1' WHERE username='$_POST[username]' AND bid='$_POST[bid]'";
+  mysqli_query($db, $sql1);
 
-      mysqli_query($db, "UPDATE books SET quantity = quantity+ 1 WHERE bid='$_POST[bid]'");
+  // overwrite the stored return date with the actual return date
+  mysqli_query($db, "UPDATE issue_book SET `return` = '$x' WHERE username='$_POST[username]' AND bid='$_POST[bid]'");
+
+  mysqli_query($db, "UPDATE books SET quantity = quantity+ 1 WHERE bid='$_POST[bid]'");
      }
   }
   ?>
+  <br>
 <h2 style="text-align:center;"> Date expired list </h2>
 <?php
 $c = 0;
@@ -211,65 +226,95 @@ if(isset($_SESSION['login_user'])) {
 
   $ret= '<p style="color:yellow; background-color: green;"> RETURNED </p>';
   $exp= '<p style="color:yellow; background-color: red;"> EXPIRED </p>';
+
+  // search filter handling
+  if(isset($_POST['clear_search'])){
+    unset($_POST['search']);
+  }
+  $search_term = '';
+  if(isset($_POST['search_submit']) && !empty(trim($_POST['search']))){
+    $search_term = mysqli_real_escape_string($db, trim($_POST['search']));
+  }
    
-    if(isset($_POST['submit2'])) {
-       $sql="SELECT student.username, student.roll, student.name, books.bid, books.names, books.authors,books.edition,approve, issue_book.issue, issue_book.return  FROM student JOIN issue_book ON student.username = issue_book.username JOIN books ON books.bid = issue_book.bid 
-            WHERE issue_book.approve ='$ret'   
-            ORDER BY `issue_book`.`return` DESC";
-            $res=mysqli_query($db,$sql);
-    }
+   if(isset($_POST['submit2'])) {
+     $sql="SELECT student.username, student.roll, student.name, books.bid, books.names, books.authors,books.edition,approve, issue_book.issue, issue_book.return  FROM student JOIN issue_book ON student.username = issue_book.username JOIN books ON books.bid = issue_book.bid 
+    WHERE issue_book.approve ='$ret'";
+     if($search_term !== '') { $sql .= " AND (student.username LIKE '%$search_term%' OR student.name LIKE '%$search_term%')"; }
+     $sql .= " ORDER BY (CASE WHEN issue_book.approve LIKE '%RETURNED%' THEN 1 ELSE 0 END) ASC, issue_book.return ASC";
+     $res=mysqli_query($db,$sql);
+   }
 
-    else if(isset($_POST['submit3'])) {
-       $sql="SELECT student.username, student.roll, student.name, books.bid, books.names, books.authors,books.edition,approve, issue_book.issue, issue_book.return  FROM student JOIN issue_book ON student.username = issue_book.username JOIN books ON books.bid = issue_book.bid 
-            WHERE issue_book.approve ='$exp'
-            ORDER BY `issue_book`.`return` DESC";
-            $res=mysqli_query($db,$sql);
-    }
+   else if(isset($_POST['submit3'])) {
+     $sql="SELECT student.username, student.roll, student.name, books.bid, books.names, books.authors,books.edition,approve, issue_book.issue, issue_book.return  FROM student JOIN issue_book ON student.username = issue_book.username JOIN books ON books.bid = issue_book.bid 
+    WHERE issue_book.approve ='$exp'";
+     if($search_term !== '') { $sql .= " AND (student.username LIKE '%$search_term%' OR student.name LIKE '%$search_term%')"; }
+     $sql .= " ORDER BY (CASE WHEN issue_book.approve LIKE '%RETURNED%' THEN 1 ELSE 0 END) ASC, issue_book.return ASC";
+     $res=mysqli_query($db,$sql);
+   }
 
-    else {
-       $sql="SELECT student.username, student.roll, student.name, books.bid, books.names, books.authors,books.edition,approve, issue_book.issue, issue_book.return  FROM student JOIN issue_book ON student.username = issue_book.username JOIN books ON books.bid = issue_book.bid 
-            WHERE issue_book.approve !='' AND issue_book.approve !='Yes'  
-            ORDER BY `issue_book`.`return` DESC";
-            $res=mysqli_query($db,$sql);
-    }
+   else {
+     $sql="SELECT student.username, student.roll, student.name, books.bid, books.names, books.authors,books.edition,approve, issue_book.issue, issue_book.return  FROM student JOIN issue_book ON student.username = issue_book.username JOIN books ON books.bid = issue_book.bid 
+    WHERE issue_book.approve !='' AND issue_book.approve !='Yes'";
+     if($search_term !== '') { $sql .= " AND (student.username LIKE '%$search_term%' OR student.name LIKE '%$search_term%')"; }
+     $sql .= " ORDER BY (CASE WHEN issue_book.approve LIKE '%RETURNED%' THEN 1 ELSE 0 END) ASC, issue_book.return ASC";
+     $res=mysqli_query($db,$sql);
+   }
 
-    
-    echo "<table class='table table-bordered' style='width:98.5%;' > ";
-    
-    echo "<tr style='background-color: #b8adad;'>";
-    echo "<th>"; echo "Username"; echo "</th>"; 
-    echo "<th>"; echo "Roll"; echo "</th>"; 
-    echo "<th>"; echo "Name"; echo "</th>"; 
-    echo "<th>"; echo "Book ID"; echo "</th>"; 
-    echo "<th>"; echo "Book Name"; echo "</th>"; 
-    echo "<th>"; echo "Author/s Name"; echo "</th>";
-    echo "<th>"; echo "Edition"; echo "</th>";
-    echo "<th>"; echo "Status"; echo "</th>";
-    echo "<th>"; echo "Issue Date"; echo "</th>";
-    echo "<th>"; echo "Return Date"; echo "</th>";
-    echo "</tr>"; 
-    echo "</table>";
-
-    echo "<div class='scroll'>";
-    echo "<table class='table table-bordered ' > ";
-        while($row = mysqli_fetch_assoc($res)) {
+    // if no rows, show message and don't render table
+    if(!isset($res) || mysqli_num_rows($res) === 0){
+      if(isset($search_term) && $search_term !== ''){
+        echo "<h3 style='text-align:center; margin-top:20px;'>No records match '".htmlspecialchars($search_term)."'</h3>";
+      } else {
+        echo "<h3 style='text-align:center; margin-top:20px;'>No records to show</h3>";
+      }
+    } else {
+  // single table (header + body) inside scroll so columns align
+  echo "<div class='scroll'>";
+  echo "<table class='table table-bordered' style='width:98.5%;' > ";
+  echo "<tr style='background-color: #b8adad;'>";
+  echo "<th>"; echo "Username"; echo "</th>"; 
+  echo "<th>"; echo "Roll"; echo "</th>"; 
+  echo "<th>"; echo "Name"; echo "</th>"; 
+  echo "<th>"; echo "Book ID"; echo "</th>"; 
+  echo "<th>"; echo "Book Name"; echo "</th>"; 
+  echo "<th>"; echo "Author/s Name"; echo "</th>";
+  echo "<th>"; echo "Edition"; echo "</th>";
+  echo "<th>"; echo "Issue Date"; echo "</th>";
+  echo "<th>"; echo "Return Date"; echo "</th>";
+  echo "<th>"; echo "Status"; echo "</th>";
+  echo "<th>"; echo "Action"; echo "</th>";
+  echo "</tr>";
+    while($row = mysqli_fetch_assoc($res)) {
           
-            echo "<tr>";
-            echo "<td>"; echo $row['username']; echo "</td>";
-            echo "<td>"; echo $row['roll']; echo "</td>";
-            echo "<td>"; echo $row['name']; echo "</td>";
-            echo "<td>"; echo $row['bid']; echo "</td>";
-            echo "<td>"; echo $row['names']; echo "</td>";
-            echo "<td>"; echo $row['authors']; echo "</td>";
-            echo "<td>"; echo $row['edition']; echo "</td>";
-            echo "<td>"; echo $row['approve']; echo "</td>";
-            echo "<td>"; echo $row['issue']; echo "</td>";
-            echo "<td>"; echo $row['return']; echo "</td>";
+      echo "<tr>";
+      echo "<td>"; echo $row['username']; echo "</td>";
+      echo "<td>"; echo $row['roll']; echo "</td>";
+      echo "<td>"; echo $row['name']; echo "</td>";
+      echo "<td>"; echo $row['bid']; echo "</td>";
+      echo "<td>"; echo $row['names']; echo "</td>";
+      echo "<td>"; echo $row['authors']; echo "</td>";
+      echo "<td>"; echo $row['edition']; echo "</td>";
+      echo "<td>"; echo $row['issue']; echo "</td>";
+      echo "<td>"; echo $row['return']; echo "</td>";
+      echo "<td>"; echo $row['approve']; echo "</td>";
+      // Action column: show Return button only if not already returned
+      echo "<td>";
+      $approve_val = strtoupper($row['approve']);
+      if(strpos($approve_val, 'RETURNED') === false) {
+        // show small form that posts username and bid to existing handler
+        echo "<form method='post' style='margin:0'>";
+        echo "<input type='hidden' name='username' value='".htmlspecialchars($row['username'])."'>";
+        echo "<input type='hidden' name='bid' value='".htmlspecialchars($row['bid'])."'>";
+        echo "<button type='submit' name='submit' class='btn btn-warning btn-sm'>Return</button>";
+        echo "</form>";
+      }
+      echo "</td>";
 
-            echo "</tr>";
-        }
+      echo "</tr>";
+    }
         echo "</table>";
       echo "</div>";
+    }
 
 }
 else {

@@ -1,6 +1,18 @@
 <?php
      include "connection.php";
      include "navbar.php";
+
+    // Resolve a student's picture from the student table with a safe fallback
+    function get_student_pic(mysqli $db, string $username): string {
+        $u = mysqli_real_escape_string($db, trim($username));
+        if ($u === '') return 'user.jpg';
+        $rs = mysqli_query($db, "SELECT pic FROM student WHERE username='$u' LIMIT 1");
+        if ($rs && ($row = mysqli_fetch_assoc($rs))) {
+            $pic = trim((string)$row['pic']);
+            return $pic !== '' ? $pic : 'user.jpg';
+        }
+        return 'user.jpg';
+    }
 ?>
 
 <!DOCTYPE html>
@@ -142,10 +154,10 @@ ORDER BY `message`.`status` ASC;");
         <div class="left_box">
             <div class="left_box2">
                 <div>
-                    <form method="post" enctype="multipart/form-data">
-                        <input type="text" name="username" id="uname" "> 
-                        <button type="submit" name="submit" class="btn btn-default">SHOW </button>
-
+                    <form id="showForm" method="post" enctype="multipart/form-data">
+                        <input type="text" name="username" id="uname">
+                        <input type="hidden" name="submit" value="1">
+                        <button type="submit" class="btn btn-default">SHOW</button>
                     </form>
                 </div>
 
@@ -153,15 +165,13 @@ ORDER BY `message`.`status` ASC;");
                 <?php
                     echo "<table id='table' class='table'>";
                     while($res1=mysqli_fetch_assoc($sql1)) { 
-                        echo "<tr>";
+                        echo "<tr class='user-row' data-username=\"".htmlspecialchars($res1['username'], ENT_QUOTES, 'UTF-8')."\">";
                             echo"<td width=65>"; echo "<img class='img-circle profile_img' 
                             height=60 width=60 src='../images/".$res1['pic']."'>"; echo"</td>"; 
                             
-                            echo "<td style='vertical-align: middle;'>".$res1['username']."</td>";
-
-
-                        echo "</tr>";
-                    }
+                            echo "<td style='vertical-align: middle;'>".htmlspecialchars($res1['username'], ENT_QUOTES, 'UTF-8')."</td>";
+                         echo "</tr>";
+                     }
                     echo "</table>";
                 ?>
                 </div>
@@ -172,20 +182,20 @@ ORDER BY `message`.`status` ASC;");
           
             <?php
 // ----------------if submit is presssed----------------
-            if(isset($_POST['submit'])) {
-                $res=mysqli_query($db,"SELECT * FROM `message` WHERE username='$_POST[username]' ;");
-                mysqli_query($db,"UPDATE `message` SET `status`='yes' WHERE sender='student' AND username='$_POST[username]';");
-                if($_POST['username'] != '') {
-                    $_SESSION['username'] = $_POST['username'];
-                    // Fetch and set the user's pic
-                    $pic_res = mysqli_query($db, "SELECT pic FROM student WHERE username='$_POST[username]'");
-                    if ($pic_row = mysqli_fetch_assoc($pic_res)) {
-                        $_SESSION['pic'] = $pic_row['pic'];
-                    }
+            if (isset($_POST['submit']) || isset($_GET['u'])) {
+                $uname = trim($_POST['username'] ?? ($_GET['u'] ?? ''));
+                $safeUname = mysqli_real_escape_string($db, $uname);
+                $res = mysqli_query($db, "SELECT * FROM `message` WHERE username='$safeUname';");
+                mysqli_query($db, "UPDATE `message` SET `status`='yes' WHERE sender='student' AND username='$safeUname';");
+                if ($uname !== '') {
+                    // Do NOT override logged-in admin's session username
+                    $_SESSION['chat_with'] = $uname;
                 }
+                // Resolve student picture locally (no session writes)
+                $student_pic = get_student_pic($db, $_SESSION['chat_with'] ?? $uname);
                 ?>
                 <div style="height:70px; width: 100%; text-align: center; color:white;">
-                    <h3> <?php echo $_SESSION['username'];  ?> </h3>
+                    <h3><?php echo htmlspecialchars($_SESSION['chat_with'] ?? '', ENT_QUOTES, 'UTF-8'); ?></h3>
                 </div>
 <!-- --------------------show message----------------------------  -->
 <div class="msg">
@@ -203,7 +213,7 @@ while($row=mysqli_fetch_assoc($res)) {
         <div style="float:left; padding-top:5px;">
 &nbsp;
 <?php  
-       echo "<img class='img-circle profile_img' height=40 width=40 src='../images/".$_SESSION['pic']." '>  ";
+       echo "<img class='img-circle profile_img' height=40 width=40 src=\"../images/{$student_pic}\">";
     //    echo " " . $_SESSION['login_user'] . "!";
     ?>
     &nbsp;
@@ -228,7 +238,7 @@ while($row=mysqli_fetch_assoc($res)) {
         <div style="float:left; padding-top:5px;">
 &nbsp;
 <?php  
-       echo "<img class='img-circle profile_img' height=40 width=40 src='images/user.jpg'>  ";
+       echo "<img class='img-circle profile_img' height=40 width=40 src='../images/user.jpg'>";
     //    echo " " . $_SESSION['login_user'] . "!";
     ?>
     <!-- hr -->
@@ -261,24 +271,23 @@ while($row=mysqli_fetch_assoc($res)) {
             }
 // ----------------if submit is not  presssed----------------
             else {
-                if(!isset($_SESSION['username']) || $_SESSION['username']=='') {
+                if (!isset($_SESSION['chat_with']) || $_SESSION['chat_with'] == '') {
                     ?>
         <img style="margin:100px 80px;" src="images/tonor.gif" alt="animated">
                     <?php
                 }
                 else {
-                    if(isset($_POST['submit1'])) {
-                        mysqli_query($db,"INSERT INTO `message` VALUES ('','$_SESSION[username]','$_POST[message]','no', 'admin');");
-                        $res=mysqli_query($db,"SELECT * FROM `message` WHERE username='$_SESSION[username]' ;");
-
+                    if (isset($_POST['submit1'])) {
+                        mysqli_query($db, "INSERT INTO `message` VALUES ('','{$_SESSION['chat_with']}','{$_POST['message']}','no','admin');");
+                        $res = mysqli_query($db, "SELECT * FROM `message` WHERE username='{$_SESSION['chat_with']}';");
+                    } else {
+                        $res = mysqli_query($db, "SELECT * FROM `message` WHERE username='{$_SESSION['chat_with']}';");
                     }
-                    else {
-                $res=mysqli_query($db,"SELECT * FROM `message` WHERE username='$_SESSION[username]' ;");
-
-                    }
-                    ?>
+                    // Resolve student picture for current chat (no session writes)
+                    $student_pic = get_student_pic($db, $_SESSION['chat_with']);
+?>
                     <div style="height:70px; width: 100%; text-align: center; color:white;">
-                    <h3> <?php echo $_SESSION['username'];  ?> </h3>
+                    <h3><?php echo htmlspecialchars($_SESSION['chat_with'], ENT_QUOTES, 'UTF-8'); ?></h3>
                 </div>
 
 <div class="msg">
@@ -297,7 +306,7 @@ while($row=mysqli_fetch_assoc($res)) {
         <div style="float:left; padding-top:5px;">
 &nbsp;
 <?php  
-       echo "<img class='img-circle profile_img' height=40 width=40 src='images/".$_SESSION['pic']." '>  ";
+       echo "<img class='img-circle profile_img' height=40 width=40 src=\"../images/{$student_pic}\">";
     //    echo " " . $_SESSION['login_user'] . "!";
     ?>
     &nbsp;
@@ -322,7 +331,7 @@ while($row=mysqli_fetch_assoc($res)) {
         <div style="float:left; padding-top:5px;">
 &nbsp;
 <?php  
-       echo "<img class='img-circle profile_img' height=40 width=40 src='images/user.jpg'>  ";
+       echo "<img class='img-circle profile_img' height=40 width=40 src='../images/user.jpg'>";
     //    echo " " . $_SESSION['login_user'] . "!";
     ?>
     &nbsp;
@@ -357,13 +366,16 @@ while($row=mysqli_fetch_assoc($res)) {
         </div>
     </div>
 <script>
-   var table = document.getElementById('table'), rIndex;
-   for (var i = 0; i < table.rows.length; i++) {
-       table.rows[i].onclick = function () {
-           rIndex = this.rowIndex;
-           document.getElementById('uname').value = this.cells[1].innerHTML;
-       }
-   }
+  (function () {
+    document.querySelectorAll('.user-row').forEach(function (row) {
+      row.addEventListener('click', function () {
+        var uname = (row.dataset.username || '').trim();
+        if (!uname) return;
+        // Navigate via GET so PHP can open chat without relying on form submit
+        window.location.href = 'message.php?u=' + encodeURIComponent(uname);
+      });
+    });
+  })();
 </script>
 
 

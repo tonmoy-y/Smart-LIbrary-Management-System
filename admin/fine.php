@@ -1,6 +1,17 @@
 <?php
      include "connection.php";
      include "navbar.php";
+// Handle marking fine as paid (minimal, using GET to keep changes small)
+if(isset($_GET['pay_id'])){
+     $pay_id = intval($_GET['pay_id']);
+     if($pay_id > 0) {
+          // mark as paid
+          mysqli_query($db, "UPDATE `fine` SET `status`='paid' WHERE `id` = " . $pay_id);
+     }
+     // redirect back to avoid re-submission
+     echo "<script>window.location='fine.php'</script>";
+     exit;
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -133,8 +144,9 @@ function closeNav() {
 // SELECT `name`, `roll`, `dept`, `phone`, `email`, `username` FROM `student`
           // --------------- search query------------
      if(isset($_POST['submit'])) {
-          // $q = $_POST['search'];
-          $q = mysqli_query($db, "SELECT * FROM `fine`  WHERE `username` LIKE '%$_POST[search]%' OR bid LIKE '%$_POST[search]%' OR `days` LIKE '%$_POST[search]%' ");
+          // search only entries where fine > 0
+          $search = mysqli_real_escape_string($db, $_POST['search']);
+          $q = mysqli_query($db, "SELECT * FROM `fine` WHERE (`username` LIKE '%$search%' OR bid LIKE '%$search%' OR `days` LIKE '%$search%') AND `fine` > 0");
      
           if( mysqli_num_rows($q) == 0) 
                     // If search query returns results, display them
@@ -158,7 +170,14 @@ echo "<table class='table table-bordered table-hover' > ";
           echo "<td>"; echo $row['returned']; echo "</td>";
           echo "<td>"; echo $row['days']; echo "</td>";
           echo "<td>"; echo $row['fine']; echo "</td>";
-          echo "<td>"; echo $row['status']; echo "</td>";
+          // show pay option if status empty, otherwise show Paid
+          echo "<td>";
+          if(empty($row['status'])) {
+               echo "<a href='?pay_id=".intval($row['id'])."' class='btn btn-success btn-xs'>Pay</a>";
+          } else {
+               echo "Paid";
+          }
+          echo "</td>";
           echo "</tr>";
      }
      echo "</table>";
@@ -168,7 +187,8 @@ echo "<table class='table table-bordered table-hover' > ";
 else {
 
 
-     $res=mysqli_query($db,"SELECT * FROM `fine`");
+     // list only records where fine > 0
+     $res=mysqli_query($db,"SELECT * FROM `fine` WHERE `fine` > 0");
      //table header
      echo "<table class='table table-bordered table-hover' > ";
      echo "<tr style='background-color: #b8adad;'>";
@@ -188,7 +208,13 @@ else {
           echo "<td>"; echo $row['returned']; echo "</td>";
           echo "<td>"; echo $row['days']; echo "</td>";
           echo "<td>"; echo $row['fine']; echo "</td>";
-          echo "<td>"; echo $row['status']; echo "</td>";
+          echo "<td>";
+          if(empty($row['status'])) {
+               echo "<a href='?pay_id=".intval($row['id'])."' class='btn btn-success btn-xs'>Pay</a>";
+          } else {
+               echo "Paid";
+          }
+          echo "</td>";
           echo "</tr>";
      }
      echo "</table>";

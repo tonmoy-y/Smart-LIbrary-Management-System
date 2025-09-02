@@ -3,6 +3,38 @@
      include "connection.php";
      include "navbar.php";
 
+// Handle return action (minimal, reuses existing logic pattern)
+if(isset($_POST['return_submit'])){
+  $uname = mysqli_real_escape_string($db, $_POST['username']);
+  $bid = mysqli_real_escape_string($db, $_POST['bid']);
+  // calculate fine based on issue_book return date
+  $resx = mysqli_query($db, "SELECT * FROM issue_book WHERE username='$uname' AND bid='$bid' LIMIT 1");
+  $day = 0; $fine = 0;
+  if($rx = mysqli_fetch_assoc($resx)){
+    $d = strtotime($rx['return']);
+    $c = strtotime(date("Y-m-d"));
+    $diff = $c - $d;
+    if($diff > 0){
+      $day = floor($diff / (60 * 60 * 24));
+      $fine = $day * .10;
+    }
+  }
+  $x = date("Y-m-d");
+  // insert fine record
+  mysqli_query($db, "INSERT INTO `fine` VALUES ('', '".mysqli_real_escape_string($db,$uname)."', '".mysqli_real_escape_string($db,$bid)."', '$x', '$day', '$fine', 'Not Paid')");
+  // mark returned
+  $var1= '<p style="color:yellow; background-color: green;"> RETURNED </p>';
+  $sql1 = "UPDATE issue_book SET approve='$var1' WHERE username='".mysqli_real_escape_string($db,$uname)."' AND bid='".mysqli_real_escape_string($db,$bid)."'";
+  mysqli_query($db, $sql1);
+  // overwrite the stored return date with the actual return date
+  mysqli_query($db, "UPDATE issue_book SET `return` = '$x' WHERE username='".mysqli_real_escape_string($db,$uname)."' AND bid='".mysqli_real_escape_string($db,$bid)."'");
+  // increase book quantity
+  mysqli_query($db, "UPDATE books SET quantity = quantity+ 1 WHERE bid='".mysqli_real_escape_string($db,$bid)."'");
+  // redirect to avoid repost
+  echo "<script>window.location='issue_info.php'</script>";
+  exit;
+}
+
 ?>
 
 <!DOCTYPE html>
@@ -91,14 +123,14 @@ body {
 }
 
 .container {
-    height: 700px;
+    height: 550px;
     background-color: black;
     opacity: 0.7;
     color: white;
 }
 .scroll {
     width: 100%;
-    height: 550px;
+    height: 350px;
     overflow-y: scroll;
 }
 
@@ -151,45 +183,73 @@ function closeNav() {
 
 <div class="container">
 <br><br>
-<form action="" method="post"> 
-  <button class="btn btn-default" style="float: right;" name="submit_m" type="submit">Send Email</button>
-</form>
+<!-- top-right search and send-email controls -->
+<div style="overflow: hidden;">
+  <div class="srch" style="float: right; margin-bottom: 8px;">
+    <form action="" method="post" class="form-inline" style="display:inline-block;">
+      <input type="text" name="search" class="form-control" placeholder="username or student name" value="<?php if(isset($_POST['search'])) echo htmlspecialchars($_POST['search']); ?>" required>
+      <button class="btn btn-primary" type="submit" name="search_submit" style="background-color:#b8adad; border-color:#b8adad; color:#000;">Search</button>
+      <button class="btn btn-default" type="submit" name="clear_search" title="Clear search">Reset</button>
+    </form>
+
+    <form action="" method="post" style="display:inline-block; margin-left:8px;">
+      <button class="btn btn-default" name="submit_m" type="submit">Send Email</button>
+    </form>
+  </div>
+</div>
 
 <h2 style="text-align;"> Information of Borrowed Books</h2>
 <?php
 $c = 0;
-// if(isset($_SESSION['login_user'])) { 
-    $sql="SELECT student.username, student.roll, student.name, books.bid, books.names, books.authors,books.edition, issue_book.issue, issue_book.return  FROM student JOIN issue_book ON student.username = issue_book.username JOIN books ON books.bid = issue_book.bid WHERE issue_book.approve='Yes'  
-            ORDER BY `issue_book`.`return` ASC";
+// build base query for borrowed books
+$search_term = '';
+if(isset($_POST['clear_search'])){
+  // clearing search - unset the POST value so later code shows all
+  unset($_POST['search']);
+}
+if(isset($_POST['search_submit']) && !empty(trim($_POST['search']))) {
+  $search_term = mysqli_real_escape_string($db, trim($_POST['search']));
+}
 
-    $res=mysqli_query($db,$sql);
+$sql = "SELECT student.username, student.roll, student.name, books.bid, books.names, books.authors, books.edition, issue_book.issue, issue_book.return, issue_book.approve FROM student JOIN issue_book ON student.username = issue_book.username JOIN books ON books.bid = issue_book.bid WHERE issue_book.approve='Yes'";
+if($search_term !== ''){
+  // match username or student name
+  $sql .= " AND (student.username LIKE '%$search_term%' OR student.name LIKE '%$search_term%')";
+}
+$sql .= " ORDER BY `issue_book`.`return` ASC";
 
-    echo "<table class='table table-bordered' style='width:98.5%;' > ";
-    
-    echo "<tr style='background-color: #b8adad;'>";
-    echo "<th>"; echo "Username"; echo "</th>"; 
-    echo "<th>"; echo "Roll"; echo "</th>"; 
-    echo "<th>"; echo "Name"; echo "</th>"; 
-    echo "<th>"; echo "Book ID"; echo "</th>"; 
-    echo "<th>"; echo "Book Name"; echo "</th>"; 
-    echo "<th>"; echo "Author/s Name"; echo "</th>";
-    echo "<th>"; echo "Edition"; echo "</th>";
-    echo "<th>"; echo "Issue Date"; echo "</th>";
-    echo "<th>"; echo "Return Date"; echo "</th>";
-    echo "</tr>"; 
-    echo "</table>";
+$res = mysqli_query($db, $sql);
 
-    echo "<div class='scroll'>";
-    echo "<table class='table table-bordered ' > ";
-        while($row = mysqli_fetch_assoc($res)) {
+  // if no rows, show message and don't render table headers
+  if(mysqli_num_rows($res) == 0) {
+    if($search_term !== ''){
+      echo "<h3 style='text-align:center; margin-top:40px;'>No borrowed books match '".htmlspecialchars($search_term)."'</h3>";
+    } else {
+      echo "<h3 style='text-align:center; margin-top:40px;'>No one has borrowed books</h3>";
+    }
+  } else {
+  // use a single table so columns align
+  echo "<div class='scroll'>";
+  echo "<table class='table table-bordered' style='width:98.5%;' > ";
+  echo "<tr style='background-color: #b8adad;'>";
+  echo "<th>"; echo "Username"; echo "</th>"; 
+  echo "<th>"; echo "Roll"; echo "</th>"; 
+  echo "<th>"; echo "Name"; echo "</th>"; 
+  echo "<th>"; echo "Book ID"; echo "</th>"; 
+  echo "<th>"; echo "Book Name"; echo "</th>"; 
+  echo "<th>"; echo "Author/s Name"; echo "</th>";
+  echo "<th>"; echo "Edition"; echo "</th>";
+  echo "<th>"; echo "Issue Date"; echo "</th>";
+  echo "<th>"; echo "Return Date"; echo "</th>";
+  echo "<th>"; echo "Action"; echo "</th>";
+  echo "</tr>";
+  while($row = mysqli_fetch_assoc($res)) {
           $d = date("Y-m-d");
-          if($d > $row['return']) {
+            if($d > $row['return']) {
               $c=$c+1;
               $var= '<p style="color:yellow; background-color: red;"> EXPIRED </p>';
               $sql1 = "UPDATE issue_book SET approve='$var' WHERE `return` = '$row[return]' AND approve='Yes' limit $c";
               mysqli_query($db, $sql1);
-              
-              echo $d."<br>";
             }
             echo "<tr>";
             echo "<td>"; echo $row['username']; echo "</td>";
@@ -201,11 +261,22 @@ $c = 0;
             echo "<td>"; echo $row['edition']; echo "</td>";
             echo "<td>"; echo $row['issue']; echo "</td>";
             echo "<td>"; echo $row['return']; echo "</td>";
-
+            // action: show Return button if not already returned
+            $approve_val = strtoupper($row['approve']);
+            echo "<td>";
+            if(strpos($approve_val, 'RETURNED') === false) {
+                echo "<form method='post' style='margin:0'>";
+                echo "<input type='hidden' name='username' value='".htmlspecialchars($row['username'])."'>";
+                echo "<input type='hidden' name='bid' value='".htmlspecialchars($row['bid'])."'>";
+                echo "<button type='submit' name='return_submit' class='btn btn-warning btn-sm'>Return</button>";
+                echo "</form>";
+            }
+            echo "</td>";
             echo "</tr>";
         }
         echo "</table>";
       echo "</div>";
+  }
 
 
 if(isset($_POST['submit_m'])) {

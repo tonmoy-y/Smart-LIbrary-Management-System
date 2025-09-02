@@ -14,6 +14,7 @@ if(!isset($_SESSION['login_user'])) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Book Request</title>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
      <style type="text/css">
           .sarch {
                text-align:right;
@@ -79,6 +80,17 @@ body {
      
 }
 
+/* Request table layout tweaks */
+.table-req { table-layout: fixed; width: 100%; }
+.table-req th, .table-req td { vertical-align: middle; }
+.table-req th.select-col, .table-req td.select-col { width: 60px; text-align: center; }
+.table-req th.bid-col, .table-req td.bid-col { width: 100px; }
+.table-req th.name-col, .table-req td.name-col { width: 35%; }
+.table-req th.status-col, .table-req td.status-col { width: 160px; }
+.table-req th.issue-col, .table-req td.issue-col { width: 140px; }
+.table-req th.return-col, .table-req td.return-col { width: 140px; }
+.table-req input[type="checkbox"] { margin: 0; vertical-align: middle; }
+
      </style>
 </head>
 <body>
@@ -128,10 +140,10 @@ body {
   <?php
 
   // $q = $_POST['search'];
-  $q = mysqli_query($db, "SELECT * FROM issue_book WHERE username = '$_SESSION[login_user]' AND approve='' ");
+  $q = mysqli_query($db, "SELECT ib.*, b.names FROM issue_book ib LEFT JOIN books b ON b.bid = ib.bid WHERE ib.username = '$_SESSION[login_user]' AND ib.approve='' ");
   if( mysqli_num_rows($q) == 0) 
   // If search query returns results, display them
-echo "<h2 style='text-align:center;'> Threre is no book request from you. </h3>";
+echo "<h2 style='text-align:center;'> There is no book request from you. </h2>";
 else {
 ?>
 
@@ -139,27 +151,29 @@ else {
 <form method="post">
 
 <?php
-  echo "<table class='table table-bordered table-hover' > ";
+  echo "<table class='table table-bordered table-hover table-req'> ";
   echo "<tr style='background-color: #b8adad;'>";
   //table header
     
-  echo "<th>"; echo "Select"; echo "</th>"; 
-  echo "<th>"; echo "Book ID"; echo "</th>"; 
-  echo "<th>"; echo "Approve Status"; echo "</th>"; 
-  echo "<th>"; echo "Issue  Date"; echo "</th>"; 
-  echo "<th>"; echo "Return date"; echo "</th>"; 
+  echo "<th class='select-col'>Select</th>"; 
+  echo "<th class='bid-col'>Book ID</th>"; 
+  echo "<th class='name-col'>Book Name</th>"; 
+  echo "<th class='status-col'>Approve Status</th>"; 
+  echo "<th class='issue-col'>Issue Date</th>"; 
+  echo "<th class='return-col'>Return Date</th>"; 
   echo "</tr>"; 
   
   while($row = mysqli_fetch_assoc($q)) {
     echo "<tr>";
     ?>
-<td> <input type="checkbox" name="check[]" value="<?php echo $row['bid']; ?>" > </td>
+<td class="select-col"><input type="checkbox" name="check[]" value="<?php echo $row['bid']; ?>"></td>
 
 <?php
-    echo "<td>"; echo $row['bid']; echo "</td>";
-    echo "<td>"; echo $row['approve']; echo "</td>";
-    echo "<td>"; echo $row['issue']; echo "</td>";
-    echo "<td>"; echo $row['return']; echo "</td>";
+    echo "<td class='bid-col'>"; echo $row['bid']; echo "</td>";
+    echo "<td class='name-col'>"; echo isset($row['names']) ? $row['names'] : ''; echo "</td>";
+    echo "<td class='status-col'>"; echo $row['approve']; echo "</td>";
+    echo "<td class='issue-col'>"; echo $row['issue']; echo "</td>";
+    echo "<td class='return-col'>"; echo $row['return']; echo "</td>";
     
     echo "</tr>";
   }
@@ -215,4 +229,4 @@ if(isset($_POST['delete'])) {
 </div>
 
 </body>
-</html>l
+</html>

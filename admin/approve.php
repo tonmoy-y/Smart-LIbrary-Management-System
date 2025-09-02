@@ -140,7 +140,7 @@ form.Approve input.form-control {
 
 <div id="main">
 
-  <span style="font-size:30px;cursor:pointer" onclick="openNav()">&#9776; open</span>
+  <span id="openNavBtn" style="font-size:30px;cursor:pointer;color:#ffffff" onclick="openNav()">&#9776; open</span>
 
 
 <script>
