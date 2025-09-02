@@ -1,13 +1,14 @@
 <?php
     include "connection.php";
     include "navbar.php";
-?>
+    ?>
 
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <link rel="stylesheet" type="text/css" href="styles.css">
     <title>Student Registration </title>
 
@@ -49,12 +50,13 @@
      <?php
         if(isset($_POST['submit'])) {
             $count = 0;
+            $dupUsername = false; $dupEmail = false; $dupRoll = false;
             $sql = "SELECT username,email,roll FROM student";
             $res = mysqli_query($db,$sql);
             while($row = mysqli_fetch_assoc($res)) { 
-                if($row['username'] == $_POST['username'] || $row['email'] == $_POST['email'] || $row['roll'] == $_POST['roll']) {
-                    $count =$count + 1;
-                }
+                if($row['username'] == $_POST['username']) { $dupUsername = true; $count++; }
+                if($row['email'] == $_POST['email'])       { $dupEmail = true;    $count++; }
+                if($row['roll'] == $_POST['roll'])         { $dupRoll = true;     $count++; }
             }
             if($count==0) {
                 // $hashed_password = password_hash($_POST['password'], PASSWORD_DEFAULT);
@@ -87,7 +89,6 @@
         $from = "From: tonmoy4451@gmail.com";
         if(mail($to, $subject, $msg, $from)) {
                  ?>
-        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
         <script type="text/javascript">
            Swal.fire({
   title: "Success!",
@@ -120,22 +121,38 @@ else {
 
              }
             else {
-                ?>
-
+                // Show specific popup based on which field conflicts (priority: Roll, Email, Username)
+                if ($dupRoll) { ?>
                 <script type="text/javascript">
-           Swal.fire({
-  title: "Error!",
-  text: "Username or Email or Roll already exists!",
-  icon: "error",
-  confirmButtonText: "I Understand",
-  confirmButtonColor: "#468ed2ff"
-}).then(() => {
-            window.location = "register.php";
-        });
-        </script>
-
-                
-                <?php 
+                  Swal.fire({
+                    title: "Error!",
+                    text: "Roll number already exists!",
+                    icon: "error",
+                    confirmButtonText: "I Understand",
+                    confirmButtonColor: "#468ed2ff"
+                  }).then(() => { window.location = "register.php"; });
+                </script>
+                <?php } else if ($dupEmail) { ?>
+                <script type="text/javascript">
+                  Swal.fire({
+                    title: "Error!",
+                    text: "Email already exists!",
+                    icon: "error",
+                    confirmButtonText: "I Understand",
+                    confirmButtonColor: "#468ed2ff"
+                  }).then(() => { window.location = "register.php"; });
+                </script>
+                <?php } else if ($dupUsername) { ?>
+                <script type="text/javascript">
+                  Swal.fire({
+                    title: "Error!",
+                    text: "Username already exists!",
+                    icon: "error",
+                    confirmButtonText: "I Understand",
+                    confirmButtonColor: "#468ed2ff"
+                  }).then(() => { window.location = "register.php"; });
+                </script>
+                <?php }
             }
         }
      ?>

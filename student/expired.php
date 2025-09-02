@@ -204,23 +204,23 @@ if(isset($_SESSION['login_user'])) {
   $exp= '<p style="color:yellow; background-color: red;"> EXPIRED </p>';
    
     if(isset($_POST['submit2'])) {
-       $sql="SELECT student.username, student.roll, student.name, books.bid, books.names, books.authors,books.edition,approve, issue_book.issue, issue_book.return  FROM student JOIN issue_book ON student.username = issue_book.username JOIN books ON books.bid = issue_book.bid 
-            WHERE issue_book.approve ='$ret'   
-            ORDER BY `issue_book`.`return` DESC";
+    $sql="SELECT student.username, student.roll, student.name, books.bid, books.names, books.authors,books.edition,approve, issue_book.issue, issue_book.return  FROM student JOIN issue_book ON student.username = issue_book.username JOIN books ON books.bid = issue_book.bid 
+      WHERE issue_book.approve ='$ret'  AND student.username='$_SESSION[login_user]' 
+      ORDER BY `issue_book`.`return` DESC";
             $res=mysqli_query($db,$sql);
     }
 
     else if(isset($_POST['submit3'])) {
-       $sql="SELECT student.username, student.roll, student.name, books.bid, books.names, books.authors,books.edition,approve, issue_book.issue, issue_book.return  FROM student JOIN issue_book ON student.username = issue_book.username JOIN books ON books.bid = issue_book.bid 
-            WHERE issue_book.approve ='$exp'
-            ORDER BY `issue_book`.`return` DESC";
+    $sql="SELECT student.username, student.roll, student.name, books.bid, books.names, books.authors,books.edition,approve, issue_book.issue, issue_book.return  FROM student JOIN issue_book ON student.username = issue_book.username JOIN books ON books.bid = issue_book.bid 
+      WHERE issue_book.approve ='$exp' AND student.username='$_SESSION[login_user]'
+      ORDER BY `issue_book`.`return` DESC";
             $res=mysqli_query($db,$sql);
     }
 
     else {
-       $sql="SELECT student.username, student.roll, student.name, books.bid, books.names, books.authors,books.edition,approve, issue_book.issue, issue_book.return  FROM student JOIN issue_book ON student.username = issue_book.username JOIN books ON books.bid = issue_book.bid 
-            WHERE issue_book.approve !='' AND issue_book.approve !='Yes'  
-            ORDER BY `issue_book`.`return` DESC";
+    $sql="SELECT student.username, student.roll, student.name, books.bid, books.names, books.authors,books.edition,approve, issue_book.issue, issue_book.return  FROM student JOIN issue_book ON student.username = issue_book.username JOIN books ON books.bid = issue_book.bid 
+      WHERE issue_book.approve !='' AND issue_book.approve !='Yes' AND student.username='$_SESSION[login_user]' 
+      ORDER BY `issue_book`.`return` DESC";
             $res=mysqli_query($db,$sql);
     }
 

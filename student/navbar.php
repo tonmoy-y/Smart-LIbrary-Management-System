@@ -1,6 +1,7 @@
 <?php
  include "connection.php";
-session_start();
+ session_start();
+ $re = ['tm' => '']; // minimal init to avoid undefined variable/offset
 ?>
 
 <!DOCTYPE html>
@@ -123,7 +124,9 @@ if (distance < 0) {
   <?php
                       if(isset($_SESSION['login_user'])) {
                         ?>  
+                        <?php if ($re && !empty($re['tm'])) { ?>
                         <a> <span id="demo" class="timer-box"></span> </a>
+                        <?php } ?>
                         <a href="message.php" class="nav-btn admin"><span class="glyphicon glyphicon-envelope"> </span>
                          <span class="badge bg-green">
                           <?php echo $c['total']; ?>
@@ -143,7 +146,7 @@ if (distance < 0) {
                       }
                       else {
                     ?>
-                    <a href="../login.php" class="nav-btn student"><span class="glyphicon glyphicon-log-in"> </span>  Student Login</a>
+                    <a href="../login.php" class="nav-btn student"><span class="glyphicon glyphicon-log-in"> </span>  Login</a>
            
                     <?php
                       }
@@ -174,9 +177,36 @@ if (distance < 0) {
     }
     ?>
         </header>
-    <!-- </div> -->
-
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-     
-</body>
-</html>
+    <?php if ($re && !empty($re['tm'])) { ?>
+    <script>
+                  // Set the date we're counting down to
+                  var countDownDate = new Date("<?php echo $re['tm']; ?>").getTime();
+                  // Update the count down every 1 second
+                  var x = setInterval(function() {
+                  // Get today's date and time
+                  var now = new Date().getTime();
+                  // Find the distance between now and the count down date
+                  var distance = countDownDate - now;
+                  // Time calculations for days, hours, minutes and seconds
+                  var days = Math.floor(distance / (1000 * 60 * 60 * 24));
+                  var hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                  var minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+                  var seconds = Math.floor((distance % (1000 * 60)) / 1000);
+                  // Display the result in the element with id="demo"
+                  var demoElem = document.getElementById("demo");
+                  demoElem.innerHTML = days + "d " + hours + "h " + minutes + "m " + seconds + "s ";
+                  if (distance < 0) {
+                      clearInterval(x);
+                      demoElem.innerHTML = "EXPIRED";
+                      demoElem.classList.add("expired");
+                  } else {
+                      demoElem.classList.remove("expired");
+                  }
+                  // If the count down is finished, write some text
+                  if (distance < 0) {
+                    clearInterval(x);
+                    document.getElementById("demo").innerHTML = "EXPIRED";
+                  }
+                  }, 1000);
+     </script>
+    <?php } ?>

@@ -8,7 +8,15 @@ A comprehensive web-based library management system built with PHP and MySQL tha
 
 [![LinkedIn](https://img.shields.io/badge/LinkedIn-0077B5?style=flat&logo=linkedin)](https://www.linkedin.com/in/tonmoyy/)  <br>
 [![Facebook](https://img.shields.io/badge/Facebook-1877F2?style=flat&logo=facebook&logoColor=white)](https://www.facebook.com/realtonmoysarker) <br>
+<<<<<<< HEAD
 [![Email](https://img.shields.io/badge/Email-D14836?style=flat&logo=gmail&logoColor=white)](mailto:tonmoy4451@gmail.com)  tonmoy4451@gmail.com
+=======
+<<<<<<< HEAD
+[![Email](https://img.shields.io/badge/Email-D14836?style=flat&logo=gmail&logoColor=white)](mailto:tonmoy4451@gmail.com): tonmoy4451@gmail.com
+=======
+[![Email](https://img.shields.io/badge/Email-D14836?style=flat&logo=gmail&logoColor=white)](mailto:tonmoy4451@gmail.com)  tonmoy4451@gmail.com
+>>>>>>> 7373355 (Update README.md)
+>>>>>>> abc8b40 (Update many feature)
 
 ## Features
 

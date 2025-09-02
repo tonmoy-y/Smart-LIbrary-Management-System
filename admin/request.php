@@ -88,7 +88,7 @@ body {
 }
 
 .container {
-    height: 600px;
+    height: 550px;
     background-color: black;
     opacity: 0.7;
     color: white;
@@ -121,7 +121,7 @@ body {
 
 <div id="main">
 
-  <span style="font-size:30px;cursor:pointer" onclick="openNav()">&#9776; open</span>
+  <span id="openNavBtn" style="font-size:30px;cursor:pointer;color:#ffffff" onclick="openNav()">&#9776; open</span>
 
 
 <script>
@@ -142,9 +142,9 @@ function closeNav() {
     <div class="srch">
         <form class="navbar-form" action="" method="post" name="form1">
             
-            <input type="text" name="username" class="form-control" placeholder="Username" required>
+            <!-- <input type="text" name="username" class="form-control" placeholder="Username" required>
             <input type="text" name="bid" class="form-control" placeholder="by Book ID" required>
-            <button type="submit" name="submit" class="btn btn-default">Submit</button>
+            <button type="submit" name="submit" class="btn btn-default">Submit</button> -->
             
         </form>
         
@@ -176,6 +176,7 @@ if(isset($_SESSION['login_user'])) {
         echo "<th>"; echo "Author/s Name"; echo "</th>";
         echo "<th>"; echo "Edition"; echo "</th>";
         echo "<th>"; echo "Status"; echo "</th>";
+  echo "<th>"; echo "Approve"; echo "</th>";
         echo "</tr>"; 
         
         while($row = mysqli_fetch_assoc($res)) {
@@ -188,6 +189,14 @@ if(isset($_SESSION['login_user'])) {
             echo "<td>"; echo $row['authors']; echo "</td>";
             echo "<td>"; echo $row['edition']; echo "</td>";
             echo "<td>"; echo $row['status']; echo "</td>";
+            // Approve button (posts username and bid and uses existing handler to redirect to approve.php)
+            echo "<td>";
+            echo "<form method='post' style='margin:0'>";
+            echo "<input type='hidden' name='username' value='".htmlspecialchars($row['username'])."'>";
+            echo "<input type='hidden' name='bid' value='".htmlspecialchars($row['bid'])."'>";
+            echo "<button type='submit' name='submit' class='btn btn-default btn-sm' style='background:#ffffff;color:#000;border:1px solid #ddd;'>Approve</button>";
+            echo "</form>";
+            echo "</td>";
             
             echo "</tr>";
         }
@@ -240,16 +249,16 @@ if( mysqli_num_rows($q) == 0) {
     }
     */
     
-    if(isset($_POST['submit'])) {
-        $_SESSION['st_name'] = $_POST['username'];
-        $_SESSION['bid'] = $_POST['bid'];
-        ?>
-
-<script type="text/javascript">
-    window.location = "approve.php"; 
-    </script>
-    <?php
-}
+  if(isset($_POST['submit'])) {
+    // If username and bid are posted, this is the Approve button for a row -> redirect to approve.php
+    if(!empty($_POST['username']) && !empty($_POST['bid'])) {
+      $_SESSION['st_name'] = $_POST['username'];
+      $_SESSION['bid'] = $_POST['bid'];
+      echo "<script>window.location='approve.php'</script>";
+      exit;
+    }
+    // Otherwise it's the search form which is already handled earlier via the same name; keep existing behavior
+  }
 
 
 

@@ -1,6 +1,15 @@
 <?php
-     include "connection.php";
-     include "navbar.php";
+      include "connection.php";
+      include "navbar.php";
+$re = null;
+      // Handle student deletion
+      if(isset($_POST['delete_user']) && isset($_POST['username_to_delete'])){
+           $uname = mysqli_real_escape_string($db, $_POST['username_to_delete']);
+           // delete the student record
+           mysqli_query($db, "DELETE FROM student WHERE username='$uname'");
+           echo "<script>alert('Student deleted successfully'); window.location='student.php';</script>";
+           exit;
+      }
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -147,6 +156,7 @@ function closeNav() {
      echo "<th>"; echo "Phone"; echo "</th>"; 
      echo "<th>"; echo "Email"; echo "</th>"; 
      echo "<th>"; echo "Username"; echo "</th>"; 
+     echo "<th>"; echo "Action"; echo "</th>"; 
     //  echo "<th>"; echo "Department"; echo "</th>";
      echo "</tr>"; 
 
@@ -158,6 +168,12 @@ function closeNav() {
           echo "<td>"; echo $row['phone']; echo "</td>";
           echo "<td>"; echo $row['email']; echo "</td>";
           echo "<td>"; echo $row['username']; echo "</td>";
+          echo "<td>";
+          echo "<form method='post' style='margin:0' onsubmit=\"return confirm('Delete this student?');\">";
+          echo "<input type='hidden' name='username_to_delete' value='".htmlspecialchars($row['username'], ENT_QUOTES)."'>";
+          echo "<button type='submit' name='delete_user' class='btn btn-danger btn-xs'>Delete</button>";
+          echo "</form>";
+          echo "</td>";
           echo "</tr>";
      }
      echo "</table>";
@@ -177,6 +193,7 @@ else {
      echo "<th>"; echo "Phone"; echo "</th>"; 
      echo "<th>"; echo "Email"; echo "</th>"; 
      echo "<th>"; echo "Username"; echo "</th>"; 
+     echo "<th>"; echo "Action"; echo "</th>"; 
     //  echo "<th>"; echo "Department"; echo "</th>";
      echo "</tr>";  
 
@@ -188,6 +205,12 @@ else {
           echo "<td>"; echo $row['phone']; echo "</td>";
           echo "<td>"; echo $row['email']; echo "</td>";
           echo "<td>"; echo $row['username']; echo "</td>";
+          echo "<td>";
+          echo "<form method='post' style='margin:0' onsubmit=\"return confirm('Delete this student?');\">";
+          echo "<input type='hidden' name='username_to_delete' value='".htmlspecialchars($row['username'], ENT_QUOTES)."'>";
+          echo "<button type='submit' name='delete_user' class='btn btn-danger btn-xs'>Delete</button>";
+          echo "</form>";
+          echo "</td>";
           echo "</tr>";
      }
      echo "</table>";
