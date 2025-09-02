@@ -96,16 +96,16 @@ body {
                ?>
      </div>
 
-  <div class="h"> <a href="books.php"> Books </a> </div>
+  <!-- <div class="h"> <a href="books.php"> Books </a> </div>
   <div class="h"> <a href="request.php">Book Request</a> </div>
   <div class="h"> <a href="issue_info.php">Issue Information</a> </div>
-  <div class="h"> <a href="expired.php">Expired Books</a> </div>
+  <div class="h"> <a href="expired.php">Expired Books</a> </div> -->
   
 </div>
 
 <div id="main">
 
-  <span style="font-size:30px;cursor:pointer" onclick="openNav()">&#9776; open</span>
+  <!-- <span style="font-size:30px;cursor:pointer" onclick="openNav()">&#9776; open</span> -->
 
 
 <script>
