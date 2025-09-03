@@ -13,6 +13,23 @@
         }
         return 'user.jpg';
     }
+
+    // Handle send message early so it works even when ?u= is present in URL
+    if (isset($_POST['submit1'])) {
+        $to = trim($_POST['to'] ?? ($_SESSION['chat_with'] ?? ''));
+        $msg = trim($_POST['message'] ?? '');
+        if ($to !== '' && $msg !== '') {
+            $to_esc  = mysqli_real_escape_string($db, $to);
+            $msg_esc = mysqli_real_escape_string($db, $msg);
+            // Ensure columns are specified to avoid schema mismatch
+            mysqli_query($db, "INSERT INTO `message` (username, message, status, sender) VALUES ('$to_esc', '$msg_esc', 'no', 'admin')");
+            // Make sure current chat is persisted
+            $_SESSION['chat_with'] = $to;
+        }
+        // Redirect (PRG pattern) to avoid duplicate submits and keep context
+        header("Location: message.php?u=" . urlencode($to));
+        exit;
+    }
 ?>
 
 <!DOCTYPE html>
@@ -260,7 +277,8 @@ while($row=mysqli_fetch_assoc($res)) {
 <!-- ----------------------------------------  -->
                 <div style="height:100px; padding-top:10px;">
     <form action="" method="post" class="write">
-        <input type="text" name="message" class="form-control" placeholder="Write Message..." style="float:left;">
+        <input type="hidden" name="to" value="<?php echo htmlspecialchars($_SESSION['chat_with'] ?? $uname ?? '', ENT_QUOTES, 'UTF-8'); ?>">
+        <input type="text" name="message" class="form-control" placeholder="Write Message..." style="float:left;" required>
         &nbsp; 
         <button class="btn btn-info btn-lg" type="submit" name="submit1"><span class="glyphicon glyphicon-send"></span> &nbsp Send</button>
 
@@ -277,12 +295,8 @@ while($row=mysqli_fetch_assoc($res)) {
                     <?php
                 }
                 else {
-                    if (isset($_POST['submit1'])) {
-                        mysqli_query($db, "INSERT INTO `message` VALUES ('','{$_SESSION['chat_with']}','{$_POST['message']}','no','admin');");
-                        $res = mysqli_query($db, "SELECT * FROM `message` WHERE username='{$_SESSION['chat_with']}';");
-                    } else {
-                        $res = mysqli_query($db, "SELECT * FROM `message` WHERE username='{$_SESSION['chat_with']}';");
-                    }
+                    // Fetch conversation messages (sending handled earlier)
+                    $res = mysqli_query($db, "SELECT * FROM `message` WHERE username='" . mysqli_real_escape_string($db, $_SESSION['chat_with']) . "';");
                     // Resolve student picture for current chat (no session writes)
                     $student_pic = get_student_pic($db, $_SESSION['chat_with']);
 ?>
@@ -351,7 +365,8 @@ while($row=mysqli_fetch_assoc($res)) {
 </div>
     <div style="height:100px; padding-top:10px;">
     <form action="" method="post" class="write">
-        <input type="text" name="message" class="form-control" placeholder="Write Message..." style="float:left;">
+        <input type="hidden" name="to" value="<?php echo htmlspecialchars($_SESSION['chat_with'] ?? '', ENT_QUOTES, 'UTF-8'); ?>">
+        <input type="text" name="message" class="form-control" placeholder="Write Message..." style="float:left;" required>
         &nbsp; 
         <button class="btn btn-info btn-lg" type="submit" name="submit1"><span class="glyphicon glyphicon-send"></span> &nbsp Send</button>
 
