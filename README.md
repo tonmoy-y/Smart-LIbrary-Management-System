@@ -1,6 +1,6 @@
 # Smart Library Management System
 
-A comprehensive web-based library management system built with PHP and MySQL that helps efficiently manage library resources, users, and operations. This system streamlines library operations and enhances user experience in educational institutions.
+A production‑ready web-based Library Management application built with vanilla **PHP**, **MySQL**, and **Bootstrap**. It supports complete circulation workflows (registration, verification, issue / return, fines, messaging) for two roles: **Admin** and **Student**. Recent updates include secure password hashing (bcrypt) and OTP‑based verification / password reset.
 
 ## Developer Contact Information
 
@@ -11,9 +11,9 @@ A comprehensive web-based library management system built with PHP and MySQL tha
 [![Email](https://img.shields.io/badge/Email-D14836?style=flat&logo=gmail&logoColor=white)](mailto:tonmoy4451@gmail.com)  tonmoy4451@gmail.com
 =======
 
-## Features
+## ✨ Key Features
 
-### User Authentication and Management
+### Authentication & Accounts
 - **Dual User System**: 
   - Separate interfaces for administrators and students
   - Role-based access control
@@ -93,7 +93,7 @@ A comprehensive web-based library management system built with PHP and MySQL tha
    - Message system with administrators
    - Email notifications
 
-### Special Features
+### Special / Advanced Features
 1. **Fine Management**
    - Automatic calculation of overdue fines
    - Fine payment tracking
@@ -121,7 +121,7 @@ A comprehensive web-based library management system built with PHP and MySQL tha
      - Registration
      - Password reset
 
-## Technical Requirements
+## ⚙️ Technical Requirements
 
 - PHP 7.0 or higher
 - MySQL 5.6 or higher
@@ -129,53 +129,286 @@ A comprehensive web-based library management system built with PHP and MySQL tha
 - XAMPP/WAMP/MAMP or similar server package
 - Web Browser (Chrome/Firefox/Safari)
 
-## Installation
+## 🚀 Quick Start (Local – XAMPP / WAMP)
 
-1. Clone the repository to your local machine
-2. Place the files in your web server directory (e.g., htdocs for XAMPP)
-3. Create a MySQL database and import the provided SQL file
-4. Configure the database connection in `connection.php`
-5. Start your web server and MySQL service
-6. Access the system through your web browser
-
-## Configuration
-
-Update the database connection details in `connection.php`:
+1. Clone the repository
+```bash
+git clone https://github.com/tonmoy-y/Smart-LIbrary-Management-System.git
+cd Smart-LIbrary-Management-System/Library
+```
+2. Move (or keep) the `Library` folder inside your web root (e.g. `C:/xampp/htdocs/Library`).  
+3. Create a database (example: `library`):
+```sql
+CREATE DATABASE library CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+```
+4. Import your schema / seed data (if you have an exported SQL file):
+```sql
+-- In phpMyAdmin or mysql CLI
+SOURCE path/to/export.sql;
+```
+5. Open `connection.php` (and `admin/connection.php`, `student/connection.php` if duplicated) and confirm credentials:
 ```php
 $db = mysqli_connect("localhost","root","","library");
 ```
+6. Start Apache + MySQL in XAMPP.  
+7. Visit: `http://localhost/Library/login.php` or `index.php`.
+8. Register an Admin account first (admin registration page).  
+9. Register a Student, complete OTP email verification (or configure email—see below).  
+10. Login and explore dashboards.
 
-## Usage
+## 🛠 Full Setup Guide (From Git Clone to Working OTP Email)
 
-1. **Admin Access**
-   - Register as an admin through the registration page
-   - Log in using admin credentials
-   - Access the admin dashboard to manage library operations
+### 1. Clone Repository
+```bash
+git clone https://github.com/tonmoy-y/Smart-LIbrary-Management-System.git
+cd Smart-LIbrary-Management-System/Library
+```
 
-2. **Student Access**
-   - Register as a student
-   - Verify email address
-   - Log in to access student features
-   - Browse and request books
-   - Track borrowed items
+### 2. Place in Web Root (Windows XAMPP)
+Copy or move the `Library` folder to:  
+`C:/xampp/htdocs/Library`
 
-## Security Features
+Then browse: `http://localhost/Library/`
 
-- Password hashing
-- Session management
-- Input validation
-- XSS prevention
-- Email verification for student accounts
-- Secure password recovery system
+### 3. Create Database
+Use phpMyAdmin or MySQL CLI:
+```sql
+CREATE DATABASE library CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+```
+Import schema if you have one (example):
+```sql
+SOURCE C:/path/to/library_export.sql;
+```
 
-## Contributing
+### 4. Configure Database Connection
+Open ALL of these (root `connection.php`, plus `admin/connection.php`, `student/connection.php` if duplicated) and ensure:
+```php
+$db = mysqli_connect("localhost","root","","library");
+```
+Restart Apache if you changed PHP extensions.
 
-Contributions are welcome! Please feel free to submit a Pull Request.
+### 5. Ensure Password Columns Are Large Enough
+```sql
+ALTER TABLE admin   MODIFY password VARCHAR(255) NOT NULL;
+ALTER TABLE student MODIFY password VARCHAR(255) NOT NULL;
+```
 
-## License
+### 6. (Optional) Migrate Legacy Plain Passwords
+See migration snippet below (Legacy Plain Password Migration) if coming from older version.
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+### 7. Configure Email (SMTP) for OTP (XAMPP on Windows)
+The project currently uses `mail()`; configure XAMPP's built‑in sendmail relay or replace with PHPMailer.
 
-## Support
+#### 7.1 Enable OpenSSL in PHP
+Edit `C:/xampp/php/php.ini` and ensure:
+```
+extension=openssl
+```
+Restart Apache.
 
-For support, please open an issue in the repository or contact the system administrator.
+#### 7.2 Configure sendmail (Using Gmail Example)
+Edit: `C:/xampp/sendmail/sendmail.ini`
+```
+smtp_server=smtp.gmail.com
+smtp_port=587
+smtp_ssl=auto
+auth_username=YOUR_GMAIL_ADDRESS@gmail.com
+auth_password=YOUR_APP_PASSWORD
+force_sender=YOUR_GMAIL_ADDRESS@gmail.com
+```
+Gmail now requires 2FA + App Password (NOT your normal password).
+
+#### 7.3 Link PHP to sendmail
+In `php.ini`, find and set:
+```
+[mail function]
+SMTP=smtp.gmail.com
+smtp_port=587
+sendmail_path="C:\xampp\sendmail\sendmail.exe -t"
+```
+Save and restart Apache.
+
+#### 7.4 Test Mail
+Create `mail_test.php` in `Library/`:
+```php
+<?php
+var_dump(mail('your_destination_email@example.com','Test Mail','If this is true, mail works.'));
+```
+Visit: `http://localhost/Library/mail_test.php`  
+If `bool(true)` and you received the email, OTP sending should work.
+
+### 8. Adjust From Address (Optional)
+In `send_otp.php` (student/admin versions) you can set a custom header:
+```php
+$headers = "From: Library System <YOUR_GMAIL_ADDRESS@gmail.com>\r\n";
+```
+
+### 9. Register Accounts
+1. Register Admin (for management).  
+2. Register Student → check email for OTP → verify → login.  
+
+### 10. Common Email Issues
+| Symptom | Cause | Fix |
+|--------|-------|-----|
+| `bool(false)` from mail() | Misconfigured sendmail | Recheck sendmail.ini paths |
+| No email, no error | Gmail blocked | Verify app password & less secure off (not used) |
+| Timeout | Firewall blocking 587 | Allow outbound SMTP or switch network |
+| Truncated OTP email | HTML header missing | Ensure correct `$headers` formatting |
+
+### 11. (Optional) Switch to PHPMailer Later
+PHPMailer gives better error messages and TLS handling.
+
+### 12. Backup & Security Checklist
+- Change default admin password immediately.  
+- Remove any test scripts (`mail_test.php`, migrations).  
+- Keep `password_hash()` usage; never downgrade to MD5.  
+- Regularly export the database.
+
+---
+
+## 📦 Deployment (Shared Hosting / VPS Quick Notes)
+| Environment | Notes |
+|-------------|-------|
+| Shared Hosting | Upload contents of `Library/` into `public_html/Library/` (or root) and adjust paths. |
+| VPS (LAMP) | Place under `/var/www/html/Library`; set correct ownership (`www-data`). |
+| Nginx + PHP-FPM | Root to `/var/www/html/Library`; ensure `index.php` forwarding; configure `fastcgi_pass`. |
+| SSL | Use Certbot (Let’s Encrypt) – not required locally but recommended live. |
+
+### Optional: Email / OTP Sending
+Current code uses PHP's `mail()`; on Windows/XAMPP this may fail without SMTP configuration. For reliable delivery:
+- Use an SMTP relay (Gmail / SendGrid / Mailgun).  
+- Replace simple `mail()` calls with PHPMailer (future improvement).  
+
+### Legacy Plain Password Migration (If upgrading an old DB)
+If older rows stored plaintext (not 60‑char bcrypt hashes), run a one‑time migration:
+```php
+// create file: migrate_passwords.php in project root
+<?php
+include 'connection.php';
+function needs_hash($pw){return !(is_string($pw) && strlen($pw)===60 && str_starts_with($pw,'$2y$'));}
+foreach(['admin','student'] as $t){
+   $r = mysqli_query($db, "SELECT username,password FROM `$t`");
+   while($row=mysqli_fetch_assoc($r)){
+      if(needs_hash($row['password'])){
+          $h = password_hash($row['password'], PASSWORD_DEFAULT);
+          $u = mysqli_real_escape_string($db,$row['username']);
+          mysqli_query($db,"UPDATE `$t` SET password='$h' WHERE username='$u'");
+          echo "Hashed: $t => {$row['username']}\n";
+      }
+   }
+}
+echo "Done\n";
+```
+Run:
+```bash
+php migrate_passwords.php
+```
+
+Remove the script afterward for security.
+
+## ⚙️ Configuration Summary
+
+| Purpose | File(s) | Action |
+|---------|---------|--------|
+| DB Connection | `connection.php` (root, `admin/`, `student/`) | Set host/user/pass/db |
+| OTP Expiry / Cleanup | `verify.php` (student/admin) | Uses DB timestamp deletion | 
+| Password Hashing | Registration, verify, edit_profile, login | Uses `password_hash()` & `password_verify()` |
+| Email sending | `send_otp.php` (student/admin) | Configure SMTP or adapt mail() |
+
+Keep passwords columns as `VARCHAR(255)` to avoid hash truncation.
+
+## 📘 Usage Flow
+
+1. Admin registers (or you insert an initial admin manually).  
+2. Students register → receive OTP → verify.  
+3. Students browse books, place requests.  
+4. Admin reviews and approves issues.  
+5. System tracks due dates, fines, and overdue status.  
+6. Users can reset forgotten passwords via OTP.  
+7. Profiles can be updated (password change optional; hash only when provided).  
+
+### Typical Daily Admin Actions
+- Approve pending students (if manual gating used).  
+- Add / update books (stock + metadata).  
+- Process issue / return queue.  
+- Review fines & messages.  
+
+### Typical Student Actions
+- Search catalog, request book.  
+- Check issued items & due dates.  
+- Pay attention to fines / notifications.  
+- Update profile & reset password if required.
+
+## 🔐 Security Features (Current)
+- Bcrypt password hashing (`password_hash`, `password_verify`).
+- Session-based auth segregation (student vs admin namespaces).
+- OTP-based email verification & password reset (with server-side expiry + DB cleanup).
+- Basic SQL protection (manual escaping—future refactor: prepared statements recommended).
+- Limited exposure of sensitive data (password hashes not displayed in profiles anymore).
+
+### Recommended Future Hardening
+- Use prepared statements (`mysqli_stmt` / PDO) everywhere.
+- Add CSRF tokens to forms.
+- Rate-limit OTP resend & login attempts.
+- Switch to PHPMailer + SMTP with authenticated sending.
+- Enforce stronger password policy (length / complexity / haveibeenpwned check optional).
+- Add audit log (issues, returns, admin actions).
+
+## 🗂 Project Structure (Key Files)
+```
+Library/
+├─ index.php
+├─ login.php
+├─ register.php
+├─ update_password.php
+├─ send_otp.php
+├─ books.php
+├─ connection.php
+├─ styles.css / responsive.css
+├─ images/
+├─ admin/
+│  ├─ admin_login.php
+│  ├─ register.php
+│  ├─ verify.php
+│  ├─ send_otp.php
+│  ├─ update_password.php
+│  ├─ edit_profile.php
+│  ├─ books.php / add.php / approve.php / issue_info.php / fine.php
+│  └─ ... (other admin utilities)
+├─ student/
+│  ├─ register.php
+│  ├─ verify.php
+│  ├─ send_otp.php
+│  ├─ update_password.php
+│  ├─ edit_profile.php
+│  ├─ books.php / request.php / issue_info.php / fine.php
+│  └─ ... (student views)
+└─ README.md
+```
+
+## 🧩 Design Highlights
+| Aspect | Approach | Benefit |
+|--------|----------|---------|
+| Roles | Separate admin & student directories | Clear separation and simpler access control |
+| OTP | DB timestamp + cleanup query | Prevents timer spoofing on reload |
+| Passwords | Bcrypt hashing | Secure credential storage |
+| Fines | Calculated on overdue delta | Automated penalty management |
+| UI | Bootstrap 3 + custom CSS | Quick responsive layout |
+
+## 🚧 Known Limitations / Next Steps
+- No comprehensive prepared statement layer yet.
+- No queue / cron for periodic cleanup (handled ad-hoc on page hits).
+- Email deliverability depends on PHP mail() configuration.
+- Limited audit / reporting exports.
+
+## 🤝 Contributing
+PRs welcome. Please open an Issue first for significant changes.
+
+## 📄 License
+MIT – see `LICENSE.txt`.
+
+## 💬 Support
+Open an Issue or reach out via the contact channels above.
+
+---
+Built with care to simplify campus library workflows. Contributions & feedback are appreciated.
