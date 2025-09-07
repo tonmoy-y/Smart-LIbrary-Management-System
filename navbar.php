@@ -1,6 +1,28 @@
 <?php
  include "connection.php";
 session_start();
+
+$currentPath = str_replace('\\','/', $_SERVER['PHP_SELF']);
+if (isset($_SESSION['login_admin']) && !isset($_SESSION['student_reset'])) {
+    if (strpos($currentPath, '/admin/') === false) {
+        header('Location: admin/index');
+        exit;
+    }
+} elseif (isset($_SESSION['login_user']) && !isset($_SESSION['student_reset'])) {
+    if (strpos($currentPath, '/student/') === false) {
+        header('Location: student/index');
+        exit;
+    }
+}
+
+if (isset($_SESSION['student_reset'])) {
+
+    if (time() - $_SESSION['student_reset_time'] > 300) { // 300 sec = 5 min
+        unset($_SESSION['student_reset']);
+        unset($_SESSION['student_reset_time']);
+    }
+}
+
 ?>
 
 <!DOCTYPE html>
@@ -8,13 +30,17 @@ session_start();
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" type="text/css" href="styles.css">
     <title>Online Library Management</title>
-  <!-- bootstrap -->
+    <!-- bootstrap -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="responsive.css">
+    <link rel="icon" type="image/png" sizes="32x32" href="images/logo.png">
+    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
     <link rel="stylesheet" href="https://www.w3schools.com/w3css/5/w3.css">
+    <link rel="stylesheet" type="text/css" href="styles.css">
 
 <style>
 .timer-box {
@@ -58,62 +84,62 @@ if(isset($_SESSION['login_user'])) {
 }
 ?>
         <header>
-            <a href="index.php">
+            <a href="index">
             <img src="images/logo.png" alt="Library Logo" class="logo">
 
             <p class="logofont">Online Library Management System</p>
             </a>
             <nav class="navbar">
+              <button type="button" class="menu-toggle" aria-label="Open menu" aria-expanded="false" style="z-index:1101;position:relative;"><span class="bar"></span></button>
+              <div class="drawer-backdrop" hidden></div>
+              <div class="nav-links">
               
 <!-- -------------------------------------Timer ------------------------------->
 <script>
-              // Set the date we're counting down to
-              var countDownDate = new Date("<?php echo $re['tm']; ?>").getTime();
-              
-              // Update the count down every 1 second
-              var x = setInterval(function() {
-              
-              // Get today's date and time
-              var now = new Date().getTime();
-              
-              // Find the distance between now and the count down date
-              var distance = countDownDate - now;
-              
-              // Time calculations for days, hours, minutes and seconds
-              var days = Math.floor(distance / (1000 * 60 * 60 * 24));
-              var hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-              var minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-              var seconds = Math.floor((distance % (1000 * 60)) / 1000);
-              
-              // Display the result in the element with id="demo"
-              var demoElem = document.getElementById("demo");
-              demoElem.innerHTML = days + "d " + hours + "h " + minutes + "m " + seconds + "s ";
+  (function(){
+    // Guarded timer: avoid throwing errors when data or element missing
+    try {
+      var target = document.getElementById('demo');
+      if (!target) return;
+      var raw = "<?php echo isset($re['tm']) ? addslashes($re['tm']) : ''; ?>";
+      if (!raw) return;
+      var countDownDate = new Date(raw).getTime();
+      if (isNaN(countDownDate)) return;
 
-if (distance < 0) {
-    clearInterval(x);
-    demoElem.innerHTML = "EXPIRED";
-    demoElem.classList.add("expired");
-} else {
-    demoElem.classList.remove("expired");
-}
-              
-              // If the count down is finished, write some text
-              if (distance < 0) {
-                clearInterval(x);
-                document.getElementById("demo").innerHTML = "EXPIRED";
-              }
-              }, 1000);
- </script>                             
+      function tick(){
+        var now = Date.now();
+        var distance = countDownDate - now;
+        if (distance <= 0) {
+          target.textContent = 'EXPIRED';
+          target.classList.add('expired');
+          clearInterval(timer);
+          return;
+        }
+        var days = Math.floor(distance / (1000 * 60 * 60 * 24));
+        var hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        var minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+        var seconds = Math.floor((distance % (1000 * 60)) / 1000);
+        target.textContent = days + 'd ' + hours + 'h ' + minutes + 'm ' + seconds + 's ';
+        target.classList.remove('expired');
+      }
+
+      tick();
+      var timer = setInterval(tick, 1000);
+    } catch (e) {
+      console && console.error && console.error('timer error', e);
+    }
+  })();
+</script>
                                     
  <!-- -----------------------------------------------------------------------------  -->
               
-           <a href="index.php" class="nav-btn home">Home</a>
-             <a href="books.php" class="nav-btn books">Books</a>
-            <a href="contact.php" class="nav-btn feedback">Feedback</a>
+           <a href="index" class="nav-btn home"> <i class="fa fa-home"></i> Home</a>
+             <a href="books" class="nav-btn books"> <i class="fa fa-book"></i> Books</a>
+            <a href="contact" class="nav-btn feedback"> <i class="fa fa-comment"></i> Feedback</a>
                 <?php
                 if(isset($_SESSION['login_user'])) {
                         ?>
-                <a href="fine.php" class="nav-btn books"> Fines </a> 
+                <a href="fine" class="nav-btn books"> Fines </a> 
                 
                 <?php
                       }
@@ -124,11 +150,11 @@ if (distance < 0) {
                       if(isset($_SESSION['login_user'])) {
                         ?>  
                         <a> <span id="demo" class="timer-box"></span> </a>
-                        <a href="message.php" class="nav-btn admin"><span class="glyphicon glyphicon-envelope"> </span>
+                        <a href="message" class="nav-btn admin"><span class="glyphicon glyphicon-envelope"> </span>
                          <span class="badge bg-green">
                           <?php echo $c['total']; ?>
-                         </span></a> &nbsp;&nbsp;
-                        <a href="profile.php" class="nav-btn admin">
+                         </span></a>
+                        <a href="profile" class="nav-btn admin">
                                  
                         <?php  
                           echo "<img class='img-circle profile_img' height=25 width=25 src='images/".$_SESSION['pic']." '>  ";
@@ -136,20 +162,45 @@ if (distance < 0) {
                         ?>
                     
                         </a>
-                        &nbsp;&nbsp;
-                    <a href="logout.php" class="nav-btn student"><span class="glyphicon glyphicon-log-out"> </span>Log out</a>
+                        
+                    <a href="logout" class="nav-btn student"><span class="glyphicon glyphicon-log-out"> </span>Log out</a>
 
                     <?php
                       }
                       else {
                     ?>
-                    <a href="login.php" class="nav-btn student"><span class="glyphicon glyphicon-log-in"> </span>  Login</a>
+                    <a href="login" class="nav-btn student"> <i class="fa fa-sign-in-alt"></i>  Login</a>
            
                     <?php
                       }
                     ?>
                 </div>
+              </div>
             </nav>
+            <script>
+              // Attach toggle after DOM is ready to avoid timing/stacking issues
+              (function(){
+                function initNavToggle(){
+                  var btn = document.querySelector('.menu-toggle');
+                  var backdrop = document.querySelector('.drawer-backdrop');
+                  if (!btn) return;
+                  // ensure button sits above other elements
+                  try { btn.style.zIndex = '1101'; } catch(e){}
+                  function toggle(){
+                    var open = document.body.classList.toggle('nav-open');
+                    btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+                    if (backdrop) backdrop.toggleAttribute('hidden', !open);
+                  }
+                  btn.addEventListener('click', toggle);
+                  if (backdrop) backdrop.addEventListener('click', toggle);
+                }
+                if (document.readyState === 'loading') {
+                  document.addEventListener('DOMContentLoaded', initNavToggle);
+                } else {
+                  initNavToggle();
+                }
+              })();
+            </script>
             
     <?php
     if(isset($_SESSION['login_user'])) {

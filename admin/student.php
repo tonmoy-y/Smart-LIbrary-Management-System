@@ -7,7 +7,7 @@ $re = null;
            $uname = mysqli_real_escape_string($db, $_POST['username_to_delete']);
            // delete the student record
            mysqli_query($db, "DELETE FROM student WHERE username='$uname'");
-           echo "<script>alert('Student deleted successfully'); window.location='student.php';</script>";
+           echo "<script>window.location='student.php?deleted=1'</script>";
            exit;
       }
 ?>
@@ -82,6 +82,20 @@ body {
      </style>
 </head>
 <body> 
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<?php if(isset($_GET['deleted'])): ?>
+<script type="text/javascript">
+Swal.fire({
+     title: "Success!",
+     text: "Student was deleted.",
+     icon: "success",
+     confirmButtonText: "OK",
+     confirmButtonColor: "#589cdbff"
+}).then(() => {
+     window.location = "student";
+});
+</script>
+<?php endif; ?>
 
 <!-- ____________________________side __________________________________ -->
 
@@ -91,18 +105,21 @@ body {
      <div style="text-align: center; font-size:20px;">
 
           <?php
-           if(isset($_SESSION['login_user'])) {
-               echo "<img class='img-circle profile_img' height=100 width=100 src='images/".$_SESSION['pic']." '>  ";
+           if(isset($_SESSION['login_admin'])) {
+               $rawPic = isset($_SESSION['pic']) ? trim($_SESSION['pic']) : '';
+               $safePic = preg_replace('/[^A-Za-z0-9._-]/','_', $rawPic);
+               if ($safePic === '' || !is_file(__DIR__.'/../images/'.$safePic)) { $safePic='no-cover.png'; }
+               echo "<img class='img-circle profile_img' height=100 width=100 src='../images/".$safePic."'>  ";
                echo "<br> <br>";
-               echo "Welcome,  ". $_SESSION['login_user'] . "!";
+               echo "Welcome,  ". $_SESSION['login_admin'] . "!";
            }
                ?>
      </div>
 
-<div class="h"> <a href="books.php"> Books </a> </div>
-  <div class="h"> <a href="request.php">Book Request</a> </div>
-  <div class="h"> <a href="issue_info.php">Issue Information</a> </div>
-  <div class="h"> <a href="expired.php">Expired List</a> </div>
+<div class="h"> <a href="books"> Books </a> </div>
+  <div class="h"> <a href="request">Book Request</a> </div>
+  <div class="h"> <a href="issue_info">Issue Information</a> </div>
+  <div class="h"> <a href="expired">Expired List</a> </div>
 </div>
 
 <div id="main">
@@ -169,7 +186,7 @@ function closeNav() {
           echo "<td>"; echo $row['email']; echo "</td>";
           echo "<td>"; echo $row['username']; echo "</td>";
           echo "<td>";
-          echo "<form method='post' style='margin:0' onsubmit=\"return confirm('Delete this student?');\">";
+          echo "<form method='post' style='margin:0' class='student-delete-form' data-uname='".htmlspecialchars($row['username'], ENT_QUOTES)."'>";
           echo "<input type='hidden' name='username_to_delete' value='".htmlspecialchars($row['username'], ENT_QUOTES)."'>";
           echo "<button type='submit' name='delete_user' class='btn btn-danger btn-xs'>Delete</button>";
           echo "</form>";
@@ -206,7 +223,7 @@ else {
           echo "<td>"; echo $row['email']; echo "</td>";
           echo "<td>"; echo $row['username']; echo "</td>";
           echo "<td>";
-          echo "<form method='post' style='margin:0' onsubmit=\"return confirm('Delete this student?');\">";
+          echo "<form method='post' style='margin:0' class='student-delete-form' data-uname='".htmlspecialchars($row['username'], ENT_QUOTES)."'>";
           echo "<input type='hidden' name='username_to_delete' value='".htmlspecialchars($row['username'], ENT_QUOTES)."'>";
           echo "<button type='submit' name='delete_user' class='btn btn-danger btn-xs'>Delete</button>";
           echo "</form>";
@@ -218,5 +235,38 @@ else {
      ?>
 </div>
 </div>
+<script type="text/javascript">
+document.addEventListener('DOMContentLoaded', function() {
+     document.querySelectorAll('.student-delete-form').forEach(function(form){
+          const btn = form.querySelector("button[name='delete_user']");
+          if(!btn) return;
+          btn.addEventListener('click', function(e){
+               e.preventDefault();
+               const uname = form.getAttribute('data-uname') || '';
+               Swal.fire({
+                    title: "Warning!",
+                    text: "Are you sure today?",
+                    icon: "warning",
+                    showCancelButton: true,
+                    confirmButtonText: "Yes",
+                    cancelButtonText: "No",
+                    confirmButtonColor: "#589cdbff"
+               }).then((result) => {
+                    if(result.isConfirmed){
+                         // ensure delete_user is present when submitting programmatically
+                         if(!form.querySelector("input[name='delete_user']")){
+                              const hidden = document.createElement('input');
+                              hidden.type = 'hidden';
+                              hidden.name = 'delete_user';
+                              hidden.value = '1';
+                              form.appendChild(hidden);
+                         }
+                         HTMLFormElement.prototype.submit.call(form);
+                    }
+               });
+          });
+     });
+});
+</script>
 </body>
 </html>

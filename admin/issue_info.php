@@ -7,6 +7,9 @@
 if(isset($_POST['return_submit'])){
   $uname = mysqli_real_escape_string($db, $_POST['username']);
   $bid = mysqli_real_escape_string($db, $_POST['bid']);
+  // delete data from timer table
+  mysqli_query($db, "DELETE FROM `timer` WHERE name='$uname' AND bid='$bid';");
+
   // calculate fine based on issue_book return date
   $resx = mysqli_query($db, "SELECT * FROM issue_book WHERE username='$uname' AND bid='$bid' LIMIT 1");
   $day = 0; $fine = 0;
@@ -31,7 +34,7 @@ if(isset($_POST['return_submit'])){
   // increase book quantity
   mysqli_query($db, "UPDATE books SET quantity = quantity+ 1 WHERE bid='".mysqli_real_escape_string($db,$bid)."'");
   // redirect to avoid repost
-  echo "<script>window.location='issue_info.php'</script>";
+  echo "<script>window.location='issue_info.php?returned=1'</script>";
   exit;
 }
 
@@ -42,6 +45,8 @@ if(isset($_POST['return_submit'])){
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <title>Book Request</title>
      <style type="text/css">
           .srch {
@@ -140,6 +145,23 @@ th,td {
      </style>
 </head>
 <body>
+
+
+
+<?php if(isset($_GET['returned'])): ?>
+<script>
+Swal.fire({
+    title: "Success!",
+    text: "Book has been returned successfully.",
+    icon: "success",
+    confirmButtonText: "OK",
+    confirmButtonColor: "#589cdbff"
+});
+</script>
+<?php endif; ?>
+
+
+
     
 <div id="mySidenav" class="sidenav">
   <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
@@ -147,19 +169,22 @@ th,td {
 
           <?php
           
-               if(isset($_SESSION['login_user'])) {
+               if(isset($_SESSION['login_admin'])) {
                      
-                    echo "<img class='img-circle profile_img' height=100 width=100 src='images/".$_SESSION['pic']." '>  ";
+                    $rawPic = isset($_SESSION['pic']) ? trim($_SESSION['pic']) : '';
+                    $safePic = preg_replace('/[^A-Za-z0-9._-]/','_', $rawPic);
+                    if ($safePic === '' || !is_file(__DIR__.'/../images/'.$safePic)) { $safePic='no-cover.png'; }
+                    echo "<img class='img-circle profile_img' height=100 width=100 src='../images/".$safePic."'>  ";
                     echo "<br> <br>";
-                    echo "Welcome,  ". $_SESSION['login_user'] . "!";
+                    echo "Welcome,  ". $_SESSION['login_admin'] . "!";
                }
                ?>
      </div>
 
-  <div class="h"> <a href="books.php"> Books </a> </div>
-  <div class="h"> <a href="request.php">Book Request</a> </div>
-  <div class="h"> <a href="issue_info.php">Issue Information</a> </div>
-  <div class="h"> <a href="expired.php">Expired List</a> </div>
+  <div class="h"> <a href="books"> Books </a> </div>
+  <div class="h"> <a href="request">Book Request</a> </div>
+  <div class="h"> <a href="issue_info">Issue Information</a> </div>
+  <div class="h"> <a href="expired">Expired List</a> </div>
 </div>
 
 <div id="main">
@@ -265,10 +290,11 @@ $res = mysqli_query($db, $sql);
             $approve_val = strtoupper($row['approve']);
             echo "<td>";
             if(strpos($approve_val, 'RETURNED') === false) {
-                echo "<form method='post' style='margin:0'>";
+                // Use a button to trigger JS confirmation
+                echo "<form method='post' style='margin:0' class='return-form'>";
                 echo "<input type='hidden' name='username' value='".htmlspecialchars($row['username'])."'>";
                 echo "<input type='hidden' name='bid' value='".htmlspecialchars($row['bid'])."'>";
-                echo "<button type='submit' name='return_submit' class='btn btn-warning btn-sm'>Return</button>";
+                echo "<button type='button' class='btn btn-warning btn-sm return-btn' data-username='".htmlspecialchars($row['username'])."' data-bid='".htmlspecialchars($row['bid'])."' data-book='".htmlspecialchars($row['names'])."'>Return</button>";
                 echo "</form>";
             }
             echo "</td>";
@@ -322,5 +348,43 @@ if(isset($_POST['submit_m'])) {
 
 
 </div>
+
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.return-btn').forEach(function(btn) {
+        btn.addEventListener('click', function(e) {
+            const form = btn.closest('form');
+            const username = btn.getAttribute('data-username');
+            const book = btn.getAttribute('data-book');
+            Swal.fire({
+                title: 'Are you sure?',
+                text: "Are you sure you want to return '" + book + "' for user '" + username + "'?",
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonText: 'Yes',
+                cancelButtonText: 'No',
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Add a hidden input to trigger PHP
+                    const submit = document.createElement('input');
+                    submit.type = 'hidden';
+                    submit.name = 'return_submit';
+                    submit.value = '1';
+                    form.appendChild(submit);
+                    form.submit();
+                }
+            });
+        });
+    });
+});
+</script>
+
+
+
+
+
 </body>
 </html>

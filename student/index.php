@@ -20,84 +20,169 @@
 </head>
 <body>
 
-<!-- <header> -->
-    
-         <!-- <a href="index.php">
-                <img src="images/logo.png" alt="Library Logo" class="logo">
-    
-                <p class="logofont">Online Library Management System</p>
-                </a>
-
-
-    <?php
-    //  if(isset($_SESSION['login_user'])) {
-        ?>
-         <nav class="navbar">
-                <a href="index.php" class="nav-btn home">Home</a>
-                <a href="books.php" class="nav-btn books">Books</a>
-                <a href="contact.php" class="nav-btn feedback">Feedback</a>
-                <div class="nav navbar-nav navbar-right">
-                    <a href="logout.php" class="nav-btn student"><span class="glyphicon glyphicon-log-in"> </span>  Log out</a>
-                    <!-- <a href="admin.php" class="nav-btn admin"> </a> -->
-                <!-- </div>
-            </nav> -->
-            <!-- <?php
-    //  }
-    
-    // else {
-        ?> -->
-                <!-- <nav class="navbar">
-                <a href="index.php" class="nav-btn home">Home</a>
-                <a href="books.php" class="nav-btn books">Books</a>
-                <a href="contact.php" class="nav-btn feedback">Feedback</a>
-                <div class="nav navbar-nav navbar-right">
-                    <a href="student_login.php" class="nav-btn student"><span class="glyphicon glyphicon-log-in"> </span>  Student Login</a>
-                    <a href="admin.php" class="nav-btn admin">Admin Login</a>
-                </div>
-            </nav> -->
-        <!-- <?php
-    // } -->
-    ?> -->
-<!-- </header> -->
     <div class="wrapper">
         <section class="sec_img"> 
 
-            <!-- <div class="w3-content w3-section" style="width: 800px;">
-                <img class="mySlides w3-animate-left" src="images/a.jpg" alt="" style="width: 100%;">
-                <img class="mySlides w3-animate-left" src="images/b.jpg" alt="" style="width: 100%;">
-                <img class="mySlides  w3-animate-fading" src="images/c.jpg" alt="" style="width: 100%;">
-                <img class="mySlides  w3-animate-fading" src="images/d.jpg" alt="" style="width: 100%;">
-                <img class="mySlides " src="images/e.jpg" alt="" style="width: 100%;">
-            </div> 
-        <script type="text/JavaScript"> 
-            var a =0;
-            carousel();
-        
-            function carousel() {
-                var i;
-                var x = document.getElementsByClassName("mySlides");
-                for(i=0;i<x.length;i++) {
-                    x[i].style.display = "none";  
-                }
-                a++; 
-                if (a> x.length) {a = 1}
-                    
-                  x[a-1].style.display = "block";
-                  setTimeout(carousel, 5000); // Change image every 2 seconds
-            } 
-        </script> -->
+            <div class="w3-content w3-section" style="width: 600px; position: relative;">
+                
+                <!-- Information slides -->
 
-            <br> <br> <br> 
-            <div class="box">
-                <br> 
-                <h1 style="text-align: center; font-size: 35px;"> Welcome to the Library </h1> <br>
-                <h1 style="text-align: center; font-size: 25px" > Opens at: 09:00 </h1> <br>                                            
-                <h1 style="text-align: center; font-size: 25px"> Closes at: 17:00 </h1> <br>
-            </div>
+                <div class="mySlides  info-slide ">
+                    <h2>Library Hours</h2>
+                    <p>Library starts at 9:00 AM</p>
+                    <p>Closes at 8:00 PM</p>
+                </div>
+                
+                <div class="mySlides  info-slide ">
+                    <h2>Services</h2>
+                    <p>Book lending and returning</p>
+                    <p>Study rooms available</p>
+                    <p>Computer and internet access</p>
+                </div>
+                
+                <div class="mySlides  info-slide ">
+                    <h2>Contact Information</h2>
+                    <p>Phone: +8801700000000</p>
+                    <p>Email: library@example.com</p>
+                    <p>Address: 123 Library Street</p>
+                </div>
+
+                <div class="mySlides  info-slide ">
+                    <h2>Library Rules</h2>
+                    <p>Keep silence in reading areas</p>
+                    <p>Return books on time</p>
+                    <p>No food or drinks allowed</p>
+                </div>
+
+                <!-- Navigation buttons -->
+                <!-- <button class="slide-btn prev-btn" onclick="changeSlide(-1)">❮</button>
+                <button class="slide-btn next-btn" onclick="changeSlide(1)">❯</button> -->
+
+                <!-- Dots indicator -->
+                <div class="dots-container">
+                    <span class="dot" onclick="currentSlide(1)"></span>
+                    <span class="dot" onclick="currentSlide(2)"></span>
+                    <span class="dot" onclick="currentSlide(3)"></span>
+                    <span class="dot" onclick="currentSlide(4)"></span>
+                </div>
+            </div> 
+
+        <script type="text/JavaScript"> 
+            let slideIndex = 1;
+            showSlide(slideIndex);
+
+            function changeSlide(n) {
+                showSlide(slideIndex += n);
+            }
+
+            function currentSlide(n) {
+                showSlide(slideIndex = n);
+            }
+
+            function showSlide(n) {
+                let slides = document.getElementsByClassName("mySlides");
+                let dots = document.getElementsByClassName("dot");
+                
+                if (n > slides.length) {slideIndex = 1}
+                if (n < 1) {slideIndex = slides.length}
+                
+                for (let i = 0; i < slides.length; i++) {
+                    slides[i].style.display = "none";
+                }
+                
+                for (let i = 0; i < dots.length; i++) {
+                    dots[i].classList.remove("active");
+                }
+                
+                slides[slideIndex-1].style.display = "block";
+                dots[slideIndex-1].classList.add("active");
+            }
+
+            // Auto slide (optional) 
+            setInterval(function() {
+                changeSlide(1);
+            }, 5000);
+        </script>
+
         </section>
-        
-        
     </div>
+
+    <style>
+    .info-slide {
+        background: linear-gradient(5deg, #610795 0%, #610795 100%) !important;
+        color: white;
+        padding: 60px 40px;
+        text-align: center;
+        height: 300px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        border-radius: 15px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        margin-top: 120px;
+        opacity: 0.7;
+    }
+
+    .info-slide h2 {
+        font-size: 2.5em;
+        margin-bottom: 30px;
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+    }
+
+    .info-slide p {
+        font-size: 1.3em;
+        margin: 10px 0;
+        opacity: 0.8;
+    }
+
+    .slide-btn {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        background-color: rgba(0,0,0,0.5);
+        color: white;
+        border: none;
+        padding: 16px 20px;
+        font-size: 24px;
+        cursor: pointer;
+        border-radius: 0 3px 3px 0;
+        user-select: none;
+        transition: 0.3s ease;
+    }
+
+    .prev-btn {
+        left: 0;
+        border-radius: 3px 0 0 3px;
+    }
+
+    .next-btn {
+        right: 0;
+    }
+
+    .slide-btn:hover {
+        background-color: rgba(0,0,0,0.8);
+    }
+
+    .dots-container {
+        text-align: center;
+        margin-top: 20px;
+    }
+
+    .dot {
+        cursor: pointer;
+        height: 15px;
+        width: 15px;
+        margin: 0 5px;
+        background-color: #bbb;
+        border-radius: 90%;
+        display: inline-block;
+        transition: background-color 0.3s ease;
+    }
+
+    .dot:hover, .dot.active {
+        background-color: #717171;
+    }
+    </style>
 
     <?php
         include "footer.php";

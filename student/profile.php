@@ -31,7 +31,7 @@
             if (isset($_POST['submit1'])) {
                 ?>
                 <script type="text/javascript">
-                    window.location = "edit_profile.php";
+                    window.location = "edit_profile";
                 </script>
                 <?php
 
@@ -43,8 +43,18 @@
             </h2>
             <?php
             $row= mysqli_fetch_assoc($q);
-            echo "<div style='text-align: center;'> 
-            <img class='img-circle profile-img' height=140 width=140 src='images/".$_SESSION['pic']."'> </div>";
+            $rawPic = isset($_SESSION['pic']) ? trim($_SESSION['pic']) : '';
+            $safePic = preg_replace('/[^A-Za-z0-9._-]/','_', $rawPic);
+            $imgDir = __DIR__ . '/../images/';
+            if ($safePic === '' || !is_file($imgDir.$safePic)) {
+                $fallback = 'no-cover.png';
+                if (!is_file($imgDir.$fallback)) {
+                    $phData = base64_decode('iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAQAAAAAYLlVAAAAK0lEQVR4Ae3PMQkAMAgAsXH/n9u4BNnQAklJkiRJkiRJkiRJkiRJL4y8AL2mA+2MbNTSAAAAAElFTkSuQmCC');
+                    @file_put_contents($imgDir.$fallback, $phData);
+                }
+                $safePic = $fallback;
+            }
+            echo "<div style='text-align: center;'>\n            <img class='img-circle profile-img' height='140' width='140' src='../images/".htmlspecialchars($safePic, ENT_QUOTES, 'UTF-8')."' alt='Profile Picture'> </div>";
             ?>
             <div style="text-align: center;"> <b> Welcome</b>
                 <h4>
@@ -117,15 +127,7 @@
                     echo "</td>";
                  echo "</tr>";
 
-                 echo "<tr>";
-                   echo "<td>";
-                    echo "<b>password: </b>";
-                    echo "</td>";
-
-                    echo "<td>";
-                    echo $row['password'];
-                    echo "</td>";
-                 echo "</tr>"; 
+                // do not display password hash
 
                  echo "</table>";
             echo "</b>";

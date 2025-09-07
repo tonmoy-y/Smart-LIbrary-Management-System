@@ -1,90 +1,54 @@
 <?php
-    include "connection.php";
-    include "navbar.php";
- 
+        include "connection.php";
+        include "navbar.php"; // navbar already renders <head> & styles
 ?>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Forget Password</title>
+<style>
+    body {
+        margin:0;
+        min-height:100vh;
+        background: url("images/forget1.png") center/cover no-repeat;
+    }
+    .password-wrapper {
+        max-width:400px;
+        margin:130px auto 80px;
+        background:rgba(0,0,0,.82);
+        border-radius:15px;
+        padding:25px 28px 30px;
+        text-align:center;
+    }
+    .password-wrapper h1 {font-size:30px;font-family:"Lucida Console", monospace;color:#fff;margin:0 0 25px;}
+    .password-wrapper .form-control {width:100%;max-width:300px;margin:0 auto;padding:10px 12px;font-size:16px;border-radius:6px;border:none;}
+    .password-wrapper button.btn {background:#7272b6;color:#fff;font-weight:600;border:none;padding:10px 18px;border-radius:8px;transition:.25s;}
+    .password-wrapper button.btn:hover{opacity:.85;}
+    html,body {overscroll-behavior:contain;}
+    @media (max-width:576px){.password-wrapper{margin:110px 12px 60px;padding:22px 20px 26px;} .password-wrapper h1{font-size:24px;}}
+</style>
 
-    <style type="text/css">
-        body {
-            display: flex;
-            margin-bottom: 0;
-            height: calc(100vh - 190px);
-            width: 100%;
-            background-size: cover;
-            background-repeat: no-repeat;
-            background-position: center;
-
-            background-image: url("images/forget1.png");
-            /* background-color: rgb(36, 107, 116); */
-
-        }
-        .wrapper {
-            width  : 400px;
-            /* height : 300px; */
-            margin: 75px auto;
-            background-color: black;
-            opacity: 0.8;
-            border-radius: 15px;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            /* justify-content: center; */
-            align-items: center;
-
-
-        }
-input.form-control {
-    width: 300px;
-    max-width: 300px;
-    padding: 10px;
-    font-size: 16px;
-    border-radius: 5px;
-    border: none;
-}
-
-
-    </style>
-</head>
-<body>
-    <div class="wrapper" >
-        <div style="text-align:center; color: white;">
-            <!-- <h1 style="text-align: center; font-size: 35px;font-family: Lucida Console;">Library Management System</h1> -->
-            <h1 style="text-align: center; font-size: 35px;font-family: Lucida Console;">Change your password</h1>
-
-        </div>
-
-        <form action="" method="post" >
-            <input type="text" name="username" placeholder="Enter your username" class="form-control" required> <br>
-            <input type="text" name="email" placeholder="Enter your email" class="form-control" required> <br>
-            <input type="text" name="password" placeholder="Enter your New password" class="form-control" required> <br>
-            <button class="btn btn-default" type="submit" style="float:right; margin-top: 10px; " name="submit">
-                Change Password
-            </button>
-        </form>
-
-    </div>
+<div class="password-wrapper">
+    <h1>Change your password</h1>
+    <form action="" method="post">
+        <input type="text" name="username" placeholder="Enter your username" class="form-control" required><br>
+        <input type="text" name="email" placeholder="Enter your email" class="form-control" required><br>
+        <input type="text" name="password" placeholder="Enter your New password" class="form-control" required><br>
+        <button class="btn btn-default" type="submit" name="submit">Change Password</button>
+    </form>
+</div>
     <?php
 if(isset($_POST['submit'])) {
     $rest = mysqli_query($db,"SELECT * FROM `student` WHERE username='$_POST[username]' AND email='$_POST[email]'");
+    $_SESSION['username'] = $_POST['username'];
     $_SESSION['password'] = $_POST['password'];
-    if($rest) { // যদি UPDATE সফল হয়
-        if(mysqli_affected_rows($db) > 0) { // কতগুলা রো affected হয়েছে চেক করবে
-           $otp = rand(100000,999999);
-        mysqli_query($db,"INSERT INTO `verify` (username, email, otp) VALUES('$_POST[username]','$_POST[email]','$otp')");
-        $to = $_POST['email'];
-        $subject = "Account Verification";
-        $msg = "Your OTP is: $otp.";
-        $from = "From: tonmoy4451@gmail.com";
-        if(mail($to, $subject, $msg, $from)) {
+    $_SESSION['email'] = $_POST['email'];
+    if($rest) { //  UPDATE 
+        if(mysqli_affected_rows($db) > 0) { 
+           
+        include "send_otp.php";
+        if(sendOtp($db, $_POST['username'], $_POST['email'])) {
+            
+
                  ?>
-        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
         <script type="text/javascript">
            Swal.fire({
   title: "Success!",
@@ -93,12 +57,12 @@ if(isset($_POST['submit'])) {
   confirmButtonText: "OK",
   confirmButtonColor: "#3085d6"
 }).then(() => {
-            window.location = "verify.php";
+            window.location = "verify";
         });
         </script>
         <?php
             }
-        } else { // যদি username/email মেল না খায়
+        } else { // 
             ?>
             <script type="text/javascript">
             Swal.fire({
@@ -110,14 +74,18 @@ if(isset($_POST['submit'])) {
             });
             </script>
             <?php
+            // Clear session variables
+            unset($_SESSION['email']);
+            unset($_SESSION['password']);
+            unset($_SESSION['username']);
+
         }
     } else { // কুয়েরি fail হলে
         echo "Database error: " . mysqli_error($db);
     }
 }
-
+include "footer.php";
     ?>
 
 
-</body>
-</html>
+<!-- Closing tags provided by included navbar layout -->

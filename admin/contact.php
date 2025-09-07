@@ -2,6 +2,11 @@
 // include database connection file
      include "connection.php";
      include "navbar.php";
+     if (isset($_SESSION['admin_reset'])) {
+         unset($_SESSION['admin_reset']);
+        unset($_SESSION['admin_reset_time']);
+        echo "<script>window.location = '../index';</script>";
+  }
 ?>
 
 <!DOCTYPE html>
@@ -106,6 +111,15 @@ form.write input.form-control {
             width: 100%;
 }
 
+     /* Mobile-only adjustments to match root contact */
+     @media (max-width: 576px) {
+          .wrap { width: calc(100% - 20px); margin: 10px; padding: 16px; }
+          .input-box .form-control { width: 100%; height: 52px; display: block; }
+          .input-box .btn-submit { width: 100%; height: 44px; display: block; margin-left: 0; margin-top: 8px; }
+          .comment-table { width: 100%; table-layout: fixed; }
+          .reply-column { max-width: 50%; width: auto; }
+     }
+
      </style>
 
 </head>
@@ -136,7 +150,7 @@ form.write input.form-control {
      if(isset($_POST['submit'])) {
           $comment = trim($_POST['comment']);
           if($comment !== '') {
-               $user = isset($_SESSION['login_user']) ? $_SESSION['login_user'] : 'Guest';
+               $user = isset($_SESSION['login_admin']) ? $_SESSION['login_admin'] : 'Guest';
                $stmt = mysqli_prepare($db, "INSERT INTO `comments` (`username`, `comment`) VALUES (?, ?)");
                if($stmt) {
                     mysqli_stmt_bind_param($stmt, 'ss', $user, $comment);
@@ -146,7 +160,7 @@ form.write input.form-control {
                     mysqli_query($db, "INSERT INTO `comments` (`username`, `comment`) VALUES ('".mysqli_real_escape_string($db,$user)."','".mysqli_real_escape_string($db,$comment)."')");
                }
                // reload to show the comment list (PRG pattern)
-               echo "<script>window.location='contact.php'</script>";
+               echo "<script>window.location='contact'</script>";
                exit;
           } else {
                ?>
@@ -157,7 +171,7 @@ form.write input.form-control {
                     icon: "warning",
                     confirmButtonText: "I Understand",
                     confirmButtonColor: "#589cdbff"
-               }).then(() => { window.location = "contact.php"; });
+               }).then(() => { window.location = "contact"; });
                </script>
                <?php
           }
@@ -165,8 +179,8 @@ form.write input.form-control {
 
      // Determine if current user is admin by checking the admin table
      $is_admin = false;
-     if(isset($_SESSION['login_user'])) {
-          $lu = $_SESSION['login_user'];
+     if(isset($_SESSION['login_admin'])) {
+          $lu = $_SESSION['login_admin'];
           $s = mysqli_prepare($db, "SELECT `username` FROM `admin` WHERE `username` = ? LIMIT 1");
           if($s) {
                mysqli_stmt_bind_param($s, 's', $lu);
@@ -203,7 +217,7 @@ form.write input.form-control {
                     }
                }
           }
-          echo "<script>window.location='contact.php'</script>";
+          echo "<script>window.location='contact'</script>";
           exit;
      }
 

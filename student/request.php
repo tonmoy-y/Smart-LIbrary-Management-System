@@ -3,7 +3,7 @@
      include "connection.php";
      include "navbar.php";
 if(!isset($_SESSION['login_user'])) {
-    echo "<script>alert('Please log in first!'); window.location='student_login.php';</script>";
+    echo "<script>alert('Please log in first!'); window.location='student_login';</script>";
     exit();
 }
 ?>
@@ -103,17 +103,17 @@ body {
           
                if(isset($_SESSION['login_user'])) {
                      
-                    echo "<img class='img-circle profile_img' height=100 width=100 src='images/".$_SESSION['pic']." '>  ";
+                    echo "<img class='img-circle profile_img' height=100 width=100 src='../images/".$_SESSION['pic']." '>  ";
                     echo "<br> <br>";
                     echo "Welcome,  ". $_SESSION['login_user'] . "!";
                }
                ?>
      </div>
 
-  <div class="h"> <a href="books.php"> Books </a> </div>
-  <div class="h"> <a href="request.php">Book Request</a> </div>
-  <div class="h"> <a href="issue_info.php">Issue Information</a> </div>
-  <div class="h"> <a href="expired.php">Expired Books</a> </div>
+  <div class="h"> <a href="books"> Books </a> </div>
+  <div class="h"> <a href="request">Book Request</a> </div>
+  <div class="h"> <a href="issue_info">Issue Information</a> </div>
+  <div class="h"> <a href="expired">Expired Books</a> </div>
 </div>
 
 <div id="main">
@@ -140,7 +140,7 @@ body {
   <?php
 
   // $q = $_POST['search'];
-  $q = mysqli_query($db, "SELECT ib.*, b.names FROM issue_book ib LEFT JOIN books b ON b.bid = ib.bid WHERE ib.username = '$_SESSION[login_user]' AND ib.approve='' ");
+  $q = mysqli_query($db, "SELECT ib.*, b.names FROM issue_book ib LEFT JOIN books b ON b.bid = ib.bid WHERE ib.username = '$_SESSION[login_user]' AND ib.approve='Pending' ");
   if( mysqli_num_rows($q) == 0) 
   // If search query returns results, display them
 echo "<h2 style='text-align:center;'> There is no book request from you. </h2>";
@@ -200,7 +200,7 @@ if(isset($_POST['delete'])) {
   confirmButtonText: "OK",
   confirmButtonColor: "#589cdbff"
 }).then(() => {
-            window.location = "request.php";
+            window.location = "request";
         });
         </script>
 
@@ -216,7 +216,7 @@ if(isset($_POST['delete'])) {
   confirmButtonText: "OK",
   confirmButtonColor: "#589cdbff"
 }).then(() => {
-            window.location = "request.php";
+            window.location = "request";
         });
         </script>
 

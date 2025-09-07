@@ -25,7 +25,7 @@
      
         <div class="box2">
 <br>
-            <h1 style= "text-align: center; font-size: 35px;font-family: Lucida Console;">Library Management</h1>
+            <h1 style= "text-align: center; font-size: 35px; font-family: 'Lucida Console', 'Lucida Sans Typewriter', Monaco, 'Bitstream Vera Sans Mono', monospace;">Library Management</h1>
         <h1 style="text-align: center; font-size: 25px;">Admin Registration Form</h1> <br>
             <form name="Registration" action="" method="post">
                 <div class="reg" >
@@ -62,23 +62,38 @@
             }
             if($count==0) {
                 // $hashed_password = password_hash($_POST['password'], PASSWORD_DEFAULT);
-                $hashed_password = ($_POST['password']);
-                // $hashed_password = md5($_POST['password']);
+               
+                $hashed_password = password_hash($_POST['password'], PASSWORD_DEFAULT);
               mysqli_query($db,"INSERT INTO `admin` VALUES( ' ', '$_POST[name]','$_POST[dept]','$_POST[phone]','$_POST[email]','$_POST[username]','$hashed_password','admin.jpg','');");
         
         ?>
-        <script type="text/javascript">
-            alert("Registration Successful! Now you can login.");
-            window.location = "../login.php";
-        </script>
+                  <script type="text/javascript">
+Swal.fire({
+    title: "Success!",
+    text: "Registration Successful. You can login after approval.",
+    icon: "success",
+    confirmButtonText: "OK",
+    confirmButtonColor: "#589cdbff"
+}).then(() => {
+    window.location = "../login";
+});
+</script>
         <?php
             }
             
             else {
                 ?>
-                <script type="text/javascript">
-                    alert("Username already exists! Please choose another username.");
-                </script>
+                           <script type="text/javascript">
+Swal.fire({
+    title: "Error!",
+    text: "Username already exists! Please choose another username.",
+    icon: "error",
+    confirmButtonText: "OK",
+    confirmButtonColor: "#589cdbff"
+}).then(() => {
+    window.location = "../login";
+});
+</script>
                 <?php 
             }
         }

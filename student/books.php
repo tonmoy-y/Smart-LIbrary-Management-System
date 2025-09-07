@@ -2,6 +2,11 @@
 
      include "connection.php";
      include "navbar.php";
+        if (isset($_SESSION['student_reset'])) {
+         unset($_SESSION['student_reset']);
+        unset($_SESSION['student_reset_time']);
+        echo "<script>window.location = '../books';</script>";
+  }
 
 ?>
 <!DOCTYPE html>
@@ -39,7 +44,7 @@
 
 .book-img img {
   width: 100%;
-  height: 200px;
+  height: 300px; /* increased from 200px */
   object-fit: cover;
 }
 
@@ -167,10 +172,10 @@ body {
                ?>
      </div>
 
-  <div class="h"> <a href="books.php"> Books </a> </div>
-  <div class="h"> <a href="request.php">Book Request</a> </div>
-  <div class="h"> <a href="issue_info.php">Issue Information</a> </div>
-  <div class="h"> <a href="expired.php">Expired Books</a> </div>
+  <div class="h"> <a href="books"> Books </a> </div>
+  <div class="h"> <a href="request">Book Request</a> </div>
+  <div class="h"> <a href="issue_info">Issue Information</a> </div>
+  <div class="h"> <a href="expired">Expired Books</a> </div>
   
 </div>
 
@@ -211,8 +216,10 @@ function closeNav() {
      <div class="sarch">
           <form class="navbar-form" action="" method="post" name="form1">
 
-               <!-- <input class="form-control" type="text" class="form-control" name="bid" placeholder="Enter Book ID to Request book" required>
-               <button type="submit" name="submit1" class="btn btn-default" style="background: #b8adad";>  Request </button> -->
+               <!-- 
+          <input class="form-control" type="text" class="form-control" name="bid" placeholder="Enter Book ID to Request book" required>
+               <button type="submit" name="submit1" class="btn btn-default" style="background: #b8adad";>  Request </button>
+                -->
 
           </form>
      </div>
@@ -309,7 +316,7 @@ if(isset($_POST['submit1'])) {
             confirmButtonText: "OK",
             confirmButtonColor: "#589cdbff"
         }).then(() => {
-            window.location = "books.php";
+            window.location = "books";
         });
         </script>
         <?php
@@ -318,7 +325,7 @@ if(isset($_POST['submit1'])) {
 
 
 
-$check = mysqli_query($db, "SELECT * FROM issue_book WHERE username='$_SESSION[login_user]' AND bid='$_POST[bid]' AND approve=''");
+$check = mysqli_query($db, "SELECT * FROM issue_book WHERE username='$_SESSION[login_user]' AND bid='$_POST[bid]' AND (approve ='Pending' OR approve='Yes')");
 if(mysqli_num_rows($check) > 0) {
 //     $rowCheck = mysqli_fetch_assoc($check);
 //     if($rowCheck['approve'] == '') {
@@ -327,12 +334,12 @@ if(mysqli_num_rows($check) > 0) {
         <script type="text/javascript">
 Swal.fire({
     title: "Warning!",
-    text: "You have already requested this book.",
+    text: "You  already  have or requested this book.",
     icon: "warning",
     confirmButtonText: "OK",
     confirmButtonColor: "#589cdbff"
 }).then(() => {
-    window.location = "books.php";
+    window.location = "books";
 });
 </script>
         <?php
@@ -341,7 +348,7 @@ Swal.fire({
 }
 
 
-          mysqli_query($db, "INSERT INTO issue_book VALUES ('$_SESSION[login_user]','$_POST[bid]','','', '')");
+          mysqli_query($db, "INSERT INTO issue_book VALUES ('$_SESSION[login_user]','$_POST[bid]','','', 'Pending')");
          ?>
           <script type="text/javascript">
 Swal.fire({
@@ -351,7 +358,7 @@ Swal.fire({
     confirmButtonText: "OK",
     confirmButtonColor: "#589cdbff"
 }).then(() => {
-    window.location = "request.php";
+    window.location = "request";
 });
 </script>
 
@@ -367,7 +374,7 @@ Swal.fire({
     confirmButtonText: "OK",
     confirmButtonColor: "#589cdbff"
 }).then(() => {
-    window.location = "books.php";
+    window.location = "books";
 });
 </script>
 <?php
@@ -383,7 +390,7 @@ Swal.fire({
     confirmButtonText: "OK",
     confirmButtonColor: "#589cdbff"
 }).then(() => {
-    window.location = "../login.php";
+    window.location = "../login";
 });
 </script>
 

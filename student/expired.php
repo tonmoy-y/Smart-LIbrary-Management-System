@@ -11,7 +11,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Book Request</title>
-     <style type="text/css">
+  <style type="text/css">
         .srch {
                 display: flex;
                 flex-direction: column; 
@@ -94,11 +94,12 @@ body {
 }
 
 .container {
-    height: 800px;
-    background-color: black;
-    opacity: 0.7;
-    color: white;
-    margin-top:-45px
+  min-height: 600px;
+  background-color: black;
+  opacity: 0.7;
+  color: white;
+  margin-top:-45px;
+  padding: 10px;
 }
 .scroll {
     width: 100%;
@@ -106,8 +107,25 @@ body {
     overflow-y: scroll;
 }
 
-th,td {
-  width: 10%;
+th,td { width: 10%; }
+
+/* Mobile-only fixes */
+@media (max-width: 576px) {
+  #main { padding-right: 10px; }
+  /* Make the open control align to the right and not overlap */
+  #main > span[onclick] { display: inline-block; margin: 10px 0; }
+  .container { margin-top: 10px; padding: 10px; }
+  /* Top controls stack: Returned, Expired, fine info */
+  .container .controls { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: space-between; }
+  .container .controls .left, .container .controls .right { width: 100%; }
+  .container .controls .left button { width: 49%; min-width: 120px; }
+  .container .controls .right h2 { font-size: 16px; margin: 8px 0 0; }
+  /* Tables fit screen */
+  table { display: block; width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  table th, table td { white-space: nowrap; }
+  .scroll { height: auto; max-height: 60vh; }
+  /* Side nav width smaller on phones */
+  .sidenav { width: 0; }
 }
      </style>
 </head>
@@ -121,28 +139,29 @@ th,td {
           
                if(isset($_SESSION['login_user'])) {
                      
-                    echo "<img class='img-circle profile_img' height=100 width=100 src='images/".$_SESSION['pic']." '>  ";
+                    echo "<img class='img-circle profile_img' height=100 width=100 src='../images/".$_SESSION['pic']." '>  ";
                     echo "<br> <br>";
                     echo "Welcome,  ". $_SESSION['login_user'] . "!";
                }
                ?>
      </div>
 
-  <div class="h"> <a href="books.php"> Books </a> </div>
-  <div class="h"> <a href="request.php">Book Request</a> </div>
-  <div class="h"> <a href="issue_info.php">Issue Information</a> </div>
-  <div class="h"> <a href="expired.php">Expired List</a> </div>
+  <div class="h"> <a href="books"> Books </a> </div>
+  <div class="h"> <a href="request">Book Request</a> </div>
+  <div class="h"> <a href="issue_info">Issue Information</a> </div>
+  <div class="h"> <a href="expired">Expired List</a> </div>
 </div>
 
 <div id="main">
 
-  <span style="font-size:30px;cursor:pointer" onclick="openNav()">&#9776; open</span>
+  <span style="font-size:30px;cursor:pointer; float:right;" onclick="openNav()">&#9776; open</span>
 
 
 <script>
 function openNav() {
-  document.getElementById("mySidenav").style.width = "300px";
-  document.getElementById("main").style.marginLeft = "300px";
+  var w = Math.min(window.innerWidth || 300, 280);
+  document.getElementById("mySidenav").style.width = w + "px";
+  document.getElementById("main").style.marginLeft = w + "px";
   document.body.style.backgroundColor = "rgba(0,0,0,0.4)";
 }
 
@@ -158,15 +177,14 @@ function closeNav() {
   <?php
   if(isset($_SESSION['login_user'])) {
     ?>
-    <div style="float:left; margin: 15px 0px;">
-      <form action="" method="post" name="form2">
-
-        <button name="submit2" type="submit" class="btn btn-default" style="background-color:green; color:yellow;"> Returned </button> &nbsp;
-        <button name="submit3" type="submit" class="btn btn-default" style="background-color:red; color:yellow;"> Expired </button>
+    <div class="controls">
+      <div class="left">
+        <form action="" method="post" name="form2" style="display:inline-block;">
+          <button name="submit2" type="submit" class="btn btn-default" style="background-color:green; color:yellow;"> Returned </button>
+          <button name="submit3" type="submit" class="btn btn-default" style="background-color:red; color:yellow; margin-left:8px;"> Expired </button>
+        </form>
       </div>
-    </form>
-
-    <div style="float:right; margin: 15px 0px;">
+      <div class="right">
 
     <?php
     $var2=0;
@@ -181,6 +199,7 @@ function closeNav() {
         <h2>Your fine is 
           <?php echo "$".$var3 ?>
         </h2>
+      </div>
     </div>
 
 <br><br><br>
@@ -228,7 +247,7 @@ if(isset($_SESSION['login_user'])) {
         echo "<h3 style='text-align:center; color: yellow;'>No expired requests</h3>";
     } else {
     
-    echo "<table class='table table-bordered' style='width:98.5%;' > ";
+  echo "<table class='table table-bordered' style='width:100%;' > ";
     
     echo "<tr style='background-color: #b8adad;'>";
     echo "<th>"; echo "Username"; echo "</th>"; 

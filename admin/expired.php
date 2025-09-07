@@ -98,7 +98,7 @@ body {
     background-color: black;
     opacity: 0.7;
     color: white;
-    margin-top:-45px
+    margin-top:-5px
 }
 .scroll {
     width: 100%;
@@ -121,8 +121,20 @@ th,td {
   width: 10%;
 }
      </style>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 <body>
+<?php if(isset($_GET['returned'])): ?>
+<script>
+Swal.fire({
+  title: "Success!",
+  text: "Book has been returned successfully.",
+  icon: "success",
+  confirmButtonText: "OK",
+  confirmButtonColor: "#589cdbff"
+});
+</script>
+<?php endif; ?>
     
 <div id="mySidenav" class="sidenav">
   <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
@@ -130,24 +142,27 @@ th,td {
 
           <?php
           
-               if(isset($_SESSION['login_user'])) {
+               if(isset($_SESSION['login_admin'])) {
                      
-                    echo "<img class='img-circle profile_img' height=100 width=100 src='images/".$_SESSION['pic']." '>  ";
+                    $rawPic = isset($_SESSION['pic']) ? trim($_SESSION['pic']) : '';
+                    $safePic = preg_replace('/[^A-Za-z0-9._-]/','_', $rawPic);
+                    if ($safePic === '' || !is_file(__DIR__.'/../images/'.$safePic)) { $safePic='no-cover.png'; }
+                    echo "<img class='img-circle profile_img' height=100 width=100 src='../images/".$safePic."'>  ";
                     echo "<br> <br>";
-                    echo "Welcome,  ". $_SESSION['login_user'] . "!";
+                    echo "Welcome,  ". $_SESSION['login_admin'] . "!";
                }
                ?>
      </div>
 
-  <div class="h"> <a href="books.php"> Books </a> </div>
-  <div class="h"> <a href="request.php">Book Request</a> </div>
-  <div class="h"> <a href="issue_info.php">Issue Information</a> </div>
-  <div class="h"> <a href="expired.php">Expired List</a> </div>
+  <div class="h"> <a href="books"> Books </a> </div>
+  <div class="h"> <a href="request">Book Request</a> </div>
+  <div class="h"> <a href="issue_info">Issue Information</a> </div>
+  <div class="h"> <a href="expired">Expired List</a> </div>
 </div>
 
 <div id="main">
 
-  <span style="font-size:30px;cursor:pointer" onclick="openNav()">&#9776; open</span>
+  <span style="font-size:30px;cursor:pointer" onclick="openNav()">&#9776; open</span> 
 
 
 <script>
@@ -167,7 +182,7 @@ function closeNav() {
 <div class="container">
 
   <?php
-  if(isset($_SESSION['login_user'])) {
+  if(isset($_SESSION['login_admin'])) {
     ?>
     <div style="float:left; margin: 15px 0px;">
       <form action="" method="post" name="form2">
@@ -215,6 +230,8 @@ $fine = 0;
   mysqli_query($db, "UPDATE issue_book SET `return` = '$x' WHERE username='$_POST[username]' AND bid='$_POST[bid]'");
 
   mysqli_query($db, "UPDATE books SET quantity = quantity+ 1 WHERE bid='$_POST[bid]'");
+  echo "<script>window.location='expired.php?returned=1'</script>";
+  exit;
      }
   }
   ?>
@@ -222,7 +239,7 @@ $fine = 0;
 <h2 style="text-align:center;"> Date expired list </h2>
 <?php
 $c = 0;
-if(isset($_SESSION['login_user'])) { 
+if(isset($_SESSION['login_admin'])) { 
 
   $ret= '<p style="color:yellow; background-color: green;"> RETURNED </p>';
   $exp= '<p style="color:yellow; background-color: red;"> EXPIRED </p>';
@@ -301,12 +318,12 @@ if(isset($_SESSION['login_user'])) {
       echo "<td>";
       $approve_val = strtoupper($row['approve']);
       if(strpos($approve_val, 'RETURNED') === false) {
-        // show small form that posts username and bid to existing handler
-        echo "<form method='post' style='margin:0'>";
-        echo "<input type='hidden' name='username' value='".htmlspecialchars($row['username'])."'>";
-        echo "<input type='hidden' name='bid' value='".htmlspecialchars($row['bid'])."'>";
-        echo "<button type='submit' name='submit' class='btn btn-warning btn-sm'>Return</button>";
-        echo "</form>";
+  // show small form and trigger SweetAlert2 confirmation like issue_info
+  echo "<form method='post' style='margin:0' class='return-form'>";
+  echo "<input type='hidden' name='username' value='".htmlspecialchars($row['username'])."'>";
+  echo "<input type='hidden' name='bid' value='".htmlspecialchars($row['bid'])."'>";
+  echo "<button type='button' class='btn btn-warning btn-sm return-btn' data-username='".htmlspecialchars($row['username'])."' data-bid='".htmlspecialchars($row['bid'])."' data-book='".htmlspecialchars($row['names'])."'>Return</button>";
+  echo "</form>";
       }
       echo "</td>";
 
@@ -328,5 +345,37 @@ else {
 
 
 </div>
+</div>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  document.querySelectorAll('.return-btn').forEach(function(btn) {
+    btn.addEventListener('click', function(e) {
+      const form = btn.closest('form');
+      const username = btn.getAttribute('data-username');
+      const book = btn.getAttribute('data-book');
+      Swal.fire({
+        title: 'Are you sure?',
+        text: "Are you sure you want to return '" + book + "' for user '" + username + "'?",
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonText: 'Yes',
+        cancelButtonText: 'No',
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33'
+      }).then((result) => {
+        if (result.isConfirmed) {
+          const submit = document.createElement('input');
+          submit.type = 'hidden';
+          submit.name = 'submit';
+          submit.value = '1';
+          form.appendChild(submit);
+          // call native submit to avoid name='submit' shadowing
+          HTMLFormElement.prototype.submit.call(form);
+        }
+      });
+    });
+  });
+});
+</script>
 </body>
 </html>

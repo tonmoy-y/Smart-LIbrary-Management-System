@@ -1,4 +1,6 @@
 <?php
+    // Start output buffering so header redirects work even if included files emit output
+    ob_start();
      include "connection.php";
      include "navbar.php";
 
@@ -96,7 +98,6 @@
             color:white;
             margin-left: 30px;
             padding: 10px;
-
         }
 tr:hover {
             background-color: #1e3f54;
@@ -127,8 +128,7 @@ form.write input.form-control {
 }
 .chat {
     display:flex;
-    flex-row: row-warp;
-
+    flex-wrap: wrap;
 }
 
 .user .chatbox,
@@ -160,6 +160,21 @@ form.write input.form-control {
     align-items: flex-start;
 }
     </style>
+        <style>
+        /* Mobile-only fixes */
+        @media (max-width: 576px) {
+            .container { flex-direction: column; width: 100%; margin: 0; }
+            .left_box, .right_box { width: 100%; }
+        .left_box2, .right_box2 { width: calc(100% - 20px); margin: 10px; height: auto; }
+        .right_box2 { min-height: 60vh; display: flex; flex-direction: column; }
+            .list { max-height: 40vh; }
+        .msg { max-height: 50vh; overflow-y: auto; flex: 1 1 auto; }
+            form.write { height: auto; gap: 8px; }
+            form.write input.form-control { height: 40px; }
+            .btn.btn-info.btn-lg { padding: 8px 12px; font-size: 14px; line-height: 1.2; white-space: nowrap; }
+            .chat .chatbox { max-width: 90%; }
+        }
+        </style>
 </head>
 <body>
 <?php
@@ -231,7 +246,7 @@ while($row=mysqli_fetch_assoc($res)) {
 &nbsp;
 <?php  
        echo "<img class='img-circle profile_img' height=40 width=40 src=\"../images/{$student_pic}\">";
-    //    echo " " . $_SESSION['login_user'] . "!";
+    //    echo " " . $_SESSION['login_admin'] . "!";
     ?>
     &nbsp;
         </div>
@@ -256,7 +271,7 @@ while($row=mysqli_fetch_assoc($res)) {
 &nbsp;
 <?php  
        echo "<img class='img-circle profile_img' height=40 width=40 src='../images/user.jpg'>";
-    //    echo " " . $_SESSION['login_user'] . "!";
+    //    echo " " . $_SESSION['login_admin'] . "!";
     ?>
     <!-- hr -->
     &nbsp;
@@ -321,7 +336,7 @@ while($row=mysqli_fetch_assoc($res)) {
 &nbsp;
 <?php  
        echo "<img class='img-circle profile_img' height=40 width=40 src=\"../images/{$student_pic}\">";
-    //    echo " " . $_SESSION['login_user'] . "!";
+    //    echo " " . $_SESSION['login_admin'] . "!";
     ?>
     &nbsp;
         </div>
@@ -346,7 +361,7 @@ while($row=mysqli_fetch_assoc($res)) {
 &nbsp;
 <?php  
        echo "<img class='img-circle profile_img' height=40 width=40 src='../images/user.jpg'>";
-    //    echo " " . $_SESSION['login_user'] . "!";
+    //    echo " " . $_SESSION['login_admin'] . "!";
     ?>
     &nbsp;
         </div>
@@ -418,3 +433,7 @@ while($row=mysqli_fetch_assoc($res)) {
 
 </body>
 </html>
+<?php
+    // End buffering and send output
+    ob_end_flush();
+?>

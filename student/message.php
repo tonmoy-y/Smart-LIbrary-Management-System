@@ -24,23 +24,28 @@
            color:white;
            margin: 0px auto;
            padding: 20px;
+       display: flex;
+       flex-direction: column;
         }
 form.write {
             width: 100%;
             height:47px; 
-            display:flex; 
+        display:flex; 
+        gap: 8px;
           }
 
 form.write input.form-control { 
             max-width: none;      
-            width: 100%; 
+        width: 100%; 
             max-height: none;
-            height: 100%;  
+        height: 100%;  
+        flex: 1 1 auto;
                 
           }
 .msg {
     height: 500px;
-    overflow-y: scroll;
+    overflow-y: auto;
+    flex: 1 1 auto;
 
 }
 .btn-info {
@@ -48,7 +53,7 @@ form.write input.form-control {
 }
 .chat {
     display:flex;
-    flex-row: row-warp;
+    flex-wrap: wrap;
 
 }
 
@@ -79,6 +84,17 @@ form.write input.form-control {
     align-items: flex-start;
 }
     </style>
+        <style>
+        /* Mobile-only fixes */
+        @media (max-width: 576px) {
+            .wrapper { width: calc(100% - 20px); height: auto; min-height: 60vh; margin: 10px auto; padding: 12px; }
+            .msg { max-height: 50vh; }
+            form.write { height: auto; }
+            form.write input.form-control { height: 40px; }
+            .btn.btn-info.btn-lg { padding: 8px 12px; font-size: 14px; line-height: 1.2; white-space: nowrap; }
+            .chat .chatbox { max-width: 90%; }
+        }
+        </style>
 </head>
 <body>
 

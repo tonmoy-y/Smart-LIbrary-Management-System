@@ -3,13 +3,14 @@
     include "navbar.php";
 ?>
 
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Edit Profile</title>
-
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style type="text/css">
         form.write {
             width: 400px; 
@@ -34,7 +35,12 @@ label {
    
 <?php
     $sql = "SELECT * FROM `student` WHERE username='$_SESSION[login_user]'";
-    $result = mysqli_query($db, $sql) or die(mysql_error());
+    $result = mysqli_query($db, $sql);
+
+    if (!$result) {
+        die(mysqli_error($db));
+    }
+    // $row = mysqli_fetch_assoc($result);
 
     while ($row = mysqli_fetch_assoc($result)) {
         $name= $row['name'];
@@ -43,6 +49,7 @@ label {
         $email= $row['email'];
         $username= $row['username'];
         $password= $row['password'];
+        $currentPic = isset($row['pic']) ? $row['pic'] : '';
 
     }
 
@@ -78,8 +85,8 @@ label {
         <label><h4><b>Username :</b></h4></label>
         <input class="form-control" type="text" name="username" value="<?php echo $username; ?>" >
        
-        <label><h4><b>Password:</b></h4></label>
-        <input class="form-control" type="text" name="password" value="<?php echo $password; ?>"><br>
+    <label><h4><b>Password:</b></h4></label>
+    <input class="form-control" type="password" name="password" placeholder="Leave blank to keep current password"><br>
             <!-- <input type="text" name=""> -->
              <div style="text-align:center;">
 
@@ -91,27 +98,62 @@ label {
     <?php
     if (isset($_POST['submit'])) {
 
-        if (isset($_FILES['file']) && $_FILES['file']['name'] != "") {
-            move_uploaded_file($_FILES['file']['tmp_name'], "../images/".$_FILES['file']['name']);
-            $pic = $_FILES['file']['name'];
-            $_SESSION['pic'] = $pic;
+        if (!empty($_FILES['file']['name'])) {
 
-        }
-        else {
-            $pic = $_SESSION['pic']; // Keep the existing picture if no new file is uploaded
+            $original = $_FILES['file']['name'];
+            // sanitize: lowercase + spaces -> underscore + only safe chars
+            $ext = strtolower(pathinfo($original, PATHINFO_EXTENSION));
+            $base = pathinfo($original, PATHINFO_FILENAME);
+            $base = preg_replace('/[^A-Za-z0-9_-]+/', '_', $base);
+            $base = trim($base, '_');
+            if ($base === '') { $base = 'avatar'; }
+
+            // make unique to avoid cache / overwrite
+            $pic = $base.'_'.time().'.'.$ext;
+
+            $target = "../images/".$pic;
+            if (move_uploaded_file($_FILES['file']['tmp_name'], $target)) {
+                // extra integrity check (non-zero size & image signature)
+                $valid = (filesize($target) > 100) && @getimagesize($target);
+                if ($valid) {
+                    $_SESSION['pic'] = $pic;
+                } else {
+                    @unlink($target);
+                    $pic = (!empty($_SESSION['pic'])) ? $_SESSION['pic'] : (isset($currentPic)?$currentPic:'');
+                }
+            } else {
+                // fallback: keep old pic
+                $pic = (!empty($_SESSION['pic'])) ? $_SESSION['pic'] : (isset($currentPic)?$currentPic:'');
+            }
+        } else {
+            $pic = (!empty($_SESSION['pic'])) ? $_SESSION['pic'] : (isset($currentPic) ? $currentPic : '');
+            if (empty($_SESSION['pic']) && !empty($pic)) {
+                $_SESSION['pic'] = $pic;
+            }
         }
         $name = $_POST['name'];
         $dept = $_POST['dept'];
         $phone = $_POST['phone'];
         $email = $_POST['email'];
         $username = $_POST['username'];
-        $password = $_POST['password'];
+        $new_password = isset($_POST['password']) ? trim($_POST['password']) : '';
 
+        $password_clause = '';
+        if($new_password !== '') {
+            $password_hashed = password_hash($new_password, PASSWORD_DEFAULT);
+            $password_clause = ", password='$password_hashed'";
+        }
 
-    
-        $sql1 = "UPDATE `student` SET pic='$pic', `name`='$name', dept='$dept', phone='$phone', email='$email', username='$username', password='$password' WHERE username='$_SESSION[login_user]'";
+    // sanitize pic before DB update (defensive)
+    $picClean = preg_replace('/[^A-Za-z0-9._-]/','_', $pic);
+    $sql1 = "UPDATE `student` SET pic='$picClean', `name`='$name', dept='$dept', phone='$phone', email='$email', username='$username' $password_clause WHERE username='$_SESSION[login_user]'";
         
         if (mysqli_query($db, $sql1)) {
+
+            if (!empty($username) && $username !== $_SESSION['login_user']) {
+                $_SESSION['login_user'] = $username;
+            }
+
             ?>
 
             <script type="text/javascript">
@@ -122,7 +164,7 @@ label {
   confirmButtonText: "OK",
   confirmButtonColor: "#3085d6"
 }).then(() => {
-            window.location = "profile.php";
+            window.location = "profile";
         });
         </script>
 
@@ -138,7 +180,7 @@ label {
   confirmButtonText: "OK",
   confirmButtonColor: "#3085d6"
 }).then(() => {
-            window.location = "edit_profile.php";
+            window.location = "edit_profile";
         });
         </script>
         

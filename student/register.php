@@ -10,6 +10,15 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <link rel="stylesheet" type="text/css" href="styles.css">
+    <style type="text/css" >
+    .wapr {
+        
+        height: 629px !important;
+    
+       
+    }
+    
+    </style>
     <title>Student Registration </title>
 
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
@@ -19,25 +28,33 @@
 
 <!-- Latest compiled JavaScript -->
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+
+
 </head>
 <body>
     <div class="wrapper">
       <section>
      
         <div class="box2">
-<br>
-            <h1 style= "text-align: center; font-size: 35px;font-family: Lucida Console;">Library Management</h1>
-        <h1 style="text-align: center; font-size: 25px;">User Registration Form</h1>
+<h6><br></h6>
+            <h1 style= "text-align: center; font-size: 35px; font-family: 'Lucida Console', 'Lucida Sans Typewriter', Monaco, 'Bitstream Vera Sans Mono', monospace;">Library Management</h1>
+        <h1 style="text-align: center; font-size: 25px;">Registration Form</h1>
             <form name="Registration" action="" method="post">
                 <div class="reg" class="form-control">
-                <input class="form-control" type="text" id="Name" name="name" placeholder="Full Name" required>
-                <input class="form-control" type="text" id="Roll" name="roll" placeholder="Roll Number" required>
-                <input class="form-control" type="text" id="Dept" name="dept" placeholder="Department Name (Ex: CSE)" required>
-                <input class="form-control" type="number" id="Phone" name="phone" placeholder="Phone No" required>
-                <input class="form-control" type="email" id="email" name="email" placeholder="Email Address" required>
-                <input class="form-control" type="text" id="username" name="username" placeholder="Username" required>
+                <input class="form-control" type="text" id="Name" name="name" placeholder="Full Name" required
+       value="<?php echo isset($_POST['name']) ? htmlspecialchars($_POST['name'], ENT_QUOTES) : ''; ?>">
+                <input class="form-control" type="text" id="Roll" name="roll" placeholder="Roll Number: 2103XXX" required
+       value="<?php echo isset($_POST['roll']) ? htmlspecialchars($_POST['roll'], ENT_QUOTES) : ''; ?>">
+                <input class="form-control" type="text" id="Dept" name="dept" placeholder="Department Name (Ex: CSE)" required
+       value="<?php echo isset($_POST['dept']) ? htmlspecialchars($_POST['dept'], ENT_QUOTES) : ''; ?>">
+                <input class="form-control" type="number" id="Phone" name="phone" placeholder="Phone No 017XXXXXXX" required
+       value="<?php echo isset($_POST['phone']) ? htmlspecialchars($_POST['phone'], ENT_QUOTES) : ''; ?>">
+                <input class="form-control" type="email" id="email" name="email" placeholder="Email Address" required
+       value="<?php echo isset($_POST['email']) ? htmlspecialchars($_POST['email'], ENT_QUOTES) : ''; ?>">
+                <input class="form-control" type="text" id="username" name="username" placeholder="Username" required
+       value="<?php echo isset($_POST['username']) ? htmlspecialchars($_POST['username'], ENT_QUOTES) : ''; ?>">
                 <input class="form-control" type="password" id="password" name="password" placeholder="Password" required>
-                <input type="submit" class="btn btn-success" value="Register" name="submit" style="color: rgb(255, 255, 255); width: 100px ; height: 30ox; font-weight: 1000;">
+                <input type="submit" class="btn btn-success" value="Register" name="submit" style="color: rgb(255, 255, 255); width: 120px ; height: 40px; font-weight: 700;">
 
             </div> 
             </form>
@@ -59,9 +76,8 @@
                 if($row['roll'] == $_POST['roll'])         { $dupRoll = true;     $count++; }
             }
             if($count==0) {
-                // $hashed_password = password_hash($_POST['password'], PASSWORD_DEFAULT);
-                $hashed_password = ($_POST['password']);
-                // $hashed_password = md5($_POST['password']);
+                // store password as a secure hash
+                $hashed_password = password_hash($_POST['password'], PASSWORD_DEFAULT);
                 if (str_contains($_POST['username'], 'admin')) {
     ?>
      <script type="text/javascript">
@@ -72,7 +88,7 @@
   confirmButtonText: "OK",
   confirmButtonColor: "#3085d6"
 }).then(() => {
-            window.location = "../verify.php";
+            window.location = "../verify";
         });
         </script>
 
@@ -81,13 +97,11 @@
 }
 
         mysqli_query($db,"INSERT INTO `student` VALUES('$_POST[name]','$_POST[roll]','$_POST[dept]','$_POST[phone]','$_POST[email]','0','$_POST[username]','$hashed_password','user.jpg');");
-        $otp = rand(100000,999999);
-        mysqli_query($db,"INSERT INTO `verify` (username, email, otp) VALUES('$_POST[username]','$_POST[email]','$otp')");
-        $to = $_POST['email'];
-        $subject = "Account Verification";
-        $msg = "Your OTP is: $otp.";
-        $from = "From: tonmoy4451@gmail.com";
-        if(mail($to, $subject, $msg, $from)) {
+       include "../send_otp.php";
+        if(sendOtp($db, $_POST['username'], $_POST['email'])) {
+        $_SESSION['username'] = $_POST['username'];
+         $_SESSION['student_reset'] = true;
+        $_SESSION['student_reset_time'] = time();
                  ?>
         <script type="text/javascript">
            Swal.fire({
@@ -97,7 +111,7 @@
   confirmButtonText: "OK",
   confirmButtonColor: "#3085d6"
 }).then(() => {
-            window.location = "../verify.php";
+            window.location = "verify_acc";
         });
         </script>
         <?php
@@ -112,7 +126,7 @@ else {
   confirmButtonText: "I Understand",
   confirmButtonColor: "#589cdbff"
 }).then(() => {
-            window.location = "register.php";
+            window.location = "register";
         });
         </script>
                 <?php 
@@ -130,7 +144,9 @@ else {
                     icon: "error",
                     confirmButtonText: "I Understand",
                     confirmButtonColor: "#468ed2ff"
-                  }).then(() => { window.location = "register.php"; });
+                  }).then(() => { // window.location = "register"; 
+
+                  });
                 </script>
                 <?php } else if ($dupEmail) { ?>
                 <script type="text/javascript">
@@ -140,7 +156,9 @@ else {
                     icon: "error",
                     confirmButtonText: "I Understand",
                     confirmButtonColor: "#468ed2ff"
-                  }).then(() => { window.location = "register.php"; });
+                  }).then(() => { //window.location = "register";
+
+                   });
                 </script>
                 <?php } else if ($dupUsername) { ?>
                 <script type="text/javascript">
@@ -150,16 +168,18 @@ else {
                     icon: "error",
                     confirmButtonText: "I Understand",
                     confirmButtonColor: "#468ed2ff"
-                  }).then(() => { window.location = "register.php"; });
+                  }).then(() => { // window.location = "register"; 
+
+                  });
                 </script>
                 <?php }
             }
         }
      ?>
 
-    <footer>
-
-    </footer>
     </div>
+    <?php
+        include "footer.php";
+    ?>
 </body>
 </html>

@@ -53,16 +53,20 @@
        
     if (isset($_POST['submit1'])) {
      if (isset($_POST['user']) && $_POST['user'] == 'admin') {
+        $_SESSION['admin_reset'] = true;
+        $_SESSION['admin_reset_time'] = time();
  ?>
         <script>
             // alert("You have selected Admin. Redirecting to Admin Registration.");
-            window.location.href = "admin/register.php";
+            window.location.href = "admin/register";
         </script>
 <?php
 } elseif (isset($_POST['user']) && $_POST['user'] == 'student') {
+     $_SESSION['student_reset'] = true;
+        $_SESSION['student_reset_time'] = time();
             echo "<script>
             // alert('You have selected Student. Redirecting to Student Registration.');
-            window.location.href = 'student/register.php';
+            window.location.href = 'student/register';
         </script>";
         } else {
             echo "<script>alert('Please select a user type.');</script>";

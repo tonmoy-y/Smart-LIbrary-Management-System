@@ -2,6 +2,11 @@
 
      include "connection.php";
      include "navbar.php";
+        if (isset($_SESSION['admin_reset'])) {
+         unset($_SESSION['admin_reset']);
+        unset($_SESSION['admin_reset_time']);
+        echo "<script>window.location = '../books';</script>";
+  }
 
 ?>
 <!DOCTYPE html>
@@ -38,7 +43,7 @@
 
 .book-img img {
   width: 100%;
-  height: 200px;
+  height: 300px; /* increased from 200px */
   object-fit: cover;
 }
 
@@ -153,20 +158,23 @@ body {
 
           <?php
           
-               if(isset($_SESSION['login_user'])) {
+               if(isset($_SESSION['login_admin'])) {
                      
-                    echo "<img class='img-circle profile_img' height=100 width=100 src='images/".$_SESSION['pic']." '>  ";
+                    $rawPic = isset($_SESSION['pic']) ? trim($_SESSION['pic']) : '';
+                    $safePic = preg_replace('/[^A-Za-z0-9._-]/','_', $rawPic);
+                    if ($safePic === '' || !is_file(__DIR__.'/../images/'.$safePic)) { $safePic = 'no-cover.png'; }
+                    echo "<img class='img-circle profile_img' height=100 width=100 src='../images/".$safePic."'>  ";
                     echo "<br> <br>";
-                    echo "Welcome,  ". $_SESSION['login_user'] . "!";
+                    echo "Welcome,  ". $_SESSION['login_admin'] . "!";
                }
                ?>
      </div>
 
-  <div class="h"> <a href="add.php">Add Books </a> </div>
-  <!-- <div class="h"> <a href="delete.php">Delete Books</a> </div> -->
-  <div class="h"> <a href="request.php">Book Request</a> </div>
-  <div class="h"> <a href="issue_info.php">Issue Information</a> </div>
-    <div class="h"> <a href="expired.php">Expired List</a> </div>
+  <div class="h"> <a href="add">Add Books </a> </div>
+  <!-- <div class="h"> <a href="delete">Delete Books</a> </div> -->
+  <div class="h"> <a href="request">Book Request</a> </div>
+  <div class="h"> <a href="issue_info">Issue Information</a> </div>
+    <div class="h"> <a href="expired">Expired List</a> </div>
 </div>
 
 <div id="main">
@@ -277,7 +285,7 @@ if(isset($_POST['submit'])) {
 
 // ----------------- delete query -------------------
 if(isset($_POST['submit1'])) {
-     if(isset($_SESSION['login_user'])) {
+     if(isset($_SESSION['login_admin'])) {
    
           $delete_query = "DELETE FROM books WHERE bid='$_POST[bid]'";
           mysqli_query($db, $delete_query);
@@ -290,7 +298,7 @@ Swal.fire({
     confirmButtonText: "OK",
     confirmButtonColor: "#589cdbff"
 }).then(() => {
-    window.location = "request.php";
+    window.location = "request";
 });
 </script>
           <?php
@@ -306,7 +314,7 @@ Swal.fire({
     confirmButtonText: "OK",
     confirmButtonColor: "#589cdbff"
 }).then(() => {
-    window.location = "../login.php";
+    window.location = "../login";
 });
 </script>
                     <?php

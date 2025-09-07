@@ -123,19 +123,22 @@ form.Approve input.form-control {
 
           <?php
           
-               if(isset($_SESSION['login_user'])) {
+               if(isset($_SESSION['login_admin'])) {
                      
-                    echo "<img class='img-circle profile_img' height=100 width=100 src='images/".$_SESSION['pic']." '>  ";
+                    $rawPic = isset($_SESSION['pic']) ? trim($_SESSION['pic']) : '';
+                    $safePic = preg_replace('/[^A-Za-z0-9._-]/','_', $rawPic);
+                    if ($safePic === '' || !is_file(__DIR__.'/../images/'.$safePic)) { $safePic='no-cover.png'; }
+                    echo "<img class='img-circle profile_img' height=100 width=100 src='../images/".$safePic."'>  ";
                     echo "<br> <br>";
-                    echo "Welcome,  ". $_SESSION['login_user'] . "!";
+                    echo "Welcome,  ". $_SESSION['login_admin'] . "!";
                }
                ?>
      </div>
 
-  <div class="h"> <a href="books.php"> Books </a> </div>
-  <!-- <div class="h"> <a href="delete.php">Delete Books</a> </div> -->
-  <div class="h"> <a href="request.php">Book Request</a> </div>
-  <div class="h"> <a href="issue_info.php">Issue Information</a> </div>
+  <div class="h"> <a href="books"> Books </a> </div>
+  <!-- <div class="h"> <a href="delete">Delete Books</a> </div> -->
+  <div class="h"> <a href="request">Book Request</a> </div>
+  <div class="h"> <a href="issue_info">Issue Information</a> </div>
 </div>
 
 <div id="main">
@@ -170,11 +173,11 @@ function closeNav() {
     <br>
     
     <!-- Issue Date -->
-    <input type="date" name="issue" class="form-control" placeholder="Issue Date yyyy-mm-dd" required pattern="\d{4}-\d{2}-\d{2}"> 
+    <!-- <input type="date" name="issue" class="form-control" placeholder="Issue Date" required pattern="\d{4}-\d{2}-\d{2}">  -->
     <br>
     
     <!-- Return Date -->
-    <input type="date" name="return" class="form-control" placeholder="Return Date yyyy-mm-dd" required pattern="\d{4}-\d{2}-\d{2}"> 
+    <input type="date" name="return" class="form-control" placeholder="Return Date" required pattern="\d{4}-\d{2}-\d{2}"> 
     <br>
 
     <button type="submit" name="submit" class="btn btn-default">Approve</button>
@@ -185,34 +188,49 @@ function closeNav() {
 
 <?php
 
-
 if(isset($_POST['submit']))  {
+    $server_issue_date = date("Y-m-d"); // Server-side current date
     $tm = date("M d, Y H:i:s", strtotime($_POST['return'] . ' 20:00:00'));
-    mysqli_query($db, "INSERT INTO `timer` VALUES ('$_SESSION[st_name]','$_SESSION[bid]','$tm');");
-    mysqli_query($db,"UPDATE issue_book SET approve='$_POST[approve]', issue='$_POST[issue]', `return`='$_POST[return]' WHERE username='$_SESSION[st_name]' AND bid='$_SESSION[bid]';");
-    mysqli_query($db,"UPDATE books SET quantity=quantity-1 WHERE bid='$_SESSION[bid]';");
-    
-    $res = mysqli_query($db,"SELECT quantity FROM books WHERE bid='$_SESSION[bid]';");   
-    
-    while($row = mysqli_fetch_assoc($res)) {
-        if($row['quantity'] == 0) {
-            mysqli_query($db,"UPDATE books SET status='Not Available' WHERE bid='$_SESSION[bid]';");
-        }
-    }
-    ?>
-    <script type="text/javascript">
-Swal.fire({
-    title: "Success!",
-    text: "Request Approved Successfully.",
-    icon: "success",
-    confirmButtonText: "OK",
-    confirmButtonColor: "#589cdbff"
-}).then(() => {
-    window.location = "request.php";
-});
-</script>
-<?php
 
+    $q1 = mysqli_query($db, "INSERT INTO `timer` VALUES ('$_SESSION[st_name]','$_SESSION[bid]','$tm');");
+    $q2 = mysqli_query($db,"UPDATE issue_book SET approve='$_POST[approve]', issue='$server_issue_date', `return`='$_POST[return]' WHERE username='$_SESSION[st_name]' AND bid='$_SESSION[bid]' AND approve!='Yes' AND `return` ='';");
+    $q3 = mysqli_query($db,"UPDATE books SET quantity=quantity-1 WHERE bid='$_SESSION[bid]';");
+
+    $db_error = mysqli_error($db);
+
+    if($q1 && $q2 && $q3) {
+        $res = mysqli_query($db,"SELECT quantity FROM books WHERE bid='$_SESSION[bid]';");   
+        while($row = mysqli_fetch_assoc($res)) {
+            if($row['quantity'] == 0) {
+                mysqli_query($db,"UPDATE books SET status='Not Available' WHERE bid='$_SESSION[bid]';");
+            }
+        }
+        ?>
+        <script type="text/javascript">
+        Swal.fire({
+            title: "Success!",
+            text: "Request Approved Successfully.",
+            icon: "success",
+            confirmButtonText: "OK",
+            confirmButtonColor: "#589cdbff"
+        }).then(() => {
+            window.location = "request";
+        });
+        </script>
+        <?php
+    } else {
+        ?>
+        <script type="text/javascript">
+        Swal.fire({
+            title: "Database Error!",
+            text: "<?php echo addslashes($db_error); ?>",
+            icon: "error",
+            confirmButtonText: "OK",
+            confirmButtonColor: "#589cdbff"
+        });
+        </script>
+        <?php
+    }
 }
 ?>
 </div>

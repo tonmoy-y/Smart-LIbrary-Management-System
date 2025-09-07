@@ -128,6 +128,15 @@ form.write input.form-control {
             width: 100%;
 }
 
+     /* Mobile-only adjustments */
+     @media (max-width: 576px) {
+          .wrap { width: calc(100% - 20px); margin: 10px; padding: 16px; }
+          .input-box .form-control { width: 100%; height: 52px; display: block; }
+          .input-box .btn-submit { width: 100%; height: 44px; display: block; margin-left: 0; margin-top: 8px; }
+          .comment-table { width: 100%; }
+          .reply-column { max-width: 50%; width: auto; }
+     }
+
      </style>
 
 </head>
@@ -166,7 +175,7 @@ form.write input.form-control {
                     icon: "info",
                     confirmButtonText: "Go to Login",
                     confirmButtonColor: "#589cdbff"
-               }).then(() => { window.location = "login.php"; });
+               }).then(() => { window.location = "login"; });
                </script>
                <?php
                exit;
@@ -183,7 +192,7 @@ form.write input.form-control {
                     mysqli_query($db, "INSERT INTO `comments` (`username`, `comment`) VALUES ('".mysqli_real_escape_string($db,$user)."','".mysqli_real_escape_string($db,$comment)."')");
                }
                // reload to show the comment list (PRG pattern)
-               echo "<script>window.location='contact.php'</script>";
+               echo "<script>window.location='contact'</script>";
                exit;
            } else {
                ?>
@@ -194,7 +203,7 @@ form.write input.form-control {
                     icon: "warning",
                     confirmButtonText: "I Understand",
                     confirmButtonColor: "#589cdbff"
-               }).then(() => { window.location = "contact.php"; });
+               }).then(() => { window.location = "contact"; });
                </script>
                <?php
           }
@@ -240,7 +249,7 @@ form.write input.form-control {
                     }
                }
           }
-          echo "<script>window.location='contact.php'</script>";
+          echo "<script>window.location='contact'</script>";
           exit;
      }
 
