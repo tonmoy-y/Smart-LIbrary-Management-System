@@ -117,17 +117,17 @@ th,td {
           
                if(isset($_SESSION['login_user'])) {
                      
-                    echo "<img class='img-circle profile_img' height=100 width=100 src='images/".$_SESSION['pic']." '>  ";
+                    echo "<img class='img-circle profile_img' height=100 width=100 src='../images/".$_SESSION['pic']." '>  ";
                     echo "<br> <br>";
                     echo "Welcome,  ". $_SESSION['login_user'] . "!";
                }
                ?>
      </div>
 
-  <div class="h"> <a href="books.php"> Books </a> </div>
-  <div class="h"> <a href="request.php">Book Request</a> </div>
-  <div class="h"> <a href="issue_info.php">Issue Information</a> </div>
-  <div class="h"> <a href="expired.php">Expired List</a> </div>
+  <div class="h"> <a href="books"> Books </a> </div>
+  <div class="h"> <a href="request">Book Request</a> </div>
+  <div class="h"> <a href="issue_info">Issue Information</a> </div>
+  <div class="h"> <a href="expired">Expired List</a> </div>
 </div>
 
 <div id="main">

@@ -4,6 +4,6 @@
         unset($_SESSION['login_user']); // Unset the session variable
     } 
     
-    header("Location: ../index.php"); // Redirect to the index page
+    header("Location: ../index"); // Redirect to the index page
 
 ?>

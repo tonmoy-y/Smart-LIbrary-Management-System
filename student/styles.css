@@ -191,7 +191,7 @@ footer {
 }
 
 .nav-btn {
-    padding: 10px 20px;
+    padding: 10px 10px;
     color: white;
     text-decoration: none;
     border-radius: 8px;
@@ -254,7 +254,7 @@ section {
     width: 400px;
     background-color:#610795;
     margin: 30px auto;
-    opacity: .6;
+    opacity: .8;
     color: rgb(248, 242, 242);
     border-radius: 15px;
 }
@@ -324,7 +324,7 @@ input  {
     width: 400px;
     background-color:#910707;
     margin: 20px auto;
-    opacity: .6;
+    opacity: .8;
     color: rgb(248, 242, 242);
     border-radius: 15px;
     font-family: Helvetica;

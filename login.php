@@ -28,7 +28,7 @@
                 <br>
                 <div class="box1">
                    <h6> <br> </h6>
-                    <h1 style="text-align: center; font-size: 35px;font-family: Lucida Console; ;">Library Management System</h1>
+                    <h1 style="text-align: center; font-size: 35px; font-family: 'Lucida Console', 'Lucida Sans Typewriter', Monaco, 'Bitstream Vera Sans Mono', monospace;">Library Management System</h1>
                     <h1 style="text-align: center; font-size: 25px;">User Login Form</h1>
                     <form name="Login" action="" method="post">
                         
@@ -53,8 +53,8 @@
                         </div> 
                     </form>
                     <p class="forget">
-                        <a style="color: yellow; text-decoration:none;" href="update_password.php"> Forgot Password</a><br>
-                        New to this website? <a style="color:#ffd700;; text-decoration:none;" href="register.php">Register</a><br>
+                        <a style="color: yellow; text-decoration:none;" href="update_password"> Forgot Password</a><br>
+                        New to this website? <a style="color:#ffd700;; text-decoration:none;" href="register">Register</a><br>
                     </p>
                 </div>
                 
@@ -80,7 +80,7 @@
   confirmButtonText: "OK",
   confirmButtonColor: "#3085d6"
 }).then(() => {
-            window.location = "login.php";
+            window.location = "login";
         });
         </script>
             <?php
@@ -92,8 +92,8 @@
 
             // $row = mysqli_fetch_assoc($res);
             $stored_password = $row['password'];
-            if(($_POST['password'] == $stored_password  )) { //password_verify($_POST['password'], $stored_password)) {
-                $_SESSION['login_user'] = $_POST['username'];
+            if(password_verify($_POST['password'], $stored_password)) {
+                $_SESSION['login_admin'] = $_POST['username'];
                 $_SESSION['pic'] = $row['pic'];
 
                 ?>
@@ -108,7 +108,7 @@
   confirmButtonText: "OK",
   confirmButtonColor: "#3085d6"
 }).then(() => {
-           window.location = "admin/profile.php";
+           window.location = "admin/profile";
        });
                </script>
 <?php
@@ -123,7 +123,7 @@
   confirmButtonText: "OK",
   confirmButtonColor: "#3085d6"
 }).then(() => {
-            window.location = "login.php";
+            window.location = "login";
         });
         </script>
 
@@ -131,6 +131,13 @@
             }
         }
         }
+
+
+
+
+
+//-------------------------------------------student login-------------------------------------------------
+
         else {
 
             
@@ -148,7 +155,7 @@
   confirmButtonText: "OK",
   confirmButtonColor: "#3085d6"
 }).then(() => {
-            window.location = "login.php";
+            window.location = "login";
         });
         </script>
             <?php
@@ -156,9 +163,8 @@
         else {
             
                         $stored_password = $row['password'];
-            // if(password_verify($_POST['password'], $stored_password)) {
             if($row['status'] == 1) {
-                if(($_POST['password'] == $stored_password)  ) {
+                if(password_verify($_POST['password'], $stored_password)) {
                     $_SESSION['login_user'] = $_POST['username'];
                     $_SESSION['pic'] = $row['pic'];
                     
@@ -171,7 +177,7 @@
   confirmButtonText: "OK",
   confirmButtonColor: "#3085d6"
 }).then(() => {
-           window.location = "student/profile.php";
+           window.location = "student/profile";
        });
                </script>
 <?php
@@ -186,7 +192,7 @@
   confirmButtonText: "OK",
   confirmButtonColor: "#3085d6"
 }).then(() => {
-            window.location = "login.php";
+            window.location = "login";
         });
                 </script>
 
@@ -194,6 +200,10 @@
             }
         }
         elseif($row['status'] == 0) {
+            include "send_otp.php";
+            if(sendOtp($db, $_POST['username'], $row['email'])) {
+
+
 ?>
                <script type="text/javascript">
                    Swal.fire({
@@ -203,11 +213,33 @@
   confirmButtonText: "OK",
   confirmButtonColor: "#3085d6"
 }).then(() => {
-           window.location = "verify.php";
+
+           window.location = "student/verify_acc";
+
        });
                </script>
   <?php
             }
+            else 
+                {
+?>
+
+<script type="text/javascript">
+           Swal.fire({
+  title: "Error!",
+  text: "Failed to send OTP! Please contact support.",
+  icon: "error",
+  confirmButtonText: "OK",
+  confirmButtonColor: "#3085d6"
+}).then(() => {
+            window.location = "verify";
+        });
+        </script>
+
+                    <?php
+                }    
+        
+        }
             else {
                 ?>
                 <script type="text/javascript">
@@ -218,7 +250,7 @@
   confirmButtonText: "OK",
   confirmButtonColor: "#3085d6"
 }).then(() => {
-           window.location = "login.php";
+           window.location = "login";
        });
                 </script>
 

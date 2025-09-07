@@ -104,19 +104,22 @@ body {
 
           <?php
           
-               if(isset($_SESSION['login_user'])) {
+               if(isset($_SESSION['login_admin'])) {
                      
-                    echo "<img class='img-circle profile_img' height=100 width=100 src='images/".$_SESSION['pic']." '>  ";
+                    $rawPic = isset($_SESSION['pic']) ? trim($_SESSION['pic']) : '';
+                    $safePic = preg_replace('/[^A-Za-z0-9._-]/','_', $rawPic);
+                    if ($safePic === '' || !is_file(__DIR__.'/../images/'.$safePic)) { $safePic='no-cover.png'; }
+                    echo "<img class='img-circle profile_img' height=100 width=100 src='../images/".$safePic."'>  ";
                     echo "<br> <br>";
-                    echo "Welcome,  ". $_SESSION['login_user'] . "!";
+                    echo "Welcome,  ". $_SESSION['login_admin'] . "!";
                }
                ?>
      </div>
 
-  <div class="h"> <a href="books.php"> Books </a> </div>
-  <div class="h"> <a href="request.php">Book Request</a> </div>
-  <div class="h"> <a href="issue_info.php">Issue Information</a> </div>
-  <div class="h"> <a href="expired.php">Expired List</a> </div>
+  <div class="h"> <a href="books"> Books </a> </div>
+  <div class="h"> <a href="request">Book Request</a> </div>
+  <div class="h"> <a href="issue_info">Issue Information</a> </div>
+  <div class="h"> <a href="expired">Expired List</a> </div>
 </div>
 
 <div id="main">
@@ -155,8 +158,8 @@ function closeNav() {
     <h3 style="text-align:center;" > Request of Books</h3>
     <br>
    <?php
-if(isset($_SESSION['login_user'])) { 
-    $sql ="SELECT student.username, student.roll, student.name, books.bid, books.names, books.authors,books.edition, books.status FROM student JOIN issue_book ON student.username = issue_book.username JOIN books ON books.bid = issue_book.bid WHERE issue_book.approve=''";
+if(isset($_SESSION['login_admin'])) { 
+    $sql ="SELECT student.username, student.roll, student.name, books.bid, books.names, books.authors,books.edition, books.status FROM student JOIN issue_book ON student.username = issue_book.username JOIN books ON books.bid = issue_book.bid WHERE issue_book.approve='Pending'";
     $res=mysqli_query($db,$sql);
     
     if( mysqli_num_rows($res) == 0) {                    
@@ -189,7 +192,7 @@ if(isset($_SESSION['login_user'])) {
             echo "<td>"; echo $row['authors']; echo "</td>";
             echo "<td>"; echo $row['edition']; echo "</td>";
             echo "<td>"; echo $row['status']; echo "</td>";
-            // Approve button (posts username and bid and uses existing handler to redirect to approve.php)
+            // Approve button (posts username and bid and uses existing handler to redirect to approve)
             echo "<td>";
             echo "<form method='post' style='margin:0'>";
             echo "<input type='hidden' name='username' value='".htmlspecialchars($row['username'])."'>";
@@ -207,7 +210,7 @@ else {
     ?>
     <script type="text/javascript">
         alert("Please log in to view your book requests.");
-        window.location.href = "admin_login.php"; // Redirect to login page
+        window.location.href = "admin_login"; // Redirect to login page
         
         </script>
 
@@ -215,9 +218,9 @@ else {
 }
 
 /*
-if(isset($_SESSION['login_user'])) {
+if(isset($_SESSION['login_admin'])) {
     
-$q = mysqli_query($db, "SELECT * FROM issue_book WHERE username LIKE '$_SESSION[login_user]';");
+$q = mysqli_query($db, "SELECT * FROM issue_book WHERE username LIKE '$_SESSION[login_admin]';");
 if( mysqli_num_rows($q) == 0) {                    
     echo "<h2> <b>";
     echo "Threre is no pending request";
@@ -250,11 +253,11 @@ if( mysqli_num_rows($q) == 0) {
     */
     
   if(isset($_POST['submit'])) {
-    // If username and bid are posted, this is the Approve button for a row -> redirect to approve.php
+    // If username and bid are posted, this is the Approve button for a row -> redirect to approve
     if(!empty($_POST['username']) && !empty($_POST['bid'])) {
       $_SESSION['st_name'] = $_POST['username'];
       $_SESSION['bid'] = $_POST['bid'];
-      echo "<script>window.location='approve.php'</script>";
+      echo "<script>window.location='approve'</script>";
       exit;
     }
     // Otherwise it's the search form which is already handled earlier via the same name; keep existing behavior

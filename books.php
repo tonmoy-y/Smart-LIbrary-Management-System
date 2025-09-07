@@ -96,10 +96,10 @@ body {
                ?>
      </div>
 
-  <!-- <div class="h"> <a href="books.php"> Books </a> </div>
-  <div class="h"> <a href="request.php">Book Request</a> </div>
-  <div class="h"> <a href="issue_info.php">Issue Information</a> </div>
-  <div class="h"> <a href="expired.php">Expired Books</a> </div> -->
+  <!-- <div class="h"> <a href="books"> Books </a> </div>
+  <div class="h"> <a href="request">Book Request</a> </div>
+  <div class="h"> <a href="issue_info">Issue Information</a> </div>
+  <div class="h"> <a href="expired">Expired Books</a> </div> -->
   
 </div>
 
@@ -213,52 +213,9 @@ else {
 }
 
 if(isset($_POST['submit1'])) {
-     if(isset($_SESSION['login_user'])) {
-          $sql1= mysqli_query($db, "SELECT * FROM books WHERE bid = '$_POST[bid]';");
-          $row1=mysqli_fetch_assoc($sql1);
-          $count1= mysqli_num_rows($sql1);
-          if  ($count1!=0) {
-
-$check = mysqli_query($db, "SELECT * FROM issue_book WHERE username='$_SESSION[login_user]' AND bid='$_POST[bid]'");
-if(mysqli_num_rows($check) > 0) {
-    ?>
-    <script type="text/javascript">
-        alert("You have already requested this book.");
-        window.location = "books.php";
-    </script>
-    <?php
-    exit(); 
-}
-
-          mysqli_query($db, "INSERT INTO issue_book VALUES ('$_SESSION[login_user]','$_POST[bid]','','', '')");
-         ?>
-          <script type="text/javascript">
-               window.location= "request.php";
-               alert("Book request has been sent successfully.");
-          </script>
-
-<?php
-          }
-          else {
-                     ?>
-          <script type="text/javascript">
-               alert("The book is not listed in library.");
-               window.location= "books.php";
-          </script>
-<?php
-          }
+    echo "Hey Hacker, What you are doing here!!!";
      }
-     else {
-          ?>
-          <script type="text/javascript">
-               alert("Please login to request a book.");
-          </script>
-
-<?php
-
-     }
-}
-     ?>
+       ?>
      </div>
 </body>
 </html>
