@@ -175,7 +175,7 @@ Use phpMyAdmin or MySQL CLI:
 ```sql
 CREATE DATABASE library CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 ```
-Import schema if you have one (example):
+Import schema (library (4).sql):
 ```sql
 SOURCE C:/path/to/library_export.sql;
 ```
