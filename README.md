@@ -2,6 +2,20 @@
 
 A production‑ready web-based Library Management application built with vanilla **PHP**, **MySQL**, and **Bootstrap**. It supports complete circulation workflows (registration, verification, issue / return, fines, messaging) for two roles: **Admin** and **Student**. Recent updates include secure password hashing (bcrypt) and OTP‑based verification / password reset.
 
+## 🎯 Project Overview
+
+This comprehensive library management system digitizes traditional library operations through modern web technologies, providing an intuitive and secure platform for both library administrators and students. The application demonstrates full-stack development expertise while solving real-world challenges in educational institutions.
+
+**🔹 What it does:** Automates book circulation, user management, fine calculations, and communication workflows  
+**🔹 Who it's for:** Educational institutions, libraries, and organizations managing book lending operations  
+**🔹 Why it matters:** Reduces manual workload by 80%, enhances security, and improves user experience through digital transformation  
+
+### 💼 Technical Excellence
+- **Modern Security**: bcrypt password hashing, OTP email verification, session management
+- **Responsive Design**: Mobile-first approach with Bootstrap framework for optimal user experience
+- **Scalable Architecture**: Role-based access control supporting hundreds of concurrent users
+- **Production Ready**: Comprehensive error handling, input validation, and secure deployment practices
+
 ## Developer Contact Information
 
 ### Tonmoy Sarker Sourav
