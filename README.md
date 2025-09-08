@@ -9,7 +9,6 @@ A production‑ready web-based Library Management application built with vanilla
 [![LinkedIn](https://img.shields.io/badge/LinkedIn-0077B5?style=flat&logo=linkedin)](https://www.linkedin.com/in/tonmoyy/) <br>
 [![Facebook](https://img.shields.io/badge/Facebook-1877F2?style=flat&logo=facebook&logoColor=white)](https://www.facebook.com/realtonmoysarker) <br>
 [![Email](https://img.shields.io/badge/Email-D14836?style=flat&logo=gmail&logoColor=white)](mailto:tonmoy4451@gmail.com)  tonmoy4451@gmail.com
-=======
 
 ## ✨ Key Features
 
@@ -283,6 +282,7 @@ Current code uses PHP's `mail()`; on Windows/XAMPP this may fail without SMTP co
 If older rows stored plaintext (not 60‑char bcrypt hashes), run a one‑time migration:
 ```php
 // create file: migrate_passwords.php in project root
+// Note: Requires PHP 8.0+ for str_starts_with function
 <?php
 include 'connection.php';
 function needs_hash($pw){return !(is_string($pw) && strlen($pw)===60 && str_starts_with($pw,'$2y$'));}
