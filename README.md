@@ -134,24 +134,24 @@ A production‑ready web-based Library Management application built with vanilla
 1. Clone the repository
 ```bash
 git clone https://github.com/tonmoy-y/Smart-LIbrary-Management-System.git
-cd Smart-LIbrary-Management-System/Library
+cd Smart-LIbrary-Management-System
 ```
-2. Move (or keep) the `Library` folder inside your web root (e.g. `C:/xampp/htdocs/Library`).  
+2. Move (or keep) the project folder inside your web root (e.g. `C:/xampp/htdocs/Smart-LIbrary-Management-System`).  
 3. Create a database (example: `library`):
 ```sql
 CREATE DATABASE library CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 ```
-4. Import your schema / seed data (if you have an exported SQL file):
+4. Import the provided schema file:
 ```sql
 -- In phpMyAdmin or mysql CLI
-SOURCE path/to/export.sql;
+SOURCE path/to/library (4).sql;
 ```
-5. Open `connection.php` (and `admin/connection.php`, `student/connection.php` if duplicated) and confirm credentials:
+5. Open `connection.php` (and `admin/connection.php`, `student/connection.php`) and confirm credentials:
 ```php
 $db = mysqli_connect("localhost","root","","library");
 ```
 6. Start Apache + MySQL in XAMPP.  
-7. Visit: `http://localhost/Library/login.php` or `index.php`.
+7. Visit: `http://localhost/Smart-LIbrary-Management-System/login.php` or `index.php`.
 8. Register an Admin account first (admin registration page).  
 9. Register a Student, complete OTP email verification (or configure email—see below).  
 10. Login and explore dashboards.
@@ -161,23 +161,23 @@ $db = mysqli_connect("localhost","root","","library");
 ### 1. Clone Repository
 ```bash
 git clone https://github.com/tonmoy-y/Smart-LIbrary-Management-System.git
-cd Smart-LIbrary-Management-System/Library
+cd Smart-LIbrary-Management-System
 ```
 
 ### 2. Place in Web Root (Windows XAMPP)
-Copy or move the `Library` folder to:  
-`C:/xampp/htdocs/Library`
+Copy or move the project folder to:  
+`C:/xampp/htdocs/Smart-LIbrary-Management-System`
 
-Then browse: `http://localhost/Library/`
+Then browse: `http://localhost/Smart-LIbrary-Management-System/`
 
 ### 3. Create Database
 Use phpMyAdmin or MySQL CLI:
 ```sql
 CREATE DATABASE library CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 ```
-Import schema (library (4).sql):
+Import schema using the provided SQL file:
 ```sql
-SOURCE C:/path/to/library_export.sql;
+SOURCE /path/to/Smart-LIbrary-Management-System/library (4).sql;
 ```
 
 ### 4. Configure Database Connection
@@ -229,12 +229,12 @@ sendmail_path="C:\xampp\sendmail\sendmail.exe -t"
 Save and restart Apache.
 
 #### 7.4 Test Mail
-Create `mail_test.php` in `Library/`:
+Create `mail_test.php` in the project root:
 ```php
 <?php
 var_dump(mail('your_destination_email@example.com','Test Mail','If this is true, mail works.'));
 ```
-Visit: `http://localhost/Library/mail_test.php`  
+Visit: `http://localhost/Smart-LIbrary-Management-System/mail_test.php`  
 If `bool(true)` and you received the email, OTP sending should work.
 
 ### 8. Adjust From Address (Optional)
@@ -269,9 +269,9 @@ PHPMailer gives better error messages and TLS handling.
 ## 📦 Deployment (Shared Hosting / VPS Quick Notes)
 | Environment | Notes |
 |-------------|-------|
-| Shared Hosting | Upload contents of `Library/` into `public_html/Library/` (or root) and adjust paths. |
-| VPS (LAMP) | Place under `/var/www/html/Library`; set correct ownership (`www-data`). |
-| Nginx + PHP-FPM | Root to `/var/www/html/Library`; ensure `index.php` forwarding; configure `fastcgi_pass`. |
+| Shared Hosting | Upload project contents into `public_html/Smart-LIbrary-Management-System/` (or root) and adjust paths. |
+| VPS (LAMP) | Place under `/var/www/html/Smart-LIbrary-Management-System`; set correct ownership (`www-data`). |
+| Nginx + PHP-FPM | Root to `/var/www/html/Smart-LIbrary-Management-System`; ensure `index.php` forwarding; configure `fastcgi_pass`. |
 | SSL | Use Certbot (Let’s Encrypt) – not required locally but recommended live. |
 
 ### Optional: Email / OTP Sending
@@ -356,33 +356,77 @@ Keep passwords columns as `VARCHAR(255)` to avoid hash truncation.
 
 ## 🗂 Project Structure (Key Files)
 ```
-Library/
+Smart-LIbrary-Management-System/
 ├─ index.php
 ├─ login.php
 ├─ register.php
 ├─ update_password.php
 ├─ send_otp.php
 ├─ books.php
+├─ contact.php
+├─ error.php
 ├─ connection.php
-├─ styles.css / responsive.css
-├─ images/
+├─ navbar.php
+├─ footer.php
+├─ styles.css
+├─ responsive.css
+├─ .htaccess
+├─ library (4).sql          # Database schema file
+├─ LICENSE.txt
+├─ images/                  # Shared image resources
 ├─ admin/
 │  ├─ admin_login.php
+│  ├─ index.php
 │  ├─ register.php
 │  ├─ verify.php
 │  ├─ send_otp.php
 │  ├─ update_password.php
 │  ├─ edit_profile.php
-│  ├─ books.php / add.php / approve.php / issue_info.php / fine.php
-│  └─ ... (other admin utilities)
+│  ├─ profile.php
+│  ├─ books.php
+│  ├─ add.php
+│  ├─ approve.php
+│  ├─ issue_info.php
+│  ├─ fine.php
+│  ├─ student.php
+│  ├─ admin_status.php
+│  ├─ message.php
+│  ├─ request.php
+│  ├─ contact.php
+│  ├─ connection.php
+│  ├─ navbar.php
+│  ├─ sidenav.php
+│  ├─ footer.php
+│  ├─ styles.css
+│  ├─ responsive.css
+│  ├─ logout.php
+│  ├─ session_destroy.php
+│  ├─ expired.php
+│  └─ images/              # Admin-specific images
 ├─ student/
+│  ├─ index.php
 │  ├─ register.php
 │  ├─ verify.php
+│  ├─ verify_acc.php
 │  ├─ send_otp.php
 │  ├─ update_password.php
 │  ├─ edit_profile.php
-│  ├─ books.php / request.php / issue_info.php / fine.php
-│  └─ ... (student views)
+│  ├─ profile.php
+│  ├─ books.php
+│  ├─ books_old.php
+│  ├─ request.php
+│  ├─ issue_info.php
+│  ├─ fine.php
+│  ├─ message.php
+│  ├─ contact.php
+│  ├─ connection.php
+│  ├─ navbar.php
+│  ├─ footer.php
+│  ├─ styles.css
+│  ├─ responsive.css
+│  ├─ logout.php
+│  ├─ session_destroy.php
+│  └─ expired.php
 └─ README.md
 ```
 
