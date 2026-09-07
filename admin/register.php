@@ -64,7 +64,9 @@
                 // $hashed_password = password_hash($_POST['password'], PASSWORD_DEFAULT);
                
                 $hashed_password = password_hash($_POST['password'], PASSWORD_DEFAULT);
-              mysqli_query($db,"INSERT INTO `admin` VALUES( ' ', '$_POST[name]','$_POST[dept]','$_POST[phone]','$_POST[email]','$_POST[username]','$hashed_password','admin.jpg','');");
+              $stmt = mysqli_prepare($db, "INSERT INTO `admin` VALUES( ' ', ?, ?, ?, ?, ?, ?, 'admin.jpg', '')");
+              mysqli_stmt_bind_param($stmt, "ssssss", $_POST['name'], $_POST['dept'], $_POST['phone'], $_POST['email'], $_POST['username'], $hashed_password);
+              mysqli_stmt_execute($stmt);
         
         ?>
                   <script type="text/javascript">

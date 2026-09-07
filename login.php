@@ -66,7 +66,10 @@
         if($_POST['user'] == 'admin') {
 
             $count = 0;
-        $res = mysqli_query($db,"SELECT * FROM `admin` WHERE username='$_POST[username]' and status='Yes';");
+        $stmt = mysqli_prepare($db, "SELECT * FROM `admin` WHERE username=? and status='Yes';");
+        mysqli_stmt_bind_param($stmt, "s", $_POST['username']);
+        mysqli_stmt_execute($stmt);
+        $res = mysqli_stmt_get_result($stmt);
 
         $row = mysqli_fetch_assoc($res);
         $count = mysqli_num_rows($res);
@@ -142,7 +145,10 @@
 
             
             $count = 0;
-            $res = mysqli_query($db,"SELECT * FROM student WHERE username='$_POST[username]'");
+            $stmt = mysqli_prepare($db, "SELECT * FROM student WHERE username=?");
+            mysqli_stmt_bind_param($stmt, "s", $_POST['username']);
+            mysqli_stmt_execute($stmt);
+            $res = mysqli_stmt_get_result($stmt);
             $row = mysqli_fetch_assoc($res);
             $count = mysqli_num_rows($res);
             if($count == 0) {

@@ -192,17 +192,30 @@ if(isset($_POST['submit']))  {
     $server_issue_date = date("Y-m-d"); // Server-side current date
     $tm = date("M d, Y H:i:s", strtotime($_POST['return'] . ' 20:00:00'));
 
-    $q1 = mysqli_query($db, "INSERT INTO `timer` VALUES ('$_SESSION[st_name]','$_SESSION[bid]','$tm');");
-    $q2 = mysqli_query($db,"UPDATE issue_book SET approve='$_POST[approve]', issue='$server_issue_date', `return`='$_POST[return]' WHERE username='$_SESSION[st_name]' AND bid='$_SESSION[bid]' AND approve!='Yes' AND `return` ='';");
-    $q3 = mysqli_query($db,"UPDATE books SET quantity=quantity-1 WHERE bid='$_SESSION[bid]';");
+    $stmt1 = mysqli_prepare($db, "INSERT INTO `timer` VALUES (?,?,?)");
+    mysqli_stmt_bind_param($stmt1, "sss", $_SESSION['st_name'], $_SESSION['bid'], $tm);
+    $q1 = mysqli_stmt_execute($stmt1);
+
+    $stmt2 = mysqli_prepare($db, "UPDATE issue_book SET approve=?, issue=?, `return`=? WHERE username=? AND bid=? AND approve!='Yes' AND `return` =''");
+    mysqli_stmt_bind_param($stmt2, "sssss", $_POST['approve'], $server_issue_date, $_POST['return'], $_SESSION['st_name'], $_SESSION['bid']);
+    $q2 = mysqli_stmt_execute($stmt2);
+
+    $stmt3 = mysqli_prepare($db, "UPDATE books SET quantity=quantity-1 WHERE bid=?");
+    mysqli_stmt_bind_param($stmt3, "s", $_SESSION['bid']);
+    $q3 = mysqli_stmt_execute($stmt3);
 
     $db_error = mysqli_error($db);
 
     if($q1 && $q2 && $q3) {
-        $res = mysqli_query($db,"SELECT quantity FROM books WHERE bid='$_SESSION[bid]';");   
+        $stmt4 = mysqli_prepare($db, "SELECT quantity FROM books WHERE bid=?");
+        mysqli_stmt_bind_param($stmt4, "s", $_SESSION['bid']);
+        mysqli_stmt_execute($stmt4);
+        $res = mysqli_stmt_get_result($stmt4);
         while($row = mysqli_fetch_assoc($res)) {
             if($row['quantity'] == 0) {
-                mysqli_query($db,"UPDATE books SET status='Not Available' WHERE bid='$_SESSION[bid]';");
+                $stmt5 = mysqli_prepare($db, "UPDATE books SET status='Not Available' WHERE bid=?");
+                mysqli_stmt_bind_param($stmt5, "s", $_SESSION['bid']);
+                mysqli_stmt_execute($stmt5);
             }
         }
         ?>

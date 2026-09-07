@@ -184,14 +184,14 @@ if(isset($_SESSION['login_admin'])) {
         
         while($row = mysqli_fetch_assoc($res)) {
             echo "<tr>";
-            echo "<td>"; echo $row['username']; echo "</td>";
-            echo "<td>"; echo $row['roll']; echo "</td>";
-            echo "<td>"; echo $row['name']; echo "</td>";
-            echo "<td>"; echo $row['bid']; echo "</td>";
-            echo "<td>"; echo $row['names']; echo "</td>";
-            echo "<td>"; echo $row['authors']; echo "</td>";
-            echo "<td>"; echo $row['edition']; echo "</td>";
-            echo "<td>"; echo $row['status']; echo "</td>";
+            echo "<td>"; echo htmlspecialchars($row['username']); echo "</td>";
+            echo "<td>"; echo htmlspecialchars($row['roll']); echo "</td>";
+            echo "<td>"; echo htmlspecialchars($row['name']); echo "</td>";
+            echo "<td>"; echo htmlspecialchars($row['bid']); echo "</td>";
+            echo "<td>"; echo htmlspecialchars($row['names']); echo "</td>";
+            echo "<td>"; echo htmlspecialchars($row['authors']); echo "</td>";
+            echo "<td>"; echo htmlspecialchars($row['edition']); echo "</td>";
+            echo "<td>"; echo htmlspecialchars($row['status']); echo "</td>";
             // Approve button (posts username and bid and uses existing handler to redirect to approve)
             echo "<td>";
             echo "<form method='post' style='margin:0'>";

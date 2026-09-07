@@ -96,7 +96,9 @@
     exit();
 }
 
-        mysqli_query($db,"INSERT INTO `student` VALUES('$_POST[name]','$_POST[roll]','$_POST[dept]','$_POST[phone]','$_POST[email]','0','$_POST[username]','$hashed_password','user.jpg');");
+        $stmt = mysqli_prepare($db, "INSERT INTO `student` VALUES(?, ?, ?, ?, ?, '0', ?, ?, 'user.jpg')");
+        mysqli_stmt_bind_param($stmt, "sssssss", $_POST['name'], $_POST['roll'], $_POST['dept'], $_POST['phone'], $_POST['email'], $_POST['username'], $hashed_password);
+        mysqli_stmt_execute($stmt);
        include "../send_otp.php";
         if(sendOtp($db, $_POST['username'], $_POST['email'])) {
         $_SESSION['username'] = $_POST['username'];

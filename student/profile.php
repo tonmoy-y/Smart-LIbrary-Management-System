@@ -36,7 +36,10 @@
                 <?php
 
             }
-                $q =mysqli_query($db, "SELECT * FROM student where username='$_SESSION[login_user]' ");
+                $stmt = mysqli_prepare($db, "SELECT * FROM student where username=?");
+                mysqli_stmt_bind_param($stmt, "s", $_SESSION['login_user']);
+                mysqli_stmt_execute($stmt);
+                $q = mysqli_stmt_get_result($stmt);
             ?>
             <h2 style="text-align: center;">
                 My Profile
@@ -58,8 +61,8 @@
             ?>
             <div style="text-align: center;"> <b> Welcome</b>
                 <h4>
-                <?php 
-                     echo $_SESSION['login_user'];
+                <?php
+                     echo htmlspecialchars($_SESSION['login_user']);
                      ?>
                 </h4>
             </div>
@@ -73,7 +76,7 @@
                     echo "</td>";
 
                     echo "<td>";
-                    echo $row['name'];
+                    echo htmlspecialchars($row['name']);
                     echo "</td>";
                  echo "</tr>";
 
@@ -83,7 +86,7 @@
                     echo "</td>";
 
                     echo "<td>";
-                    echo $row['roll'];
+                    echo htmlspecialchars($row['roll']);
                     echo "</td>";
                  echo "</tr>";
 
@@ -93,7 +96,7 @@
                     echo "</td>";
 
                     echo "<td>";
-                    echo $row['dept'];
+                    echo htmlspecialchars($row['dept']);
                     echo "</td>";
                  echo "</tr>";
 
@@ -103,7 +106,7 @@
                     echo "</td>";
 
                     echo "<td>";
-                    echo $row['phone'];
+                    echo htmlspecialchars($row['phone']);
                     echo "</td>";
                  echo "</tr>";
 
@@ -113,7 +116,7 @@
                     echo "</td>";
 
                     echo "<td>";
-                    echo $row['email'];
+                    echo htmlspecialchars($row['email']);
                     echo "</td>";
                  echo "</tr>";
 
@@ -123,7 +126,7 @@
                     echo "</td>";
 
                     echo "<td>";
-                    echo $row['username'];
+                    echo htmlspecialchars($row['username']);
                     echo "</td>";
                  echo "</tr>";
 

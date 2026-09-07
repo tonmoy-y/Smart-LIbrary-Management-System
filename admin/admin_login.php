@@ -49,7 +49,10 @@
     <?php
     if(isset($_POST['submit'])) {
         $count = 0;
-        $res = mysqli_query($db,"SELECT * FROM `admin` WHERE username='$_POST[username]'");
+        $stmt = mysqli_prepare($db, "SELECT * FROM `admin` WHERE username=?");
+        mysqli_stmt_bind_param($stmt, "s", $_POST['username']);
+        mysqli_stmt_execute($stmt);
+        $res = mysqli_stmt_get_result($stmt);
         
         $row = mysqli_fetch_assoc($res);
         $count = mysqli_num_rows($res);

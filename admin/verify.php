@@ -75,7 +75,7 @@ include "navbar.php";
         <p style="line-height: 1.3; text-align: center;">
     Please enter the OTP sent to 
     <span style="background: #fffbe6; color: #b36f00; font-weight: bold; padding: 8px 22px; border-radius: 7px; border: 1.5px solid #ffe58f; margin-left: 12px; margin-right: 12px; display: inline-block;">
-        <?php echo $_SESSION['email']; ?>
+        <?php echo htmlspecialchars($_SESSION['email']); ?>
     </span>.
 </p>
 
@@ -221,8 +221,8 @@ if (isset($_POST['submit_v'])) {
     // ensure expired rows removed again (race-safe)
     mysqli_query($db, "DELETE FROM verify_admin WHERE created_at < DATE_SUB(NOW(), INTERVAL 3 MINUTE)");
 
-    $username = isset($_SESSION['username']) ? mysqli_real_escape_string($db, $_SESSION['username']) : '';
-    $otp = isset($_POST['otp']) ? mysqli_real_escape_string($db, $_POST['otp']) : '';
+    $username = isset($_SESSION['username']) ? $_SESSION['username'] : '';
+    $otp = isset($_POST['otp']) ? $_POST['otp'] : '';
 
     if (empty($username) || strlen($otp) != 6) {
         echo "<script>
@@ -233,15 +233,23 @@ if (isset($_POST['submit_v'])) {
     }
 
     // check exact match — expired rows were already deleted, so presence = valid & not expired
-    $res = mysqli_query($db, "SELECT * FROM verify_admin WHERE username='$username' AND otp='$otp' LIMIT 1");
+    $stmt = mysqli_prepare($db, "SELECT * FROM verify_admin WHERE username=? AND otp=? LIMIT 1");
+    mysqli_stmt_bind_param($stmt, "ss", $username, $otp);
+    mysqli_stmt_execute($stmt);
+    $res = mysqli_stmt_get_result($stmt);
     if ($res && mysqli_num_rows($res) === 1) {
-        
+
   // hash password before saving to DB
   $raw_password = isset($_SESSION['password']) ? $_SESSION['password'] : '';
   $hashed_password = password_hash($raw_password, PASSWORD_DEFAULT);
 
-  mysqli_query($db, "DELETE FROM verify_admin WHERE username='$username'");
-  mysqli_query($db, "UPDATE `admin` SET `password`='$hashed_password' WHERE username='$username'");
+  $stmt = mysqli_prepare($db, "DELETE FROM verify_admin WHERE username=?");
+  mysqli_stmt_bind_param($stmt, "s", $username);
+  mysqli_stmt_execute($stmt);
+
+  $stmt = mysqli_prepare($db, "UPDATE `admin` SET `password`=? WHERE username=?");
+  mysqli_stmt_bind_param($stmt, "ss", $hashed_password, $username);
+  mysqli_stmt_execute($stmt);
 
         // clear session
         unset($_SESSION['email'], $_SESSION['username'], $_SESSION['password'], $_SESSION['admin_reset'], $_SESSION['admin_reset_time']);

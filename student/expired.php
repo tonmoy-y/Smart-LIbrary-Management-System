@@ -139,9 +139,9 @@ th,td { width: 10%; }
           
                if(isset($_SESSION['login_user'])) {
                      
-                    echo "<img class='img-circle profile_img' height=100 width=100 src='../images/".$_SESSION['pic']." '>  ";
+                    echo "<img class='img-circle profile_img' height=100 width=100 src='../images/".htmlspecialchars($_SESSION['pic'])." '>  ";
                     echo "<br> <br>";
-                    echo "Welcome,  ". $_SESSION['login_user'] . "!";
+                    echo "Welcome,  ". htmlspecialchars($_SESSION['login_user']) . "!";
                }
                ?>
      </div>
@@ -188,7 +188,10 @@ function closeNav() {
 
     <?php
     $var2=0;
-    $result = mysqli_query($db,"SELECT * FROM `fine` WHERE username='$_SESSION[login_user]'AND `status`= 'Not Paid' ;");
+    $fineStmt = mysqli_prepare($db, "SELECT * FROM `fine` WHERE username=? AND `status`= 'Not Paid'");
+    mysqli_stmt_bind_param($fineStmt, "s", $_SESSION['login_user']);
+    mysqli_stmt_execute($fineStmt);
+    $result = mysqli_stmt_get_result($fineStmt);
     while($r = mysqli_fetch_assoc($result)) {
       $var2  = $var2 + $r['fine'];
     }
@@ -207,10 +210,13 @@ function closeNav() {
 
      if(isset($_POST['submit'])) {
       $var1= '<p style="color:yellow; background-color: green;"> RETURNED </p>';
-      $sql1 = "UPDATE issue_book SET approve='$var1' WHERE username='$_POST[username]' AND bid='$_POST[bid]'";
-      mysqli_query($db, $sql1);
+      $updStmt1 = mysqli_prepare($db, "UPDATE issue_book SET approve=? WHERE username=? AND bid=?");
+      mysqli_stmt_bind_param($updStmt1, "sss", $var1, $_POST['username'], $_POST['bid']);
+      mysqli_stmt_execute($updStmt1);
 
-      mysqli_query($db, "UPDATE books SET quantity = quantity+ 1 WHERE bid='$_POST[bid]'");
+      $updStmt2 = mysqli_prepare($db, "UPDATE books SET quantity = quantity+ 1 WHERE bid=?");
+      mysqli_stmt_bind_param($updStmt2, "s", $_POST['bid']);
+      mysqli_stmt_execute($updStmt2);
      }
   }
   ?>
@@ -223,24 +229,33 @@ if(isset($_SESSION['login_user'])) {
   $exp= '<p style="color:yellow; background-color: red;"> EXPIRED </p>';
    
     if(isset($_POST['submit2'])) {
-    $sql="SELECT student.username, student.roll, student.name, books.bid, books.names, books.authors,books.edition,approve, issue_book.issue, issue_book.return  FROM student JOIN issue_book ON student.username = issue_book.username JOIN books ON books.bid = issue_book.bid 
-      WHERE issue_book.approve ='$ret'  AND student.username='$_SESSION[login_user]' 
+    $sql="SELECT student.username, student.roll, student.name, books.bid, books.names, books.authors,books.edition,approve, issue_book.issue, issue_book.return  FROM student JOIN issue_book ON student.username = issue_book.username JOIN books ON books.bid = issue_book.bid
+      WHERE issue_book.approve =?  AND student.username=?
       ORDER BY `issue_book`.`return` DESC";
-            $res=mysqli_query($db,$sql);
+            $stmt = mysqli_prepare($db, $sql);
+            mysqli_stmt_bind_param($stmt, "ss", $ret, $_SESSION['login_user']);
+            mysqli_stmt_execute($stmt);
+            $res = mysqli_stmt_get_result($stmt);
     }
 
     else if(isset($_POST['submit3'])) {
-    $sql="SELECT student.username, student.roll, student.name, books.bid, books.names, books.authors,books.edition,approve, issue_book.issue, issue_book.return  FROM student JOIN issue_book ON student.username = issue_book.username JOIN books ON books.bid = issue_book.bid 
-      WHERE issue_book.approve ='$exp' AND student.username='$_SESSION[login_user]'
+    $sql="SELECT student.username, student.roll, student.name, books.bid, books.names, books.authors,books.edition,approve, issue_book.issue, issue_book.return  FROM student JOIN issue_book ON student.username = issue_book.username JOIN books ON books.bid = issue_book.bid
+      WHERE issue_book.approve =? AND student.username=?
       ORDER BY `issue_book`.`return` DESC";
-            $res=mysqli_query($db,$sql);
+            $stmt = mysqli_prepare($db, $sql);
+            mysqli_stmt_bind_param($stmt, "ss", $exp, $_SESSION['login_user']);
+            mysqli_stmt_execute($stmt);
+            $res = mysqli_stmt_get_result($stmt);
     }
 
     else {
-    $sql="SELECT student.username, student.roll, student.name, books.bid, books.names, books.authors,books.edition,approve, issue_book.issue, issue_book.return  FROM student JOIN issue_book ON student.username = issue_book.username JOIN books ON books.bid = issue_book.bid 
-      WHERE issue_book.approve !='' AND issue_book.approve !='Yes' AND student.username='$_SESSION[login_user]' 
+    $sql="SELECT student.username, student.roll, student.name, books.bid, books.names, books.authors,books.edition,approve, issue_book.issue, issue_book.return  FROM student JOIN issue_book ON student.username = issue_book.username JOIN books ON books.bid = issue_book.bid
+      WHERE issue_book.approve !='' AND issue_book.approve !='Yes' AND student.username=?
       ORDER BY `issue_book`.`return` DESC";
-            $res=mysqli_query($db,$sql);
+            $stmt = mysqli_prepare($db, $sql);
+            mysqli_stmt_bind_param($stmt, "s", $_SESSION['login_user']);
+            mysqli_stmt_execute($stmt);
+            $res = mysqli_stmt_get_result($stmt);
     }
 
     if(mysqli_num_rows($res) == 0) {
@@ -270,16 +285,16 @@ if(isset($_SESSION['login_user'])) {
         while($row = mysqli_fetch_assoc($res)) {
           
             echo "<tr>";
-            echo "<td>"; echo $row['username']; echo "</td>";
-            echo "<td>"; echo $row['roll']; echo "</td>";
-            echo "<td>"; echo $row['name']; echo "</td>";
-            echo "<td>"; echo $row['bid']; echo "</td>";
-            echo "<td>"; echo $row['names']; echo "</td>";
-            echo "<td>"; echo $row['authors']; echo "</td>";
-            echo "<td>"; echo $row['edition']; echo "</td>";
+            echo "<td>"; echo htmlspecialchars($row['username']); echo "</td>";
+            echo "<td>"; echo htmlspecialchars($row['roll']); echo "</td>";
+            echo "<td>"; echo htmlspecialchars($row['name']); echo "</td>";
+            echo "<td>"; echo htmlspecialchars($row['bid']); echo "</td>";
+            echo "<td>"; echo htmlspecialchars($row['names']); echo "</td>";
+            echo "<td>"; echo htmlspecialchars($row['authors']); echo "</td>";
+            echo "<td>"; echo htmlspecialchars($row['edition']); echo "</td>";
             echo "<td>"; echo $row['approve']; echo "</td>";
-            echo "<td>"; echo $row['issue']; echo "</td>";
-            echo "<td>"; echo $row['return']; echo "</td>";
+            echo "<td>"; echo htmlspecialchars($row['issue']); echo "</td>";
+            echo "<td>"; echo htmlspecialchars($row['return']); echo "</td>";
 
             echo "</tr>";
         }

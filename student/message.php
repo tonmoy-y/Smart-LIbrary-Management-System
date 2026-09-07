@@ -100,15 +100,25 @@ form.write input.form-control {
 
 <?php
         if(isset($_POST['submit'])) {
-            mysqli_query($db,"INSERT INTO `message` VALUES ('','$_SESSION[login_user]','$_POST[message]','no', 'student');");
-            $res=mysqli_query($db, "SELECT * FROM `message` WHERE username='$_SESSION[login_user]';");
+            $insStmt = mysqli_prepare($db, "INSERT INTO `message` VALUES ('',?,?,'no', 'student')");
+            mysqli_stmt_bind_param($insStmt, "ss", $_SESSION['login_user'], $_POST['message']);
+            mysqli_stmt_execute($insStmt);
+            $selStmt = mysqli_prepare($db, "SELECT * FROM `message` WHERE username=?");
+            mysqli_stmt_bind_param($selStmt, "s", $_SESSION['login_user']);
+            mysqli_stmt_execute($selStmt);
+            $res = mysqli_stmt_get_result($selStmt);
 
         }
         else {
-            $res=mysqli_query($db, "SELECT * FROM `message` WHERE username='$_SESSION[login_user]';");
-        
+            $selStmt = mysqli_prepare($db, "SELECT * FROM `message` WHERE username=?");
+            mysqli_stmt_bind_param($selStmt, "s", $_SESSION['login_user']);
+            mysqli_stmt_execute($selStmt);
+            $res = mysqli_stmt_get_result($selStmt);
+
         }
-        mysqli_query($db,"UPDATE `message` SET `status`='yes' WHERE sender='admin' AND username='$_SESSION[login_user]';");
+        $updStmt = mysqli_prepare($db, "UPDATE `message` SET `status`='yes' WHERE sender='admin' AND username=?");
+        mysqli_stmt_bind_param($updStmt, "s", $_SESSION['login_user']);
+        mysqli_stmt_execute($updStmt);
     ?>
 
 <div class="wrapper">
@@ -133,7 +143,7 @@ while($row=mysqli_fetch_assoc($res)) {
         <div style="float:left; padding-top:5px;">
 &nbsp;
 <?php  
-       echo "<img class='img-circle profile_img' height=40 width=40 src='../images/".$_SESSION['pic']." '>  ";
+       echo "<img class='img-circle profile_img' height=40 width=40 src='../images/".htmlspecialchars($_SESSION['pic'])." '>  ";
     //    echo " " . $_SESSION['login_user'] . "!";
     ?>
     &nbsp;
@@ -141,7 +151,7 @@ while($row=mysqli_fetch_assoc($res)) {
         <div style="float:left;" class="chatbox">
      
             <?php
-            echo $row['message'];
+            echo htmlspecialchars($row['message']);
 
             ?>
         </div>
@@ -166,7 +176,7 @@ while($row=mysqli_fetch_assoc($res)) {
         <div style="float:left;" class="chatbox">
            
             <?php
-            echo $row['message'];
+            echo htmlspecialchars($row['message']);
 
             ?>
 

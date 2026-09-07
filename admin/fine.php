@@ -6,7 +6,9 @@ if(isset($_GET['pay_id'])){
      $pay_id = intval($_GET['pay_id']);
      if($pay_id > 0) {
           // mark as paid
-          mysqli_query($db, "UPDATE `fine` SET `status`='paid' WHERE `id` = " . $pay_id);
+          $stmt = mysqli_prepare($db, "UPDATE `fine` SET `status`='paid' WHERE `id` = ?");
+          mysqli_stmt_bind_param($stmt, "i", $pay_id);
+          mysqli_stmt_execute($stmt);
      }
      // redirect back to avoid re-submission
      echo "<script>window.location='fine.php'</script>";
@@ -148,8 +150,11 @@ function closeNav() {
           // --------------- search query------------
      if(isset($_POST['submit'])) {
           // search only entries where fine > 0
-          $search = mysqli_real_escape_string($db, $_POST['search']);
-          $q = mysqli_query($db, "SELECT * FROM `fine` WHERE (`username` LIKE '%$search%' OR bid LIKE '%$search%' OR `days` LIKE '%$search%') AND `fine` > 0");
+          $search = "%".$_POST['search']."%";
+          $stmt = mysqli_prepare($db, "SELECT * FROM `fine` WHERE (`username` LIKE ? OR bid LIKE ? OR `days` LIKE ?) AND `fine` > 0");
+          mysqli_stmt_bind_param($stmt, "sss", $search, $search, $search);
+          mysqli_stmt_execute($stmt);
+          $q = mysqli_stmt_get_result($stmt);
      
           if( mysqli_num_rows($q) == 0) 
                     // If search query returns results, display them
@@ -168,11 +173,11 @@ echo "<table class='table table-bordered table-hover' > ";
 
      while($row = mysqli_fetch_assoc($q)) {
            echo "<tr>";
-          echo "<td>"; echo $row['username']; echo "</td>";
-          echo "<td>"; echo $row['bid']; echo "</td>";
-          echo "<td>"; echo $row['returned']; echo "</td>";
-          echo "<td>"; echo $row['days']; echo "</td>";
-          echo "<td>"; echo $row['fine']; echo "</td>";
+          echo "<td>"; echo htmlspecialchars($row['username']); echo "</td>";
+          echo "<td>"; echo htmlspecialchars($row['bid']); echo "</td>";
+          echo "<td>"; echo htmlspecialchars($row['returned']); echo "</td>";
+          echo "<td>"; echo htmlspecialchars($row['days']); echo "</td>";
+          echo "<td>"; echo htmlspecialchars($row['fine']); echo "</td>";
           // show pay option if status empty, otherwise show Paid
           echo "<td>";
           if(empty($row['status'])) {
@@ -206,11 +211,11 @@ else {
 
      while($row = mysqli_fetch_assoc($res)) {
            echo "<tr>";
-          echo "<td>"; echo $row['username']; echo "</td>";
-          echo "<td>"; echo $row['bid']; echo "</td>";
-          echo "<td>"; echo $row['returned']; echo "</td>";
-          echo "<td>"; echo $row['days']; echo "</td>";
-          echo "<td>"; echo $row['fine']; echo "</td>";
+          echo "<td>"; echo htmlspecialchars($row['username']); echo "</td>";
+          echo "<td>"; echo htmlspecialchars($row['bid']); echo "</td>";
+          echo "<td>"; echo htmlspecialchars($row['returned']); echo "</td>";
+          echo "<td>"; echo htmlspecialchars($row['days']); echo "</td>";
+          echo "<td>"; echo htmlspecialchars($row['fine']); echo "</td>";
           echo "<td>";
           if(empty($row['status'])) {
                echo "<a href='?pay_id=".intval($row['id'])."' class='btn btn-success btn-xs'>Pay</a>";

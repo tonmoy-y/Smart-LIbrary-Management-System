@@ -1,0 +1,9 @@
+# Real SMTP / mail credentials (placeholders live in mail_config.php,
+# but the file itself should never be committed with real secrets).
+mail_config.php
+admin/mail_config.php
+student/mail_config.php
+
+# OS/editor cruft
+.DS_Store
+*.log

@@ -33,8 +33,10 @@ label {
 <h2 style="text-align:center; color: white;"> Edit Information</h2>
    
 <?php
-    $sql = "SELECT * FROM `admin` WHERE username='$_SESSION[login_admin]'";
-    $result = mysqli_query($db, $sql);
+    $stmt = mysqli_prepare($db, "SELECT * FROM `admin` WHERE username=?");
+    mysqli_stmt_bind_param($stmt, "s", $_SESSION['login_admin']);
+    mysqli_stmt_execute($stmt);
+    $result = mysqli_stmt_get_result($stmt);
 
     if (!$result) {
         die(mysqli_error($db));
@@ -59,8 +61,8 @@ label {
 <div class="profile_info" style="text-align:center;">
         <span style="color: white;"> Welcome </span>
         <h4  style="color: white;">
-            <?php 
-                echo $_SESSION['login_admin'];
+            <?php
+                echo htmlspecialchars($_SESSION['login_admin']);
             ?>
         </h4>
 
@@ -70,19 +72,19 @@ label {
         <input type="file" name="file" class="form-control" style="width: 80%; height:40px; margin: 0 auto;">
 
         <label><h4><b>Name: </b></h4></label>
-        <input class="form-control" type="text" name="Name" value="<?php echo $name; ?>">
+        <input class="form-control" type="text" name="Name" value="<?php echo htmlspecialchars($name); ?>">
 
-        <label><h4><b> Department</b></h4></label>    
-        <input class="form-control" type="text" name="dept" value="<?php echo $dept; ?>">
-            
-        <label><h4><b>Phone No:</b></h4></label>    
-        <input class="form-control" type="text" name="phone" value="<?php echo $phone; ?>" >
-            
+        <label><h4><b> Department</b></h4></label>
+        <input class="form-control" type="text" name="dept" value="<?php echo htmlspecialchars($dept); ?>">
+
+        <label><h4><b>Phone No:</b></h4></label>
+        <input class="form-control" type="text" name="phone" value="<?php echo htmlspecialchars($phone); ?>" >
+
         <label><h4><b>Email: </b></h4></label>
-        <input class="form-control" type="text" name="email" value="<?php echo $email; ?>" >
-        
+        <input class="form-control" type="text" name="email" value="<?php echo htmlspecialchars($email); ?>" >
+
         <label><h4><b>Username :</b></h4></label>
-        <input class="form-control" type="text" name="username" value="<?php echo $username; ?>" >
+        <input class="form-control" type="text" name="username" value="<?php echo htmlspecialchars($username); ?>" >
        
     <label><h4><b>Password:</b></h4></label>
     <input class="form-control" type="password" name="password" placeholder="Leave blank to keep current password"><br>
@@ -135,9 +137,16 @@ label {
         }
 
     $picClean = preg_replace('/[^A-Za-z0-9._-]/','_', $pic);
-    $sql1 = "UPDATE `admin` SET pic='$picClean', `Name`='$name', dept='$dept', phone='$phone', email='$email', username='$username' $password_clause WHERE username='$_SESSION[login_admin]'";
-        
-        if (mysqli_query($db, $sql1)) {
+        if($new_password !== '') {
+            $stmt1 = mysqli_prepare($db, "UPDATE `admin` SET pic=?, `Name`=?, dept=?, phone=?, email=?, username=?, password=? WHERE username=?");
+            mysqli_stmt_bind_param($stmt1, "ssssssss", $picClean, $name, $dept, $phone, $email, $username, $password_hashed, $_SESSION['login_admin']);
+        } else {
+            $stmt1 = mysqli_prepare($db, "UPDATE `admin` SET pic=?, `Name`=?, dept=?, phone=?, email=?, username=? WHERE username=?");
+            mysqli_stmt_bind_param($stmt1, "sssssss", $picClean, $name, $dept, $phone, $email, $username, $_SESSION['login_admin']);
+        }
+        $update_ok = mysqli_stmt_execute($stmt1);
+
+        if ($update_ok) {
 
             if (!empty($username) && $username !== $_SESSION['login_admin']) {
                 $_SESSION['login_admin'] = $username;

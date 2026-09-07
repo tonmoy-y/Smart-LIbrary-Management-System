@@ -140,8 +140,12 @@ function closeNav() {
           // --------------- search query------------
      if(isset($_POST['submit'])) {
           // $q = $_POST['search'];
-          $q = mysqli_query($db, "SELECT * FROM `admin` WHERE (username LIKE '%$_POST[search]%') and status='';");
-               if( mysqli_num_rows($q) == 0) 
+          $search_like = "%".$_POST['search']."%";
+          $stmt = mysqli_prepare($db, "SELECT * FROM `admin` WHERE (username LIKE ?) and status='';");
+          mysqli_stmt_bind_param($stmt, "s", $search_like);
+          mysqli_stmt_execute($stmt);
+          $q = mysqli_stmt_get_result($stmt);
+               if( mysqli_num_rows($q) == 0)
                     // If search query returns results, display them
                     echo "Sorry, no results found for your search.";
                else {
@@ -157,22 +161,22 @@ function closeNav() {
      while($row = mysqli_fetch_assoc($q)) {
           echo "<tr>";
           $_SESSION['test_name'] = $row['username'];
-          echo "<td>"; echo $row['Name']; echo "</td>";
-                  echo "<td>"; echo $row['dept']; echo "</td>";
-          echo "<td>"; echo $row['phone']; echo "</td>";
-          echo "<td>"; echo $row['email']; echo "</td>";
-          echo "<td>"; echo $row['username']; echo "</td>";
+          echo "<td>"; echo htmlspecialchars($row['Name']); echo "</td>";
+                  echo "<td>"; echo htmlspecialchars($row['dept']); echo "</td>";
+          echo "<td>"; echo htmlspecialchars($row['phone']); echo "</td>";
+          echo "<td>"; echo htmlspecialchars($row['email']); echo "</td>";
+          echo "<td>"; echo htmlspecialchars($row['username']); echo "</td>";
           // echo "</tr>";
 
  echo "<td>
             <form method='post' style='display:inline'>
-                <input type='hidden' name='username' value='". $row['username'] ."'>
+                <input type='hidden' name='username' value='". htmlspecialchars($row['username']) ."'>
                 <button type='submit' name='submit1' class='btn btn-default' style='font-size:16px; font-weight:700; color:red;'>
                  <span class='glyphicon glyphicon-remove-sign'></span>
                 Remove</button>
             </form>
             <form method='post' style='display:inline'>
-                <input type='hidden' name='username' value='". $row['username'] ."'>
+                <input type='hidden' name='username' value='". htmlspecialchars($row['username']) ."'>
                 <button type='submit' name='submit2' class='btn btn-default' style='font-size:16px; font-weight:700; color:green;'>
                  <span class='glyphicon glyphicon-ok-sign'></span>
                 Approve</button>
@@ -215,21 +219,21 @@ else {
 
      while($row = mysqli_fetch_assoc($res)) {
            echo "<tr>";
-          echo "<td>"; echo $row['Name']; echo "</td>";
-          echo "<td>"; echo $row['dept']; echo "</td>";
-          echo "<td>"; echo $row['phone']; echo "</td>";
-          echo "<td>"; echo $row['email']; echo "</td>";
-          echo "<td>"; echo $row['username']; echo "</td>";
-          
+          echo "<td>"; echo htmlspecialchars($row['Name']); echo "</td>";
+          echo "<td>"; echo htmlspecialchars($row['dept']); echo "</td>";
+          echo "<td>"; echo htmlspecialchars($row['phone']); echo "</td>";
+          echo "<td>"; echo htmlspecialchars($row['email']); echo "</td>";
+          echo "<td>"; echo htmlspecialchars($row['username']); echo "</td>";
+
  echo "<td>
             <form method='post' style='display:inline'>
-                <input type='hidden' name='username' value='". $row['username'] ."'>
+                <input type='hidden' name='username' value='". htmlspecialchars($row['username']) ."'>
                 <button type='submit' name='submit1' class='btn btn-default' style='font-size:16px; font-weight:700; color:red;'>
                  <span class='glyphicon glyphicon-remove-sign'></span>
                 Remove</button>
             </form>
             <form method='post' style='display:inline'>
-                <input type='hidden' name='username' value='". $row['username'] ."'>
+                <input type='hidden' name='username' value='". htmlspecialchars($row['username']) ."'>
                 <button type='submit' name='submit2' class='btn btn-default' style='font-size:16px; font-weight:700; color:green;'>
                  <span class='glyphicon glyphicon-ok-sign'></span>
                 Approve</button>
@@ -242,7 +246,9 @@ else {
      echo "</table>";
 }
 if(isset($_POST['submit1'])) {
-    mysqli_query($db, "DELETE FROM `admin` WHERE username='$_POST[username]';");
+    $stmt = mysqli_prepare($db, "DELETE FROM `admin` WHERE username=?");
+    mysqli_stmt_bind_param($stmt, "s", $_POST['username']);
+    mysqli_stmt_execute($stmt);
     ?>
     <script type="text/javascript">
         window.location="admin_status";
@@ -250,7 +256,9 @@ if(isset($_POST['submit1'])) {
     <?php
 }
 if(isset($_POST['submit2'])) {
-    mysqli_query($db, "UPDATE `admin` SET status='Yes' WHERE username='$_POST[username]';");
+    $stmt = mysqli_prepare($db, "UPDATE `admin` SET status='Yes' WHERE username=?");
+    mysqli_stmt_bind_param($stmt, "s", $_POST['username']);
+    mysqli_stmt_execute($stmt);
     ?>
     <script type="text/javascript">
         window.location="admin_status";

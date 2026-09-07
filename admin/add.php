@@ -155,14 +155,16 @@ form.book input.form-control {
             $target = "../images/".basename($imageName);
 
              if(move_uploaded_file($_FILES['image']['tmp_name'], $target)) {
-$name = mysqli_real_escape_string($db, $_POST['names']);
-$author = mysqli_real_escape_string($db, $_POST['authors']);
-$edition = mysqli_real_escape_string($db, $_POST['edition']);
-$status = mysqli_real_escape_string($db, $_POST['status']);
-$quantity = mysqli_real_escape_string($db, $_POST['quantity']);
-$department = mysqli_real_escape_string($db, $_POST['department']);
+$name = $_POST['names'];
+$author = $_POST['authors'];
+$edition = $_POST['edition'];
+$status = $_POST['status'];
+$quantity = $_POST['quantity'];
+$department = $_POST['department'];
 
-        mysqli_query($db,"INSERT INTO `books`( `names`, `authors`, `edition`, `status`, `quantity`, `department`, `image`) VALUES ('$name','$author','$edition','$status','$quantity','$department','$imageName')") ;
+        $stmt = mysqli_prepare($db, "INSERT INTO `books`( `names`, `authors`, `edition`, `status`, `quantity`, `department`, `image`) VALUES (?,?,?,?,?,?,?)");
+        mysqli_stmt_bind_param($stmt, "sssssss", $name, $author, $edition, $status, $quantity, $department, $imageName);
+        mysqli_stmt_execute($stmt);
 
       ?>
       <script type="text/javascript">

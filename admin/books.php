@@ -222,10 +222,14 @@ function closeNav() {
 
           // --------------- search query------------
 if(isset($_POST['submit'])) {
-    $q = mysqli_query($db, "SELECT * FROM books 
-        WHERE names LIKE '%$_POST[search]%' 
-        OR authors LIKE '%$_POST[search]%' 
-        OR department LIKE '%$_POST[search]%'");
+    $search_like = "%".$_POST['search']."%";
+    $stmt = mysqli_prepare($db, "SELECT * FROM books
+        WHERE names LIKE ?
+        OR authors LIKE ?
+        OR department LIKE ?");
+    mysqli_stmt_bind_param($stmt, "sss", $search_like, $search_like, $search_like);
+    mysqli_stmt_execute($stmt);
+    $q = mysqli_stmt_get_result($stmt);
 
     if(mysqli_num_rows($q) == 0) {
         echo "Sorry, no results found for your search.";
@@ -235,18 +239,18 @@ if(isset($_POST['submit'])) {
             echo "
             <div class='book-card'>
                 <div class='book-img'>
-                    <img src='../images/".$row['image']."' alt='".$row['names']."'>
+                    <img src='../images/".htmlspecialchars($row['image'])."' alt='".htmlspecialchars($row['names'])."'>
                 </div>
                 <div class='book-info'>
-                    <h4>".$row['names']."</h4>
-                    <p><b>Author:</b> ".$row['authors']."</p>
-                    <p><b>Edition:</b> ".$row['edition']."</p>
-                    <p><b>Dept:</b> ".$row['department']."</p>
-                    <p><b>Status:</b> ".$row['status']." | <b>Qty:</b> ".$row['quantity']."</p>
+                    <h4>".htmlspecialchars($row['names'])."</h4>
+                    <p><b>Author:</b> ".htmlspecialchars($row['authors'])."</p>
+                    <p><b>Edition:</b> ".htmlspecialchars($row['edition'])."</p>
+                    <p><b>Dept:</b> ".htmlspecialchars($row['department'])."</p>
+                    <p><b>Status:</b> ".htmlspecialchars($row['status'])." | <b>Qty:</b> ".htmlspecialchars($row['quantity'])."</p>
                 </div>
                 <div class='overlay'>
                     <form method='post' action=''>
-                        <input type='hidden' name='bid' value='".$row['bid']."'>
+                        <input type='hidden' name='bid' value='".htmlspecialchars($row['bid'])."'>
                         <button type='submit' name='submit1' class='btn btn-danger'>Delete</button>
                     </form>
                 </div>
@@ -262,18 +266,18 @@ if(isset($_POST['submit'])) {
         echo "
         <div class='book-card'>
             <div class='book-img'>
-                <img src='../images/".$row['image']."' alt='".$row['names']."'>
+                <img src='../images/".htmlspecialchars($row['image'])."' alt='".htmlspecialchars($row['names'])."'>
             </div>
             <div class='book-info'>
-                <h4>".$row['names']."</h4>
-                <p><b>Author:</b> ".$row['authors']."</p>
-                <p><b>Edition:</b> ".$row['edition']."</p>
-                <p><b>Dept:</b> ".$row['department']."</p>
-                <p><b>Status:</b> ".$row['status']." | <b>Qty:</b> ".$row['quantity']."</p>
+                <h4>".htmlspecialchars($row['names'])."</h4>
+                <p><b>Author:</b> ".htmlspecialchars($row['authors'])."</p>
+                <p><b>Edition:</b> ".htmlspecialchars($row['edition'])."</p>
+                <p><b>Dept:</b> ".htmlspecialchars($row['department'])."</p>
+                <p><b>Status:</b> ".htmlspecialchars($row['status'])." | <b>Qty:</b> ".htmlspecialchars($row['quantity'])."</p>
             </div>
             <div class='overlay'>
                 <form method='post' action=''>
-                    <input type='hidden' name='bid' value='".$row['bid']."'>
+                    <input type='hidden' name='bid' value='".htmlspecialchars($row['bid'])."'>
                     <button type='submit' name='submit1' class='btn btn-danger'>Delete</button>
                 </form>
             </div>
@@ -286,9 +290,10 @@ if(isset($_POST['submit'])) {
 // ----------------- delete query -------------------
 if(isset($_POST['submit1'])) {
      if(isset($_SESSION['login_admin'])) {
-   
-          $delete_query = "DELETE FROM books WHERE bid='$_POST[bid]'";
-          mysqli_query($db, $delete_query);
+
+          $stmt = mysqli_prepare($db, "DELETE FROM books WHERE bid=?");
+          mysqli_stmt_bind_param($stmt, "s", $_POST['bid']);
+          mysqli_stmt_execute($stmt);
           ?>
              <script type="text/javascript">
 Swal.fire({

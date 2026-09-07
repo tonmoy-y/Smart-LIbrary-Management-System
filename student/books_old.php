@@ -151,7 +151,11 @@ function closeNav() {
           // --------------- search query------------
      if(isset($_POST['submit'])) {
           // $q = $_POST['search'];
-          $q = mysqli_query($db, "SELECT * FROM books WHERE names LIKE '%$_POST[search]%' OR authors LIKE '%$_POST[search]%' OR department LIKE '%$_POST[search]%'");
+          $searchTerm = "%".$_POST['search']."%";
+          $stmt = mysqli_prepare($db, "SELECT * FROM books WHERE names LIKE ? OR authors LIKE ? OR department LIKE ?");
+          mysqli_stmt_bind_param($stmt, "sss", $searchTerm, $searchTerm, $searchTerm);
+          mysqli_stmt_execute($stmt);
+          $q = mysqli_stmt_get_result($stmt);
                if( mysqli_num_rows($q) == 0) 
                     // If search query returns results, display them
                     echo "Sorry, no results found for your search.";
@@ -214,12 +218,18 @@ else {
 
 if(isset($_POST['submit1'])) {
      if(isset($_SESSION['login_user'])) {
-          $sql1= mysqli_query($db, "SELECT * FROM books WHERE bid = '$_POST[bid]';");
+          $stmt1 = mysqli_prepare($db, "SELECT * FROM books WHERE bid = ?");
+          mysqli_stmt_bind_param($stmt1, "s", $_POST['bid']);
+          mysqli_stmt_execute($stmt1);
+          $sql1 = mysqli_stmt_get_result($stmt1);
           $row1=mysqli_fetch_assoc($sql1);
           $count1= mysqli_num_rows($sql1);
           if  ($count1!=0) {
 
-$check = mysqli_query($db, "SELECT * FROM issue_book WHERE username='$_SESSION[login_user]' AND bid='$_POST[bid]'");
+$checkStmt = mysqli_prepare($db, "SELECT * FROM issue_book WHERE username=? AND bid=?");
+mysqli_stmt_bind_param($checkStmt, "ss", $_SESSION['login_user'], $_POST['bid']);
+mysqli_stmt_execute($checkStmt);
+$check = mysqli_stmt_get_result($checkStmt);
 if(mysqli_num_rows($check) > 0) {
     ?>
     <script type="text/javascript">
@@ -230,7 +240,10 @@ if(mysqli_num_rows($check) > 0) {
     exit(); 
 }
 
-          mysqli_query($db, "INSERT INTO issue_book VALUES ('$_SESSION[login_user]','$_POST[bid]','','', '')");
+          $insStmt = mysqli_prepare($db, "INSERT INTO issue_book VALUES (?,?,?,?,?)");
+          $emptyStr = '';
+          mysqli_stmt_bind_param($insStmt, "sssss", $_SESSION['login_user'], $_POST['bid'], $emptyStr, $emptyStr, $emptyStr);
+          mysqli_stmt_execute($insStmt);
          ?>
           <script type="text/javascript">
                window.location= "request.php";

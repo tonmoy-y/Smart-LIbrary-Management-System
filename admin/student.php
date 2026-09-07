@@ -4,9 +4,11 @@
 $re = null;
       // Handle student deletion
       if(isset($_POST['delete_user']) && isset($_POST['username_to_delete'])){
-           $uname = mysqli_real_escape_string($db, $_POST['username_to_delete']);
+           $uname = $_POST['username_to_delete'];
            // delete the student record
-           mysqli_query($db, "DELETE FROM student WHERE username='$uname'");
+           $stmt = mysqli_prepare($db, "DELETE FROM student WHERE username=?");
+           mysqli_stmt_bind_param($stmt, "s", $uname);
+           mysqli_stmt_execute($stmt);
            echo "<script>window.location='student.php?deleted=1'</script>";
            exit;
       }
@@ -160,7 +162,11 @@ function closeNav() {
           // --------------- search query------------
      if(isset($_POST['submit'])) {
           // $q = $_POST['search'];
-          $q = mysqli_query($db, "SELECT * FROM student WHERE `name` LIKE '%$_POST[search]%' OR roll LIKE '%$_POST[search]%' OR username LIKE '%$_POST[search]%' OR email LIKE '%$_POST[search]%'");
+          $search = "%".$_POST['search']."%";
+          $stmt = mysqli_prepare($db, "SELECT * FROM student WHERE `name` LIKE ? OR roll LIKE ? OR username LIKE ? OR email LIKE ?");
+          mysqli_stmt_bind_param($stmt, "ssss", $search, $search, $search, $search);
+          mysqli_stmt_execute($stmt);
+          $q = mysqli_stmt_get_result($stmt);
                if( mysqli_num_rows($q) == 0) 
                     // If search query returns results, display them
                     echo "Sorry, no results found for your search.";
@@ -179,12 +185,12 @@ function closeNav() {
 
      while($row = mysqli_fetch_assoc($q)) {
           echo "<tr>";
-          echo "<td>"; echo $row['name']; echo "</td>";
-          echo "<td>"; echo $row['roll']; echo "</td>";
-          echo "<td>"; echo $row['dept']; echo "</td>";
-          echo "<td>"; echo $row['phone']; echo "</td>";
-          echo "<td>"; echo $row['email']; echo "</td>";
-          echo "<td>"; echo $row['username']; echo "</td>";
+          echo "<td>"; echo htmlspecialchars($row['name']); echo "</td>";
+          echo "<td>"; echo htmlspecialchars($row['roll']); echo "</td>";
+          echo "<td>"; echo htmlspecialchars($row['dept']); echo "</td>";
+          echo "<td>"; echo htmlspecialchars($row['phone']); echo "</td>";
+          echo "<td>"; echo htmlspecialchars($row['email']); echo "</td>";
+          echo "<td>"; echo htmlspecialchars($row['username']); echo "</td>";
           echo "<td>";
           echo "<form method='post' style='margin:0' class='student-delete-form' data-uname='".htmlspecialchars($row['username'], ENT_QUOTES)."'>";
           echo "<input type='hidden' name='username_to_delete' value='".htmlspecialchars($row['username'], ENT_QUOTES)."'>";
@@ -216,12 +222,12 @@ else {
 
      while($row = mysqli_fetch_assoc($res)) {
            echo "<tr>";
-          echo "<td>"; echo $row['name']; echo "</td>";
-          echo "<td>"; echo $row['roll']; echo "</td>";
-          echo "<td>"; echo $row['dept']; echo "</td>";
-          echo "<td>"; echo $row['phone']; echo "</td>";
-          echo "<td>"; echo $row['email']; echo "</td>";
-          echo "<td>"; echo $row['username']; echo "</td>";
+          echo "<td>"; echo htmlspecialchars($row['name']); echo "</td>";
+          echo "<td>"; echo htmlspecialchars($row['roll']); echo "</td>";
+          echo "<td>"; echo htmlspecialchars($row['dept']); echo "</td>";
+          echo "<td>"; echo htmlspecialchars($row['phone']); echo "</td>";
+          echo "<td>"; echo htmlspecialchars($row['email']); echo "</td>";
+          echo "<td>"; echo htmlspecialchars($row['username']); echo "</td>";
           echo "<td>";
           echo "<form method='post' style='margin:0' class='student-delete-form' data-uname='".htmlspecialchars($row['username'], ENT_QUOTES)."'>";
           echo "<input type='hidden' name='username_to_delete' value='".htmlspecialchars($row['username'], ENT_QUOTES)."'>";

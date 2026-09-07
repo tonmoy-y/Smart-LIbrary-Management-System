@@ -172,7 +172,7 @@ footer {
     display: flex;
     gap: 20px;
     flex-wrap: wrap;
-    padding: 20px;
+    padding: 25px;
     background-color: #c19f9f;
     box-sizing: border-box;
     justify-content: flex-start;
@@ -185,7 +185,6 @@ footer {
     display: flex;
     justify-content: flex-end;
     align-items: center;
-    align-content: top;
     flex: 1;
     gap: 5px;
 
@@ -294,7 +293,7 @@ input  {
     background-color:#610795;
     margin: 30px auto;
     opacity: .6;
-    color: rgb(121, 6, 6);
+    color: rgb(248, 242, 242);
     border-radius: 15px;
 }
 
@@ -322,7 +321,7 @@ input  {
 /*--------------------register-------------------- */
 
 .box2 {
-    height: 475px;
+    height: 500px;
     width: 400px;
     background-color:#910707;
     margin: 20px auto;
@@ -338,5 +337,10 @@ form .reg {
     align-items: center;
     gap: 10px;
 
+}
+
+.log_img label {
+    display: inline-block;
+    margin-left: 10px;
 }
 

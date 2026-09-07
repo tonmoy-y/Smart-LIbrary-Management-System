@@ -204,7 +204,10 @@ function closeNav() {
     <?php
 
      if(isset($_POST['submit'])) {
-      $res=mysqli_query($db, "SELECT * FROM issue_book WHERE username='$_POST[username]' AND bid='$_POST[bid]'") ;
+      $stmt = mysqli_prepare($db, "SELECT * FROM issue_book WHERE username=? AND bid=?");
+      mysqli_stmt_bind_param($stmt, "ss", $_POST['username'], $_POST['bid']);
+      mysqli_stmt_execute($stmt);
+      $res = mysqli_stmt_get_result($stmt);
       $day = 0;
 $fine = 0;
       while($row = mysqli_fetch_assoc($res)) {
@@ -218,18 +221,25 @@ $fine = 0;
        }
 
   $x= date("Y-m-d");
-      
-  mysqli_query($db, "INSERT INTO `fine`VALUES ('','$_POST[username]','$_POST[bid]','$x','$day','$fine','Not Paid');");
+
+  $stmt = mysqli_prepare($db, "INSERT INTO `fine` VALUES ('',?,?,?,?,?,'Not Paid')");
+  mysqli_stmt_bind_param($stmt, "sssdd", $_POST['username'], $_POST['bid'], $x, $day, $fine);
+  mysqli_stmt_execute($stmt);
 
 
   $var1= '<p style="color:yellow; background-color: green;"> RETURNED </p>';
-  $sql1 = "UPDATE issue_book SET approve='$var1' WHERE username='$_POST[username]' AND bid='$_POST[bid]'";
-  mysqli_query($db, $sql1);
+  $stmt = mysqli_prepare($db, "UPDATE issue_book SET approve=? WHERE username=? AND bid=?");
+  mysqli_stmt_bind_param($stmt, "sss", $var1, $_POST['username'], $_POST['bid']);
+  mysqli_stmt_execute($stmt);
 
   // overwrite the stored return date with the actual return date
-  mysqli_query($db, "UPDATE issue_book SET `return` = '$x' WHERE username='$_POST[username]' AND bid='$_POST[bid]'");
+  $stmt = mysqli_prepare($db, "UPDATE issue_book SET `return` = ? WHERE username=? AND bid=?");
+  mysqli_stmt_bind_param($stmt, "sss", $x, $_POST['username'], $_POST['bid']);
+  mysqli_stmt_execute($stmt);
 
-  mysqli_query($db, "UPDATE books SET quantity = quantity+ 1 WHERE bid='$_POST[bid]'");
+  $stmt = mysqli_prepare($db, "UPDATE books SET quantity = quantity+ 1 WHERE bid=?");
+  mysqli_stmt_bind_param($stmt, "s", $_POST['bid']);
+  mysqli_stmt_execute($stmt);
   echo "<script>window.location='expired.php?returned=1'</script>";
   exit;
      }
@@ -304,15 +314,15 @@ if(isset($_SESSION['login_admin'])) {
     while($row = mysqli_fetch_assoc($res)) {
           
       echo "<tr>";
-      echo "<td>"; echo $row['username']; echo "</td>";
-      echo "<td>"; echo $row['roll']; echo "</td>";
-      echo "<td>"; echo $row['name']; echo "</td>";
-      echo "<td>"; echo $row['bid']; echo "</td>";
-      echo "<td>"; echo $row['names']; echo "</td>";
-      echo "<td>"; echo $row['authors']; echo "</td>";
-      echo "<td>"; echo $row['edition']; echo "</td>";
-      echo "<td>"; echo $row['issue']; echo "</td>";
-      echo "<td>"; echo $row['return']; echo "</td>";
+      echo "<td>"; echo htmlspecialchars($row['username']); echo "</td>";
+      echo "<td>"; echo htmlspecialchars($row['roll']); echo "</td>";
+      echo "<td>"; echo htmlspecialchars($row['name']); echo "</td>";
+      echo "<td>"; echo htmlspecialchars($row['bid']); echo "</td>";
+      echo "<td>"; echo htmlspecialchars($row['names']); echo "</td>";
+      echo "<td>"; echo htmlspecialchars($row['authors']); echo "</td>";
+      echo "<td>"; echo htmlspecialchars($row['edition']); echo "</td>";
+      echo "<td>"; echo htmlspecialchars($row['issue']); echo "</td>";
+      echo "<td>"; echo htmlspecialchars($row['return']); echo "</td>";
       echo "<td>"; echo $row['approve']; echo "</td>";
       // Action column: show Return button only if not already returned
       echo "<td>";

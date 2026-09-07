@@ -103,9 +103,9 @@ body {
           
                if(isset($_SESSION['login_user'])) {
                      
-                    echo "<img class='img-circle profile_img' height=100 width=100 src='../images/".$_SESSION['pic']." '>  ";
+                    echo "<img class='img-circle profile_img' height=100 width=100 src='../images/".htmlspecialchars($_SESSION['pic'])." '>  ";
                     echo "<br> <br>";
-                    echo "Welcome,  ". $_SESSION['login_user'] . "!";
+                    echo "Welcome,  ". htmlspecialchars($_SESSION['login_user']) . "!";
                }
                ?>
      </div>
@@ -140,7 +140,10 @@ body {
   <?php
 
   // $q = $_POST['search'];
-  $q = mysqli_query($db, "SELECT ib.*, b.names FROM issue_book ib LEFT JOIN books b ON b.bid = ib.bid WHERE ib.username = '$_SESSION[login_user]' AND ib.approve='Pending' ");
+  $stmt = mysqli_prepare($db, "SELECT ib.*, b.names FROM issue_book ib LEFT JOIN books b ON b.bid = ib.bid WHERE ib.username = ? AND ib.approve='Pending' ");
+  mysqli_stmt_bind_param($stmt, "s", $_SESSION['login_user']);
+  mysqli_stmt_execute($stmt);
+  $q = mysqli_stmt_get_result($stmt);
   if( mysqli_num_rows($q) == 0) 
   // If search query returns results, display them
 echo "<h2 style='text-align:center;'> There is no book request from you. </h2>";
@@ -166,14 +169,14 @@ else {
   while($row = mysqli_fetch_assoc($q)) {
     echo "<tr>";
     ?>
-<td class="select-col"><input type="checkbox" name="check[]" value="<?php echo $row['bid']; ?>"></td>
+<td class="select-col"><input type="checkbox" name="check[]" value="<?php echo htmlspecialchars($row['bid']); ?>"></td>
 
 <?php
-    echo "<td class='bid-col'>"; echo $row['bid']; echo "</td>";
-    echo "<td class='name-col'>"; echo isset($row['names']) ? $row['names'] : ''; echo "</td>";
-    echo "<td class='status-col'>"; echo $row['approve']; echo "</td>";
-    echo "<td class='issue-col'>"; echo $row['issue']; echo "</td>";
-    echo "<td class='return-col'>"; echo $row['return']; echo "</td>";
+    echo "<td class='bid-col'>"; echo htmlspecialchars($row['bid']); echo "</td>";
+    echo "<td class='name-col'>"; echo isset($row['names']) ? htmlspecialchars($row['names']) : ''; echo "</td>";
+    echo "<td class='status-col'>"; echo htmlspecialchars($row['approve']); echo "</td>";
+    echo "<td class='issue-col'>"; echo htmlspecialchars($row['issue']); echo "</td>";
+    echo "<td class='return-col'>"; echo htmlspecialchars($row['return']); echo "</td>";
     
     echo "</tr>";
   }
@@ -186,9 +189,10 @@ else {
 <?php
 if(isset($_POST['delete'])) {
     if(!empty($_POST['check'])) {
+        $delStmt = mysqli_prepare($db, "DELETE FROM issue_book WHERE bid=? AND username=? ORDER BY bid ASC LIMIT 1");
         foreach($_POST['check'] as $value) {
-            $query = "DELETE FROM issue_book WHERE bid='$value' AND username='$_SESSION[login_user]' ORDER BY bid ASC LIMIT 1;";
-            mysqli_query($db, $query);
+            mysqli_stmt_bind_param($delStmt, "ss", $value, $_SESSION['login_user']);
+            mysqli_stmt_execute($delStmt);
         }
         ?>
         

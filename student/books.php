@@ -165,9 +165,9 @@ body {
           
                if(isset($_SESSION['login_user'])) {
                      
-                    echo "<img class='img-circle profile_img' height=100 width=100 src='../images/".$_SESSION['pic']." '>  ";
+                    echo "<img class='img-circle profile_img' height=100 width=100 src='../images/".htmlspecialchars($_SESSION['pic'])." '>  ";
                     echo "<br> <br>";
-                    echo "Welcome,  ". $_SESSION['login_user'] . "!";
+                    echo "Welcome,  ". htmlspecialchars($_SESSION['login_user']) . "!";
                }
                ?>
      </div>
@@ -228,10 +228,14 @@ function closeNav() {
 
           // --------------- search query------------
     if(isset($_POST['submit'])) {
-    $q = mysqli_query($db, "SELECT * FROM books 
-        WHERE names LIKE '%$_POST[search]%' 
-        OR authors LIKE '%$_POST[search]%' 
-        OR department LIKE '%$_POST[search]%'");
+    $searchTerm = "%".$_POST['search']."%";
+    $stmt = mysqli_prepare($db, "SELECT * FROM books
+        WHERE names LIKE ?
+        OR authors LIKE ?
+        OR department LIKE ?");
+    mysqli_stmt_bind_param($stmt, "sss", $searchTerm, $searchTerm, $searchTerm);
+    mysqli_stmt_execute($stmt);
+    $q = mysqli_stmt_get_result($stmt);
 
     if(mysqli_num_rows($q) == 0) {
         echo "Sorry, no results found for your search.";
@@ -299,7 +303,10 @@ echo "</div>";
 
 if(isset($_POST['submit1'])) {
      if(isset($_SESSION['login_user'])) {
-          $sql1= mysqli_query($db, "SELECT * FROM books WHERE bid = '$_POST[bid]';");
+          $stmt1 = mysqli_prepare($db, "SELECT * FROM books WHERE bid = ?");
+          mysqli_stmt_bind_param($stmt1, "s", $_POST['bid']);
+          mysqli_stmt_execute($stmt1);
+          $sql1 = mysqli_stmt_get_result($stmt1);
           $row1=mysqli_fetch_assoc($sql1);
           $count1= mysqli_num_rows($sql1);
           if  ($count1!=0) {
@@ -325,7 +332,10 @@ if(isset($_POST['submit1'])) {
 
 
 
-$check = mysqli_query($db, "SELECT * FROM issue_book WHERE username='$_SESSION[login_user]' AND bid='$_POST[bid]' AND (approve ='Pending' OR approve='Yes')");
+$checkStmt = mysqli_prepare($db, "SELECT * FROM issue_book WHERE username=? AND bid=? AND (approve ='Pending' OR approve='Yes')");
+mysqli_stmt_bind_param($checkStmt, "ss", $_SESSION['login_user'], $_POST['bid']);
+mysqli_stmt_execute($checkStmt);
+$check = mysqli_stmt_get_result($checkStmt);
 if(mysqli_num_rows($check) > 0) {
 //     $rowCheck = mysqli_fetch_assoc($check);
 //     if($rowCheck['approve'] == '') {
@@ -348,7 +358,11 @@ Swal.fire({
 }
 
 
-          mysqli_query($db, "INSERT INTO issue_book VALUES ('$_SESSION[login_user]','$_POST[bid]','','', 'Pending')");
+          $insStmt = mysqli_prepare($db, "INSERT INTO issue_book VALUES (?,?,?,?,?)");
+          $emptyStr = '';
+          $pendingStatus = 'Pending';
+          mysqli_stmt_bind_param($insStmt, "sssss", $_SESSION['login_user'], $_POST['bid'], $emptyStr, $emptyStr, $pendingStatus);
+          mysqli_stmt_execute($insStmt);
          ?>
           <script type="text/javascript">
 Swal.fire({

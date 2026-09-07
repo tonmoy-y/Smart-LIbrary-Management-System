@@ -233,7 +233,10 @@ form.write input.form-control {
           $comment_id = intval($_POST['comment_id'] ?? 0);
           if($comment_id > 0 && $reply !== '') {
                // Only allow a reply if none exists yet (one reply per message)
-               $check = mysqli_query($db, "SELECT admin_reply FROM `comments` WHERE id=".$comment_id." LIMIT 1");
+               $checkStmt = mysqli_prepare($db, "SELECT admin_reply FROM `comments` WHERE id=? LIMIT 1");
+               mysqli_stmt_bind_param($checkStmt, "i", $comment_id);
+               mysqli_stmt_execute($checkStmt);
+               $check = mysqli_stmt_get_result($checkStmt);
                $allow = true;
                if($check && $rrow = mysqli_fetch_assoc($check)) {
                     if(!empty($rrow['admin_reply'])) $allow = false;

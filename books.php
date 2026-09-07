@@ -151,7 +151,11 @@ function closeNav() {
           // --------------- search query------------
      if(isset($_POST['submit'])) {
           // $q = $_POST['search'];
-          $q = mysqli_query($db, "SELECT * FROM books WHERE names LIKE '%$_POST[search]%' OR authors LIKE '%$_POST[search]%' OR department LIKE '%$_POST[search]%'");
+          $search_term = "%" . $_POST['search'] . "%";
+          $stmt = mysqli_prepare($db, "SELECT * FROM books WHERE names LIKE ? OR authors LIKE ? OR department LIKE ?");
+          mysqli_stmt_bind_param($stmt, "sss", $search_term, $search_term, $search_term);
+          mysqli_stmt_execute($stmt);
+          $q = mysqli_stmt_get_result($stmt);
                if( mysqli_num_rows($q) == 0) 
                     // If search query returns results, display them
                     echo "Sorry, no results found for your search.";

@@ -34,8 +34,10 @@ label {
 <h2 style="text-align:center; color: white;"> Edit Information</h2>
    
 <?php
-    $sql = "SELECT * FROM `student` WHERE username='$_SESSION[login_user]'";
-    $result = mysqli_query($db, $sql);
+    $stmt = mysqli_prepare($db, "SELECT * FROM `student` WHERE username=?");
+    mysqli_stmt_bind_param($stmt, "s", $_SESSION['login_user']);
+    mysqli_stmt_execute($stmt);
+    $result = mysqli_stmt_get_result($stmt);
 
     if (!$result) {
         die(mysqli_error($db));
@@ -60,8 +62,8 @@ label {
 <div class="profile_info" style="text-align:center;">
         <span style="color: white;"> Welcome </span>
         <h4  style="color: white;">
-            <?php 
-                echo $_SESSION['login_user'];
+            <?php
+                echo htmlspecialchars($_SESSION['login_user']);
             ?>
         </h4>
 
@@ -71,19 +73,19 @@ label {
         <input type="file" name="file" class="form-control" style="width: 80%; height:40px; margin: 0 auto;">
 
         <label><h4><b>Name: </b></h4></label>
-        <input class="form-control" type="text" name="name" value="<?php echo $name; ?>">
+        <input class="form-control" type="text" name="name" value="<?php echo htmlspecialchars($name); ?>">
 
-        <label><h4><b> Department</b></h4></label>    
-        <input class="form-control" type="text" name="dept" value="<?php echo $dept; ?>">
-            
-        <label><h4><b>Phone No:</b></h4></label>    
-        <input class="form-control" type="text" name="phone" value="<?php echo $phone; ?>" >
-            
+        <label><h4><b> Department</b></h4></label>
+        <input class="form-control" type="text" name="dept" value="<?php echo htmlspecialchars($dept); ?>">
+
+        <label><h4><b>Phone No:</b></h4></label>
+        <input class="form-control" type="text" name="phone" value="<?php echo htmlspecialchars($phone); ?>" >
+
         <label><h4><b>Email: </b></h4></label>
-        <input class="form-control" type="text" name="email" value="<?php echo $email; ?>" >
-        
+        <input class="form-control" type="text" name="email" value="<?php echo htmlspecialchars($email); ?>" >
+
         <label><h4><b>Username :</b></h4></label>
-        <input class="form-control" type="text" name="username" value="<?php echo $username; ?>" >
+        <input class="form-control" type="text" name="username" value="<?php echo htmlspecialchars($username); ?>" >
        
     <label><h4><b>Password:</b></h4></label>
     <input class="form-control" type="password" name="password" placeholder="Leave blank to keep current password"><br>
@@ -138,17 +140,23 @@ label {
         $username = $_POST['username'];
         $new_password = isset($_POST['password']) ? trim($_POST['password']) : '';
 
-        $password_clause = '';
+        $password_hashed = null;
         if($new_password !== '') {
             $password_hashed = password_hash($new_password, PASSWORD_DEFAULT);
-            $password_clause = ", password='$password_hashed'";
         }
 
     // sanitize pic before DB update (defensive)
     $picClean = preg_replace('/[^A-Za-z0-9._-]/','_', $pic);
-    $sql1 = "UPDATE `student` SET pic='$picClean', `name`='$name', dept='$dept', phone='$phone', email='$email', username='$username' $password_clause WHERE username='$_SESSION[login_user]'";
-        
-        if (mysqli_query($db, $sql1)) {
+    $currentUser = $_SESSION['login_user'];
+    if ($password_hashed !== null) {
+        $stmt1 = mysqli_prepare($db, "UPDATE `student` SET pic=?, `name`=?, dept=?, phone=?, email=?, username=?, password=? WHERE username=?");
+        mysqli_stmt_bind_param($stmt1, "ssssssss", $picClean, $name, $dept, $phone, $email, $username, $password_hashed, $currentUser);
+    } else {
+        $stmt1 = mysqli_prepare($db, "UPDATE `student` SET pic=?, `name`=?, dept=?, phone=?, email=?, username=? WHERE username=?");
+        mysqli_stmt_bind_param($stmt1, "sssssss", $picClean, $name, $dept, $phone, $email, $username, $currentUser);
+    }
+
+        if (mysqli_stmt_execute($stmt1)) {
 
             if (!empty($username) && $username !== $_SESSION['login_user']) {
                 $_SESSION['login_user'] = $username;

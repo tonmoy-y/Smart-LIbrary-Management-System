@@ -63,7 +63,9 @@
 </div>
     <?php
     if(isset($_POST['submit'])) {
-            $rest = mysqli_query($db,"SELECT * FROM `admin` WHERE username='$_POST[username]' AND email='$_POST[email]'");
+            $stmt = mysqli_prepare($db, "SELECT * FROM `admin` WHERE username=? AND email=?");
+            mysqli_stmt_bind_param($stmt, "ss", $_POST['username'], $_POST['email']);
+            $rest = mysqli_stmt_execute($stmt);
      $_SESSION['username'] = $_POST['username'];
     $_SESSION['password'] = $_POST['password'];
     $_SESSION['email'] = $_POST['email'];

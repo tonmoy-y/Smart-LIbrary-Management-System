@@ -6,9 +6,12 @@
 
     // Resolve a student's picture from the student table with a safe fallback
     function get_student_pic(mysqli $db, string $username): string {
-        $u = mysqli_real_escape_string($db, trim($username));
+        $u = trim($username);
         if ($u === '') return 'user.jpg';
-        $rs = mysqli_query($db, "SELECT pic FROM student WHERE username='$u' LIMIT 1");
+        $stmt = mysqli_prepare($db, "SELECT pic FROM student WHERE username=? LIMIT 1");
+        mysqli_stmt_bind_param($stmt, "s", $u);
+        mysqli_stmt_execute($stmt);
+        $rs = mysqli_stmt_get_result($stmt);
         if ($rs && ($row = mysqli_fetch_assoc($rs))) {
             $pic = trim((string)$row['pic']);
             return $pic !== '' ? $pic : 'user.jpg';
@@ -21,10 +24,10 @@
         $to = trim($_POST['to'] ?? ($_SESSION['chat_with'] ?? ''));
         $msg = trim($_POST['message'] ?? '');
         if ($to !== '' && $msg !== '') {
-            $to_esc  = mysqli_real_escape_string($db, $to);
-            $msg_esc = mysqli_real_escape_string($db, $msg);
             // Ensure columns are specified to avoid schema mismatch
-            mysqli_query($db, "INSERT INTO `message` (username, message, status, sender) VALUES ('$to_esc', '$msg_esc', 'no', 'admin')");
+            $stmt = mysqli_prepare($db, "INSERT INTO `message` (username, message, status, sender) VALUES (?, ?, 'no', 'admin')");
+            mysqli_stmt_bind_param($stmt, "ss", $to, $msg);
+            mysqli_stmt_execute($stmt);
             // Make sure current chat is persisted
             $_SESSION['chat_with'] = $to;
         }
@@ -199,7 +202,7 @@ ORDER BY `message`.`status` ASC;");
                     while($res1=mysqli_fetch_assoc($sql1)) { 
                         echo "<tr class='user-row' data-username=\"".htmlspecialchars($res1['username'], ENT_QUOTES, 'UTF-8')."\">";
                             echo"<td width=65>"; echo "<img class='img-circle profile_img' 
-                            height=60 width=60 src='../images/".$res1['pic']."'>"; echo"</td>"; 
+                            height=60 width=60 src='../images/".htmlspecialchars($res1['pic'], ENT_QUOTES, 'UTF-8')."'>"; echo"</td>";
                             
                             echo "<td style='vertical-align: middle;'>".htmlspecialchars($res1['username'], ENT_QUOTES, 'UTF-8')."</td>";
                          echo "</tr>";
@@ -216,9 +219,13 @@ ORDER BY `message`.`status` ASC;");
 // ----------------if submit is presssed----------------
             if (isset($_POST['submit']) || isset($_GET['u'])) {
                 $uname = trim($_POST['username'] ?? ($_GET['u'] ?? ''));
-                $safeUname = mysqli_real_escape_string($db, $uname);
-                $res = mysqli_query($db, "SELECT * FROM `message` WHERE username='$safeUname';");
-                mysqli_query($db, "UPDATE `message` SET `status`='yes' WHERE sender='student' AND username='$safeUname';");
+                $stmt = mysqli_prepare($db, "SELECT * FROM `message` WHERE username=?");
+                mysqli_stmt_bind_param($stmt, "s", $uname);
+                mysqli_stmt_execute($stmt);
+                $res = mysqli_stmt_get_result($stmt);
+                $stmt2 = mysqli_prepare($db, "UPDATE `message` SET `status`='yes' WHERE sender='student' AND username=?");
+                mysqli_stmt_bind_param($stmt2, "s", $uname);
+                mysqli_stmt_execute($stmt2);
                 if ($uname !== '') {
                     // Do NOT override logged-in admin's session username
                     $_SESSION['chat_with'] = $uname;
@@ -245,7 +252,7 @@ while($row=mysqli_fetch_assoc($res)) {
         <div style="float:left; padding-top:5px;">
 &nbsp;
 <?php  
-       echo "<img class='img-circle profile_img' height=40 width=40 src=\"../images/{$student_pic}\">";
+       echo "<img class='img-circle profile_img' height=40 width=40 src=\"../images/".htmlspecialchars($student_pic, ENT_QUOTES, 'UTF-8')."\">";
     //    echo " " . $_SESSION['login_admin'] . "!";
     ?>
     &nbsp;
@@ -253,7 +260,7 @@ while($row=mysqli_fetch_assoc($res)) {
         <div style="float:left;" class="chatbox">
      
             <?php
-            echo $row['message'];
+            echo nl2br(htmlspecialchars($row['message']));
 
             ?>
         </div>
@@ -279,7 +286,7 @@ while($row=mysqli_fetch_assoc($res)) {
         <div style="float:left;" class="chatbox">
            
             <?php
-            echo $row['message'];
+            echo nl2br(htmlspecialchars($row['message']));
 
             ?>
 
@@ -311,7 +318,10 @@ while($row=mysqli_fetch_assoc($res)) {
                 }
                 else {
                     // Fetch conversation messages (sending handled earlier)
-                    $res = mysqli_query($db, "SELECT * FROM `message` WHERE username='" . mysqli_real_escape_string($db, $_SESSION['chat_with']) . "';");
+                    $stmt = mysqli_prepare($db, "SELECT * FROM `message` WHERE username=?");
+                    mysqli_stmt_bind_param($stmt, "s", $_SESSION['chat_with']);
+                    mysqli_stmt_execute($stmt);
+                    $res = mysqli_stmt_get_result($stmt);
                     // Resolve student picture for current chat (no session writes)
                     $student_pic = get_student_pic($db, $_SESSION['chat_with']);
 ?>
@@ -335,7 +345,7 @@ while($row=mysqli_fetch_assoc($res)) {
         <div style="float:left; padding-top:5px;">
 &nbsp;
 <?php  
-       echo "<img class='img-circle profile_img' height=40 width=40 src=\"../images/{$student_pic}\">";
+       echo "<img class='img-circle profile_img' height=40 width=40 src=\"../images/".htmlspecialchars($student_pic, ENT_QUOTES, 'UTF-8')."\">";
     //    echo " " . $_SESSION['login_admin'] . "!";
     ?>
     &nbsp;
@@ -343,7 +353,7 @@ while($row=mysqli_fetch_assoc($res)) {
         <div style="float:left;" class="chatbox">
      
             <?php
-            echo $row['message'];
+            echo nl2br(htmlspecialchars($row['message']));
 
             ?>
         </div>
@@ -368,7 +378,7 @@ while($row=mysqli_fetch_assoc($res)) {
         <div style="float:left;" class="chatbox">
            
             <?php
-            echo $row['message'];
+            echo nl2br(htmlspecialchars($row['message']));
 
             ?>
 
