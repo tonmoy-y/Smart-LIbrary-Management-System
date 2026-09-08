@@ -1,6 +1,7 @@
 <?php
         include "connection.php";
         include "navbar.php"; // already outputs full HTML <head> + <body> start
+        include "csrf.php";
 ?>
 
 <!-- Inline styles specific to this page (kept minimal) -->
@@ -9,7 +10,10 @@
     body {
         margin: 0;
         min-height: 100vh; /* full height so no white gap under background */
-        background: url("images/forget1.png") center/cover no-repeat;
+        background: url("images/forget1.png") center bottom/cover no-repeat;
+        /* new block-formatting context: stops .password-wrapper's top margin
+           from collapsing through body and exposing blank space above the bg */
+        overflow: hidden;
     }
     .password-wrapper {
         max-width: 400px;
@@ -35,7 +39,7 @@
         border: none;
     }
     .password-wrapper button.btn {
-        background:#7272b6;
+        background:var(--primary-light);
         color:#fff;
         font-weight:600;
         border:none;
@@ -55,6 +59,7 @@
 <div class="password-wrapper">
     <h1>Change your password</h1>
     <form action="" method="post">
+        <?php echo csrf_field(); ?>
         <input type="text" name="username" placeholder="Enter your username" class="form-control" required><br>
         <input type="text" name="email" placeholder="Enter your email" class="form-control" required><br>
         <input type="text" name="password" placeholder="Enter your New password" class="form-control" required><br>
@@ -63,6 +68,7 @@
 </div>
     <?php
     if(isset($_POST['submit'])) {
+            csrf_verify();
             $stmt = mysqli_prepare($db, "SELECT * FROM `admin` WHERE username=? AND email=?");
             mysqli_stmt_bind_param($stmt, "ss", $_POST['username'], $_POST['email']);
             $rest = mysqli_stmt_execute($stmt);

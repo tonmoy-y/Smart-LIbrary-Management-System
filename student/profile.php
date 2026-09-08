@@ -1,6 +1,7 @@
 <?php
     include "connection.php";
     include "navbar.php";
+    include "csrf.php";
 ?>
 
 <!DOCTYPE html>
@@ -11,16 +12,20 @@
     <title>Profile</title>
     <style type="text/css">
         .wrapper {
-            width: 500px;
-            margin; 0 auto;
-             color: white;
-            /* background-color: red; */
+            max-width: 500px;
+            width: 100%;
+            margin: 0 auto;
+            color: white;
+            box-sizing: border-box;
+            padding: 0 12px;
         }
+        .wrapper table { max-width: 100%; }
     </style>
 </head>
-<body style="background-color:rgb(36, 107, 116); ">
+<body style="background-color:var(--primary); ">
     <div class="container" style="margin-top: 20px;">
         <form action="" method="post">
+            <?php echo csrf_field(); ?>
             <button class="btn btn-default" style="float:right; " name="submit1">
                 Edit Profile
             </button>
@@ -29,6 +34,7 @@
             <?php
 
             if (isset($_POST['submit1'])) {
+                csrf_verify();
                 ?>
                 <script type="text/javascript">
                     window.location = "edit_profile";
@@ -67,7 +73,6 @@
                 </h4>
             </div>
             <?php
-            echo "<b>";
                  echo "<table class='table table-bordered'>";
 
                  echo "<tr>";
@@ -133,7 +138,6 @@
                 // do not display password hash
 
                  echo "</table>";
-            echo "</b>";
             ?>
         </div>
 

@@ -2,6 +2,7 @@
 
      include "connection.php";
      include "navbar.php";
+     include "csrf.php";
         if (isset($_SESSION['admin_reset'])) {
          unset($_SESSION['admin_reset']);
         unset($_SESSION['admin_reset_time']);
@@ -101,7 +102,7 @@ body {
   z-index: 1;
   top: 0;
   left: 0;
-  background-color: #c19f9f;
+  background-color: var(--primary);
   overflow-x: hidden;
   transition: 0.5s;
   padding-top: 60px;
@@ -142,7 +143,7 @@ body {
 .h:hover { 
      width:100%;
      height:50px;
-     background-color:#48968f;
+     background-color:var(--accent);
      
 }
 
@@ -179,7 +180,7 @@ body {
 
 <div id="main">
 
-  <span style="font-size:30px;cursor:pointer" onclick="openNav()">&#9776; open</span>
+  <button type="button" class="sidenav-toggle" onclick="openNav()" aria-label="Open section menu"><span>&#9776;</span> Menu</button>
 
 
 <script>
@@ -204,14 +205,14 @@ function closeNav() {
           <form class="navbar-form" action="" method="post" name="form1">
 
                     <input class="form-control" type="text" class="form-control" name="search" placeholder="Search for books..." required>
-                    <button type="submit" name="submit" class="btn btn-default" style="background: #b8adad";> <span class="glyphicon glyphicon-search"></span> Search</button>
+                    <button type="submit" name="submit" class="btn btn-default" style="background: var(--neutral)";> <span class="glyphicon glyphicon-search"></span> Search</button>
 
           </form>
 
            <form class="navbar-form" action="" method="post" name="form1">
 
                     <!-- <input class="form-control" type="text" class="form-control" name="bid" placeholder="Enter Book ID" required>
-                    <button type="submit" name="submit1" class="btn btn-default" style="background: #b8adad";> <span class="glyphicon glyphicon-trash"></span> Delete </button> -->
+                    <button type="submit" name="submit1" class="btn btn-default" style="background: var(--neutral)";> <span class="glyphicon glyphicon-trash"></span> Delete </button> -->
 
           </form>
 
@@ -250,6 +251,7 @@ if(isset($_POST['submit'])) {
                 </div>
                 <div class='overlay'>
                     <form method='post' action=''>
+                        ".csrf_field()."
                         <input type='hidden' name='bid' value='".htmlspecialchars($row['bid'])."'>
                         <button type='submit' name='submit1' class='btn btn-danger'>Delete</button>
                     </form>
@@ -277,6 +279,7 @@ if(isset($_POST['submit'])) {
             </div>
             <div class='overlay'>
                 <form method='post' action=''>
+                    ".csrf_field()."
                     <input type='hidden' name='bid' value='".htmlspecialchars($row['bid'])."'>
                     <button type='submit' name='submit1' class='btn btn-danger'>Delete</button>
                 </form>
@@ -289,6 +292,7 @@ if(isset($_POST['submit'])) {
 
 // ----------------- delete query -------------------
 if(isset($_POST['submit1'])) {
+     csrf_verify();
      if(isset($_SESSION['login_admin'])) {
 
           $stmt = mysqli_prepare($db, "DELETE FROM books WHERE bid=?");

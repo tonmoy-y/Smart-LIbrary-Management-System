@@ -1,11 +1,12 @@
 <?php
 session_start();
 include "connection.php";
-if(!isset($_SESSION['login_user']) && !isset($_SESSION['login_admin']) && !isset($_SESSION['admin_reset'])) {
+$is_admin_login_page = (basename($_SERVER['SCRIPT_NAME']) === 'admin_login.php');
+if(!$is_admin_login_page && !isset($_SESSION['login_user']) && !isset($_SESSION['login_admin']) && !isset($_SESSION['admin_reset'])) {
     header("Location: ../index");
     exit();
 } elseif(isset($_SESSION['login_user'])) {
-    header("Location: ../student/index"); 
+    header("Location: ../student/index");
     exit();
 }
 
@@ -25,11 +26,11 @@ if (isset($_SESSION['admin_reset'])) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
             <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <!-- bootstrap -->
-    <link rel="stylesheet" type="text/css" href="styles.css">
+    <link rel="stylesheet" type="text/css" href="styles.css?v=<?php echo @filemtime(__DIR__.'/styles.css'); ?>">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">  
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link rel="stylesheet" href="https://www.w3schools.com/w3css/5/w3.css">
-    <link rel="stylesheet" type="text/css" href="responsive.css">
+    <link rel="stylesheet" type="text/css" href="../responsive.css?v=<?php echo @filemtime(__DIR__.'/../responsive.css'); ?>">
     <link rel="icon" type="image/png" sizes="32x32" href="images/logo.png">
     <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&display=swap" rel="stylesheet">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>

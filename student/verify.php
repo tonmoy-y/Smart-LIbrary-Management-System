@@ -1,5 +1,6 @@
 <?php
 include "navbar.php";
+include "csrf.php";
 
 ?>
 
@@ -14,14 +15,16 @@ include "navbar.php";
     <style>
         .box1 {
     height: 400px;
-    width: 400px;
-    background-color:#610795;
+    max-width: 400px;
+    width: calc(100% - 24px);
+    background: linear-gradient(150deg, rgba(var(--primary-rgb), 0.92) 0%, rgba(43, 36, 68, 0.92) 100%);
     margin: 30px auto;
-    opacity: .7;
     color: rgb(248, 242, 242);
-    border-radius: 15px;
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 20px;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.45);
     /* nicer look */
-    backdrop-filter: blur(4px);
+    backdrop-filter: blur(6px);
     box-shadow: 0 10px 24px rgba(0,0,0,.25);
 }
 
@@ -99,6 +102,7 @@ include "navbar.php";
 
         <br>
     <form id="otpForm" action="" method="post">
+        <?php echo csrf_field(); ?>
         <!-- OTP digit boxes (UI only) -->
         <div class="otp-group" data-length="6">
             <input type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1" class="otp-input" autocomplete="one-time-code" />
@@ -217,6 +221,7 @@ updateTimer();
 
     <?php
 if (isset($_POST['submit_v'])) {
+    csrf_verify();
 
     // ensure expired rows removed again (race-safe)
     mysqli_query($db, "DELETE FROM verify WHERE created_at < DATE_SUB(NOW(), INTERVAL 3 MINUTE)");

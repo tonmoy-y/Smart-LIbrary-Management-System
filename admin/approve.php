@@ -2,6 +2,7 @@
 
      include "connection.php";
      include "navbar.php";
+     include "csrf.php";
 
 ?>
 
@@ -43,7 +44,7 @@ body {
   z-index: 1;
   top: 0;
   left: 0;
-  background-color: #c19f9f;
+  background-color: var(--primary);
   overflow-x: hidden;
   transition: 0.5s;
   padding-top: 60px;
@@ -84,14 +85,13 @@ body {
 .h:hover { 
      width:100%;
      height:50px;
-     background-color:#48968f;
+     background-color:var(--accent);
      
 }
 
 .container {
     height: 700px;
-    background-color: black;
-    opacity: 0.7;
+    background-color: rgba(0,0,0,0.75);
     color: white;
 }
 
@@ -143,7 +143,7 @@ form.Approve input.form-control {
 
 <div id="main">
 
-  <span id="openNavBtn" style="font-size:30px;cursor:pointer;color:#ffffff" onclick="openNav()">&#9776; open</span>
+  <button type="button" class="sidenav-toggle" onclick="openNav()" aria-label="Open section menu"><span>&#9776;</span> Menu</button>
 
 
 <script>
@@ -163,7 +163,8 @@ function closeNav() {
     <h3 style="text-align:center;"> Approve Request</h3>
     
     <form class="Approve" action="" method="post">
-    
+    <?php echo csrf_field(); ?>
+
     <!-- Approve Dropdown -->
     <select name="approve" class="form-control" required>
         <option value="" disabled selected>Approve - Yes or No</option>
@@ -189,6 +190,7 @@ function closeNav() {
 <?php
 
 if(isset($_POST['submit']))  {
+    csrf_verify();
     $server_issue_date = date("Y-m-d"); // Server-side current date
     $tm = date("M d, Y H:i:s", strtotime($_POST['return'] . ' 20:00:00'));
 

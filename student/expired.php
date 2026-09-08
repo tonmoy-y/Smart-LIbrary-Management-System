@@ -2,6 +2,7 @@
 
      include "connection.php";
      include "navbar.php";
+     include "csrf.php";
 
 ?>
 
@@ -48,7 +49,7 @@ body {
   z-index: 1;
   top: 0;
   left: 0;
-  background-color: #c19f9f;
+  background-color: var(--primary);
   overflow-x: hidden;
   transition: 0.5s;
   padding-top: 60px;
@@ -89,14 +90,13 @@ body {
 .h:hover { 
      width:100%;
      height:50px;
-     background-color:#48968f;
+     background-color:var(--accent);
      
 }
 
 .container {
   min-height: 600px;
-  background-color: black;
-  opacity: 0.7;
+  background-color: rgba(0,0,0,0.75);
   color: white;
   margin-top:-45px;
   padding: 10px;
@@ -154,7 +154,7 @@ th,td { width: 10%; }
 
 <div id="main">
 
-  <span style="font-size:30px;cursor:pointer; float:right;" onclick="openNav()">&#9776; open</span>
+  <button type="button" class="sidenav-toggle" onclick="openNav()" aria-label="Open section menu"><span>&#9776;</span> Menu</button>
 
 
 <script>
@@ -180,6 +180,7 @@ function closeNav() {
     <div class="controls">
       <div class="left">
         <form action="" method="post" name="form2" style="display:inline-block;">
+          <?php echo csrf_field(); ?>
           <button name="submit2" type="submit" class="btn btn-default" style="background-color:green; color:yellow;"> Returned </button>
           <button name="submit3" type="submit" class="btn btn-default" style="background-color:red; color:yellow; margin-left:8px;"> Expired </button>
         </form>
@@ -209,6 +210,7 @@ function closeNav() {
     <?php
 
      if(isset($_POST['submit'])) {
+      csrf_verify();
       $var1= '<p style="color:yellow; background-color: green;"> RETURNED </p>';
       $updStmt1 = mysqli_prepare($db, "UPDATE issue_book SET approve=? WHERE username=? AND bid=?");
       mysqli_stmt_bind_param($updStmt1, "sss", $var1, $_POST['username'], $_POST['bid']);
@@ -264,7 +266,7 @@ if(isset($_SESSION['login_user'])) {
     
   echo "<table class='table table-bordered' style='width:100%;' > ";
     
-    echo "<tr style='background-color: #b8adad;'>";
+    echo "<tr style='background-color: var(--neutral);'>";
     echo "<th>"; echo "Username"; echo "</th>"; 
     echo "<th>"; echo "Roll"; echo "</th>"; 
     echo "<th>"; echo "Name"; echo "</th>"; 

@@ -29,7 +29,7 @@ if(isset($_GET['pay_id'])){
 .h:hover { 
      width:100%;
      height:50px;
-     background-color:#48968f;
+     background-color:var(--accent);
      
 }
 
@@ -46,7 +46,7 @@ body {
   z-index: 1;
   top: 0;
   left: 0;
-  background-color: #c19f9f;
+  background-color: var(--primary);
   overflow-x: hidden;
   transition: 0.5s;
   padding-top: 60px;
@@ -114,7 +114,7 @@ body {
 
 <div id="main">
 
-  <span style="font-size:30px;cursor:pointer" onclick="openNav()">&#9776; open</span>
+  <button type="button" class="sidenav-toggle" onclick="openNav()" aria-label="Open section menu"><span>&#9776;</span> Menu</button>
 
 
 <script>
@@ -138,7 +138,7 @@ function closeNav() {
           <form class="navbar-form" action="" method="post" name="form1">
 
                     <input class="form-control" type="text" class="form-control" name="search" placeholder="Search for Students..." required>
-                    <button type="submit" name="submit" class="btn btn-default" style="background: #b8adad";> <span class="glyphicon glyphicon-search"></span> Search</button>
+                    <button type="submit" name="submit" class="btn btn-default" style="background: var(--neutral)";> <span class="glyphicon glyphicon-search"></span> Search</button>
 
           </form>
 
@@ -161,7 +161,7 @@ function closeNav() {
                     echo "Sorry, no results found for your search.";
                else {
 echo "<table class='table table-bordered table-hover' > ";
-     echo "<tr style='background-color: #b8adad;'>";
+     echo "<tr style='background-color: var(--neutral);'>";
      echo "<th>"; echo "Username"; echo "</th>"; 
      echo "<th>"; echo "Book ID"; echo "</th>"; 
      echo "<th>"; echo "Return Date"; echo "</th>"; 
@@ -180,7 +180,7 @@ echo "<table class='table table-bordered table-hover' > ";
           echo "<td>"; echo htmlspecialchars($row['fine']); echo "</td>";
           // show pay option if status empty, otherwise show Paid
           echo "<td>";
-          if(empty($row['status'])) {
+          if($row['status'] !== 'paid') {
                echo "<a href='?pay_id=".intval($row['id'])."' class='btn btn-success btn-xs'>Pay</a>";
           } else {
                echo "Paid";
@@ -199,7 +199,7 @@ else {
      $res=mysqli_query($db,"SELECT * FROM `fine` WHERE `fine` > 0");
      //table header
      echo "<table class='table table-bordered table-hover' > ";
-     echo "<tr style='background-color: #b8adad;'>";
+     echo "<tr style='background-color: var(--neutral);'>";
      echo "<th>"; echo "Username"; echo "</th>"; 
      echo "<th>"; echo "Book ID"; echo "</th>"; 
      echo "<th>"; echo "Return Date"; echo "</th>"; 
@@ -217,7 +217,7 @@ else {
           echo "<td>"; echo htmlspecialchars($row['days']); echo "</td>";
           echo "<td>"; echo htmlspecialchars($row['fine']); echo "</td>";
           echo "<td>";
-          if(empty($row['status'])) {
+          if($row['status'] !== 'paid') {
                echo "<a href='?pay_id=".intval($row['id'])."' class='btn btn-success btn-xs'>Pay</a>";
           } else {
                echo "Paid";

@@ -3,6 +3,7 @@
     ob_start();
      include "connection.php";
      include "navbar.php";
+     include "csrf.php";
 
     // Resolve a student's picture from the student table with a safe fallback
     function get_student_pic(mysqli $db, string $username): string {
@@ -21,6 +22,7 @@
 
     // Handle send message early so it works even when ?u= is present in URL
     if (isset($_POST['submit1'])) {
+        csrf_verify();
         $to = trim($_POST['to'] ?? ($_SESSION['chat_with'] ?? ''));
         $msg = trim($_POST['message'] ?? '');
         if ($to !== '' && $msg !== '') {
@@ -46,7 +48,7 @@
     <style>
         body {
             margin: 0;
-            background-color: #8ecdd2;
+            background-color: var(--primary-dark);
         }
         .container {
             margin: 0 -20px;
@@ -56,13 +58,13 @@
         .left_box {
             height: 650px;
             width: 40%; /* Responsive width */
-            background-color: #8ecdd2;
+            background-color: var(--primary-dark);
             /* margin-left: -20px; */
         }
         .left_box2 {
             height: 650px;
             width: 70%;
-            background-color: #537890;
+            background-color: var(--primary);
             border-radius: 20px;
             float:right;
             
@@ -79,7 +81,7 @@
         .list {
             height:550px;
             width: 100%;
-            background-color: #537890;
+            background-color: var(--primary);
             float: right;
             color:white;
             padding:10px;
@@ -90,12 +92,12 @@
         .right_box {
             height: 650px;
             width: 60%; /* Responsive width */
-            background-color: #8ecdd2;
+            background-color: var(--primary-dark);
         }
         .right_box2 {
             height: 650px;
             width: 80%; /* Responsive width */
-            background-color: #537890;
+            background-color: var(--primary);
             border-radius: 20px;
             float:left;
             color:white;
@@ -146,7 +148,7 @@ form.write input.form-control {
 }
 
 .user .chatbox {
-    background-color: red;
+    background-color: var(--accent);
     color: white;
 }
 
@@ -181,9 +183,9 @@ form.write input.form-control {
 </head>
 <body>
 <?php
-$sql1= mysqli_query($db, "SELECT student.pic, message.username FROM message  JOIN student ON student.username = message.username 
+$sql1= mysqli_query($db, "SELECT student.pic, message.username, MIN(message.status) AS min_status FROM message  JOIN student ON student.username = message.username
 WHERE message.sender='student' GROUP BY student.username
-ORDER BY `message`.`status` ASC;");
+ORDER BY min_status ASC;");
 ?>
     <div class="container">
         <div class="left_box">
@@ -299,6 +301,7 @@ while($row=mysqli_fetch_assoc($res)) {
 <!-- ----------------------------------------  -->
                 <div style="height:100px; padding-top:10px;">
     <form action="" method="post" class="write">
+        <?php echo csrf_field(); ?>
         <input type="hidden" name="to" value="<?php echo htmlspecialchars($_SESSION['chat_with'] ?? $uname ?? '', ENT_QUOTES, 'UTF-8'); ?>">
         <input type="text" name="message" class="form-control" placeholder="Write Message..." style="float:left;" required>
         &nbsp; 
@@ -390,6 +393,7 @@ while($row=mysqli_fetch_assoc($res)) {
 </div>
     <div style="height:100px; padding-top:10px;">
     <form action="" method="post" class="write">
+        <?php echo csrf_field(); ?>
         <input type="hidden" name="to" value="<?php echo htmlspecialchars($_SESSION['chat_with'] ?? '', ENT_QUOTES, 'UTF-8'); ?>">
         <input type="text" name="message" class="form-control" placeholder="Write Message..." style="float:left;" required>
         &nbsp; 

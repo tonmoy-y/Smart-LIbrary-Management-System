@@ -93,6 +93,62 @@ hr {
     vertical-align:middle;
 }
 
+/* -------------------- unified design system --------------------
+   One palette + type scale used across the public, admin, and student
+   sections. primary = brand chrome (navbar, sidenav, cards); gold =
+   premium accent for CTAs/highlights; accent = interactive blue (kept,
+   already the dominant SweetAlert color); neutral = secondary buttons.
+-------------------------------------------------------------- */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700&family=Inter:wght@400;500;600&display=swap');
+
+:root {
+    --primary: #443a68;
+    --primary-rgb: 68, 58, 104;
+    --primary-dark: #2b2444;
+    --primary-light: #6a5a94;
+    --gold: #d4a656;
+    --gold-dark: #b98a3a;
+    --accent: #3085d6;
+    --accent-dark: #2569ab;
+    --neutral: #756a8f;
+    --neutral-dark: #5c5270;
+    --surface-text: #f8f2f2;
+    --shadow-soft: 0 10px 30px rgba(20, 15, 40, 0.35);
+    --shadow-lift: 0 14px 34px rgba(20, 15, 40, 0.45);
+    --font-heading: 'Poppins', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    --font-body: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-heading);
+    letter-spacing: .3px;
+}
+
+.btn, button, input[type="submit"], .nav-btn {
+    font-family: var(--font-body);
+}
+
+/* -------------------- unified button system -------------------- */
+.btn, input[type="submit"], .wrapper button[type="submit"] {
+    border-radius: 10px !important;
+    font-weight: 600 !important;
+    letter-spacing: .2px;
+    border: none !important;
+    box-shadow: 0 6px 16px rgba(20, 15, 40, 0.22);
+    transition: transform .18s ease, box-shadow .18s ease, opacity .18s ease !important;
+}
+.btn:hover, input[type="submit"]:hover, .wrapper button[type="submit"]:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 22px rgba(20, 15, 40, 0.3);
+}
+.btn:active, input[type="submit"]:active {
+    transform: translateY(0);
+}
+.btn-success, .login input[type="submit"] {
+    background: linear-gradient(135deg, var(--gold) 0%, var(--gold-dark) 100%) !important;
+    color: #2b2444 !important;
+}
+
 
 
 
@@ -129,7 +185,10 @@ header {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     height: 100px;
     width: 100% ;
-    background-color: #c19f9f;
+    background-color: var(--primary);
+    /* contain the floated logo/title so .navbar always flows below it
+       instead of beside it (was overlapping page content at tablet widths) */
+    display: flow-root !important;
 }
 
 section .sec_img{
@@ -157,28 +216,36 @@ footer {
 }
 
 .logofont  {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-family: var(--font-heading);
     font-size: 15px !important;
-    font-weight: bold;
+    font-weight: 700;
+    letter-spacing: .2px;
     width: 120px;
     height: 80px;
     float : left;
     padding-left: 20px;
     padding-top: 10px;
     line-height: 1.3;
-    color: black; 
+    color: black;
 }
 
 .navbar {
     display: flex;
     gap: 20px;
     flex-wrap: wrap;
-    padding: 25px;
-    background-color: #c19f9f;
+    padding: 22px 28px;
+    background: linear-gradient(120deg, var(--primary) 0%, var(--primary-dark) 100%);
+    box-shadow: 0 4px 18px rgba(20, 15, 40, 0.35);
     box-sizing: border-box;
     justify-content: flex-start;
     align-content: center;
     align-items: center;
+    position: relative;
+    z-index: 10;
+    /* the logo/title <a> before this element floats its children (.logo,
+       .logofont); without this the navbar sits beside the float instead of
+       below it whenever the nav links wrap onto their own row (tablet widths) */
+    clear: both;
 
 }
 
@@ -202,25 +269,56 @@ footer {
 }
 
 /* Individual colors */
-.nav-btn.home { background-color: #7272b6; 
+.nav-btn.home { background-color: var(--primary-light); 
     text-decoration: none;
 }
-.nav-btn.books { background-color: #7272b6; 
+.nav-btn.books { background-color: var(--primary-light); 
     text-decoration: none;
 }
 .nav-btn.student { 
     text-decoration: none;
-    background-color: #7272b6; }
+    background-color: var(--primary-light); }
 .nav-btn.admin { 
     text-decoration: none;
-    background-color: #7272b6; }
+    background-color: var(--primary-light); }
 .nav-btn.feedback { 
     text-decoration: none;
-    background-color: #7272b6; }
+    background-color: var(--primary-light); }
 
 .nav-btn:hover {
-    opacity: 0.8;
-    transform: scale(1.05);
+    background-color: var(--gold) !important;
+    color: #2b2444;
+    box-shadow: 0 6px 16px rgba(212, 166, 86, 0.4);
+    transform: translateY(-2px);
+}
+
+/* Secondary in-page section menu (Add Books / Requests / Issue Info / Expired
+   List etc.) used on several admin/student pages via a slide-in .sidenav. */
+.sidenav-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--primary-light);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 9px 16px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(20,15,40,0.25);
+    transition: transform .18s ease, box-shadow .18s ease, background .18s ease;
+    margin: 12px 0;
+}
+.sidenav-toggle span {
+    font-size: 18px;
+    line-height: 1;
+}
+.sidenav-toggle:hover {
+    background: var(--gold);
+    color: #2b2444;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(212, 166, 86, 0.35);
 }
 
 
@@ -232,16 +330,28 @@ section {
     background-repeat: no-repeat;
     background-position: center;
     background-image: url("images/book-library.jpg");
+    position: relative;
+}
+
+section::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(20,15,40,.35) 0%, rgba(20,15,40,.15) 40%, rgba(20,15,40,.55) 100%);
 }
 
 .box {
+    position: relative;
     height: 275px;
     width: 450px;
-    background-color:#610795;
+    background: linear-gradient(150deg, rgba(var(--primary-rgb), 0.92) 0%, rgba(43, 36, 68, 0.92) 100%);
     margin: 30px auto;
-    opacity: .6;
     color: rgb(248, 242, 242);
-    border-radius: 15px;
+    border-radius: 20px;
+    border: 1px solid rgba(255,255,255,0.12);
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.45);
+    box-shadow: var(--shadow-soft);
+    backdrop-filter: blur(6px);
 }
 
 
@@ -250,13 +360,17 @@ section {
 
 
 .box1 {
+    position: relative;
     height: 425px;
     width: 400px;
-    background-color:#610795;
+    background: linear-gradient(150deg, rgba(var(--primary-rgb), 0.92) 0%, rgba(43, 36, 68, 0.92) 100%);
     margin: 30px auto;
-    opacity: .6;
     color: rgb(248, 242, 242);
-    border-radius: 15px;
+    border-radius: 20px;
+    border: 1px solid rgba(255,255,255,0.12);
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.45);
+    box-shadow: var(--shadow-soft);
+    backdrop-filter: blur(6px);
 }
 
 
@@ -269,29 +383,50 @@ form .login {
 
 }
 
-input  {
-    height: 30px;
+input:not([type="radio"]):not([type="checkbox"]) {
+    height: 36px;
     max-width: 300px;
-    border-radius: 5px;
+    border-radius: 8px;
+    border: 1px solid rgba(0,0,0,0.08);
+    padding: 0 12px;
+    box-shadow: inset 0 1px 3px rgba(0,0,0,0.08);
+    transition: box-shadow .2s ease, border-color .2s ease;
+}
 
+input:not([type="radio"]):not([type="checkbox"]):focus {
+    outline: none;
+    border-color: var(--gold);
+    box-shadow: 0 0 0 3px rgba(212, 166, 86, 0.3);
+}
+
+input[type="radio"], input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    max-width: none;
+    accent-color: var(--gold);
+    vertical-align: middle;
 }
 
 .forget {
     padding-top: 20px;
-    text-align: center; 
-    color: white; 
+    text-align: center;
+    color: white;
     line-height: 2;
     text-decoration: none;
 }
 
+.forget a {
+    color: var(--gold) !important;
+    font-weight: 600;
+}
+
 .inv {
-    display: flex;  
+    display: flex;
     flex-direction: column;
     height: 25px;
     width: 450px;
-    background-color:#610795;
+    background-color: rgba(var(--primary-rgb), 0.88);
     margin: 30px auto;
-    opacity: .6;
     color: rgb(248, 242, 242);
     border-radius: 15px;
 }
@@ -320,14 +455,18 @@ input  {
 /*--------------------register-------------------- */
 
 .box2 {
+    position: relative;
     height: 500px;
     width: 400px;
-    background-color:#910707;
+    background: linear-gradient(150deg, rgba(var(--primary-rgb), 0.92) 0%, rgba(43, 36, 68, 0.92) 100%);
     margin: 20px auto;
-    opacity: .6;
     color: rgb(248, 242, 242);
-    border-radius: 15px;
-    font-family: Helvetica;
+    border-radius: 20px;
+    border: 1px solid rgba(255,255,255,0.12);
+    font-family: var(--font-body);
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.45);
+    box-shadow: var(--shadow-soft);
+    backdrop-filter: blur(6px);
 }
 
 form .reg {

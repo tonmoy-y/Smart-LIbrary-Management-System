@@ -2,6 +2,7 @@
 
      include "connection.php";
      include "navbar.php";
+     include "csrf.php";
 if(!isset($_SESSION['login_user'])) {
     echo "<script>alert('Please log in first!'); window.location='student_login';</script>";
     exit();
@@ -35,7 +36,7 @@ body {
   z-index: 1;
   top: 0;
   left: 0;
-  background-color: #c19f9f;
+  background-color: var(--primary);
   overflow-x: hidden;
   transition: 0.5s;
   padding-top: 60px;
@@ -76,7 +77,7 @@ body {
 .h:hover { 
      width:100%;
      height:50px;
-     background-color:#48968f;
+     background-color:var(--accent);
      
 }
 
@@ -118,7 +119,7 @@ body {
 
 <div id="main">
 
-  <span style="font-size:30px;cursor:pointer" onclick="openNav()">&#9776; open</span>
+  <button type="button" class="sidenav-toggle" onclick="openNav()" aria-label="Open section menu"><span>&#9776;</span> Menu</button>
   
   <script>
     
@@ -152,10 +153,11 @@ else {
 
 
 <form method="post">
+<?php echo csrf_field(); ?>
 
 <?php
   echo "<table class='table table-bordered table-hover table-req'> ";
-  echo "<tr style='background-color: #b8adad;'>";
+  echo "<tr style='background-color: var(--neutral);'>";
   //table header
     
   echo "<th class='select-col'>Select</th>"; 
@@ -188,6 +190,7 @@ else {
 ?>
 <?php
 if(isset($_POST['delete'])) {
+    csrf_verify();
     if(!empty($_POST['check'])) {
         $delStmt = mysqli_prepare($db, "DELETE FROM issue_book WHERE bid=? AND username=? ORDER BY bid ASC LIMIT 1");
         foreach($_POST['check'] as $value) {

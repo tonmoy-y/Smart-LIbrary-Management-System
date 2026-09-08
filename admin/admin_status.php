@@ -1,5 +1,6 @@
 <?php
     include "navbar.php";
+    include "csrf.php";
     ?>
 
 <!DOCTYPE html>
@@ -16,7 +17,7 @@
 .h:hover { 
      width:100%;
      height:50px;
-     background-color:#48968f;
+     background-color:var(--accent);
      
 }
 
@@ -33,7 +34,7 @@ body {
   z-index: 1;
   top: 0;
   left: 0;
-  background-color: #c19f9f;
+  background-color: var(--primary);
   overflow-x: hidden;
   transition: 0.5s;
   padding-top: 60px;
@@ -103,7 +104,7 @@ body {
 
 <div id="main">
 
-  <span style="font-size:30px;cursor:pointer" onclick="openNav()">&#9776; open</span>
+  <button type="button" class="sidenav-toggle" onclick="openNav()" aria-label="Open section menu"><span>&#9776;</span> Menu</button>
 
 
 <script>
@@ -128,7 +129,7 @@ function closeNav() {
           <form class="navbar-form" action="" method="post" name="form1">
 
                     <input class="form-control" type="text" class="form-control" name="search" placeholder="Search for to approve..." required>
-                    <button type="submit" name="submit" class="btn btn-default" style="background: #b8adad";> <span class="glyphicon glyphicon-search"></span> Search</button>
+                    <button type="submit" name="submit" class="btn btn-default" style="background: var(--neutral)";> <span class="glyphicon glyphicon-search"></span> Search</button>
 
           </form>
 
@@ -150,7 +151,7 @@ function closeNav() {
                     echo "Sorry, no results found for your search.";
                else {
                      echo "<table class='table table-bordered table-hover' > ";
-     echo "<tr style='background-color: #b8adad;'>";
+     echo "<tr style='background-color: var(--neutral);'>";
      echo "<th>"; echo "Name"; echo "</th>"; 
      echo "<th>"; echo "Department"; echo "</th>"; 
      echo "<th>"; echo "Phone"; echo "</th>"; 
@@ -170,12 +171,14 @@ function closeNav() {
 
  echo "<td>
             <form method='post' style='display:inline'>
+                ". csrf_field() ."
                 <input type='hidden' name='username' value='". htmlspecialchars($row['username']) ."'>
                 <button type='submit' name='submit1' class='btn btn-default' style='font-size:16px; font-weight:700; color:red;'>
                  <span class='glyphicon glyphicon-remove-sign'></span>
                 Remove</button>
             </form>
             <form method='post' style='display:inline'>
+                ". csrf_field() ."
                 <input type='hidden' name='username' value='". htmlspecialchars($row['username']) ."'>
                 <button type='submit' name='submit2' class='btn btn-default' style='font-size:16px; font-weight:700; color:green;'>
                  <span class='glyphicon glyphicon-ok-sign'></span>
@@ -208,7 +211,7 @@ else {
      }
      //table header
      echo "<table class='table table-bordered table-hover' > ";
-     echo "<tr style='background-color: #b8adad;'>";
+     echo "<tr style='background-color: var(--neutral);'>";
      echo "<th>"; echo "Name"; echo "</th>"; 
      echo "<th>"; echo "Department"; echo "</th>"; 
      echo "<th>"; echo "Phone"; echo "</th>"; 
@@ -227,12 +230,14 @@ else {
 
  echo "<td>
             <form method='post' style='display:inline'>
+                ". csrf_field() ."
                 <input type='hidden' name='username' value='". htmlspecialchars($row['username']) ."'>
                 <button type='submit' name='submit1' class='btn btn-default' style='font-size:16px; font-weight:700; color:red;'>
                  <span class='glyphicon glyphicon-remove-sign'></span>
                 Remove</button>
             </form>
             <form method='post' style='display:inline'>
+                ". csrf_field() ."
                 <input type='hidden' name='username' value='". htmlspecialchars($row['username']) ."'>
                 <button type='submit' name='submit2' class='btn btn-default' style='font-size:16px; font-weight:700; color:green;'>
                  <span class='glyphicon glyphicon-ok-sign'></span>
@@ -246,6 +251,7 @@ else {
      echo "</table>";
 }
 if(isset($_POST['submit1'])) {
+    csrf_verify();
     $stmt = mysqli_prepare($db, "DELETE FROM `admin` WHERE username=?");
     mysqli_stmt_bind_param($stmt, "s", $_POST['username']);
     mysqli_stmt_execute($stmt);
@@ -256,6 +262,7 @@ if(isset($_POST['submit1'])) {
     <?php
 }
 if(isset($_POST['submit2'])) {
+    csrf_verify();
     $stmt = mysqli_prepare($db, "UPDATE `admin` SET status='Yes' WHERE username=?");
     mysqli_stmt_bind_param($stmt, "s", $_POST['username']);
     mysqli_stmt_execute($stmt);

@@ -1,10 +1,20 @@
 <?php
 
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception;
+
+require __DIR__ . '/PHPMailer/src/Exception.php';
+require __DIR__ . '/PHPMailer/src/PHPMailer.php';
+require __DIR__ . '/PHPMailer/src/SMTP.php';
+require __DIR__ . '/mail_config.php';
+
      include "connection.php";
      include "navbar.php";
+     include "csrf.php";
 
 // Handle return action (minimal, reuses existing logic pattern)
 if(isset($_POST['return_submit'])){
+  csrf_verify();
   $uname = mysqli_real_escape_string($db, $_POST['username']);
   $bid = mysqli_real_escape_string($db, $_POST['bid']);
   // delete data from timer table
@@ -24,7 +34,9 @@ if(isset($_POST['return_submit'])){
   }
   $x = date("Y-m-d");
   // insert fine record
-  mysqli_query($db, "INSERT INTO `fine` VALUES ('', '".mysqli_real_escape_string($db,$uname)."', '".mysqli_real_escape_string($db,$bid)."', '$x', '$day', '$fine', 'Not Paid')");
+  $fine_stmt = mysqli_prepare($db, "INSERT INTO `fine` (username, bid, returned, days, fine, status) VALUES (?,?,?,?,?,'unpaid')");
+  mysqli_stmt_bind_param($fine_stmt, "sssss", $uname, $bid, $x, $day, $fine);
+  mysqli_stmt_execute($fine_stmt);
   // mark returned
   $var1= '<p style="color:yellow; background-color: green;"> RETURNED </p>';
   $sql1 = "UPDATE issue_book SET approve='$var1' WHERE username='".mysqli_real_escape_string($db,$uname)."' AND bid='".mysqli_real_escape_string($db,$bid)."'";
@@ -82,7 +94,7 @@ body {
   z-index: 1;
   top: 0;
   left: 0;
-  background-color: #c19f9f;
+  background-color: var(--primary);
   overflow-x: hidden;
   transition: 0.5s;
   padding-top: 60px;
@@ -123,14 +135,13 @@ body {
 .h:hover { 
      width:100%;
      height:50px;
-     background-color:#48968f;
+     background-color:var(--accent);
      
 }
 
 .container {
     height: 550px;
-    background-color: black;
-    opacity: 0.7;
+    background-color: rgba(0,0,0,0.75);
     color: white;
 }
 .scroll {
@@ -189,7 +200,7 @@ Swal.fire({
 
 <div id="main">
 
-  <span style="font-size:30px;cursor:pointer" onclick="openNav()">&#9776; open</span>
+  <button type="button" class="sidenav-toggle" onclick="openNav()" aria-label="Open section menu"><span>&#9776;</span> Menu</button>
 
 
 <script>
@@ -213,11 +224,12 @@ function closeNav() {
   <div class="srch" style="float: right; margin-bottom: 8px;">
     <form action="" method="post" class="form-inline" style="display:inline-block;">
       <input type="text" name="search" class="form-control" placeholder="username or student name" value="<?php if(isset($_POST['search'])) echo htmlspecialchars($_POST['search']); ?>" required>
-      <button class="btn btn-primary" type="submit" name="search_submit" style="background-color:#b8adad; border-color:#b8adad; color:#000;">Search</button>
+      <button class="btn btn-primary" type="submit" name="search_submit" style="background-color:var(--neutral); border-color:var(--neutral); color:#000;">Search</button>
       <button class="btn btn-default" type="submit" name="clear_search" title="Clear search">Reset</button>
     </form>
 
     <form action="" method="post" style="display:inline-block; margin-left:8px;">
+      <?php echo csrf_field(); ?>
       <button class="btn btn-default" name="submit_m" type="submit">Send Email</button>
     </form>
   </div>
@@ -256,7 +268,7 @@ $res = mysqli_query($db, $sql);
   // use a single table so columns align
   echo "<div class='scroll'>";
   echo "<table class='table table-bordered' style='width:98.5%;' > ";
-  echo "<tr style='background-color: #b8adad;'>";
+  echo "<tr style='background-color: var(--neutral);'>";
   echo "<th>"; echo "Username"; echo "</th>"; 
   echo "<th>"; echo "Roll"; echo "</th>"; 
   echo "<th>"; echo "Name"; echo "</th>"; 
@@ -273,8 +285,9 @@ $res = mysqli_query($db, $sql);
             if($d > $row['return']) {
               $c=$c+1;
               $var= '<p style="color:yellow; background-color: red;"> EXPIRED </p>';
-              $sql1 = "UPDATE issue_book SET approve='$var' WHERE `return` = '$row[return]' AND approve='Yes' limit $c";
-              mysqli_query($db, $sql1);
+              $stmt1 = mysqli_prepare($db, "UPDATE issue_book SET approve=? WHERE username=? AND bid=? AND `return`=? AND approve='Yes'");
+              mysqli_stmt_bind_param($stmt1, "ssss", $var, $row['username'], $row['bid'], $row['return']);
+              mysqli_stmt_execute($stmt1);
             }
             echo "<tr>";
             echo "<td>"; echo $row['username']; echo "</td>";
@@ -292,6 +305,7 @@ $res = mysqli_query($db, $sql);
             if(strpos($approve_val, 'RETURNED') === false) {
                 // Use a button to trigger JS confirmation
                 echo "<form method='post' style='margin:0' class='return-form'>";
+                echo csrf_field();
                 echo "<input type='hidden' name='username' value='".htmlspecialchars($row['username'])."'>";
                 echo "<input type='hidden' name='bid' value='".htmlspecialchars($row['bid'])."'>";
                 echo "<button type='button' class='btn btn-warning btn-sm return-btn' data-username='".htmlspecialchars($row['username'])."' data-bid='".htmlspecialchars($row['bid'])."' data-book='".htmlspecialchars($row['names'])."'>Return</button>";
@@ -306,6 +320,7 @@ $res = mysqli_query($db, $sql);
 
 
 if(isset($_POST['submit_m'])) {
+    csrf_verify();
     $t=mysqli_query($db,"SELECT * FROM `issue_book` WHERE `approve`='Yes'");
     $date2=date_create(date("Y-m-d"));
     
@@ -318,27 +333,97 @@ if(isset($_POST['submit_m'])) {
           // Code to send email
           $name_m=$row['username'];
           $bid_m=$row['bid'];
-          $sql_m=mysqli_query($db,"SELECT * FROM `student` WHERE `username`='$name_m'");
+          $stmt_m = mysqli_prepare($db, "SELECT * FROM `student` WHERE `username`=?");
+          mysqli_stmt_bind_param($stmt_m, "s", $name_m);
+          mysqli_stmt_execute($stmt_m);
+          $sql_m = mysqli_stmt_get_result($stmt_m);
           $to=mysqli_fetch_assoc($sql_m);
-          $sql_b=mysqli_query($db,"SELECT * FROM `books` WHERE `bid`='$bid_m'");
+          $stmt_b = mysqli_prepare($db, "SELECT * FROM `books` WHERE `bid`=?");
+          mysqli_stmt_bind_param($stmt_b, "s", $bid_m);
+          mysqli_stmt_execute($stmt_b);
+          $sql_b = mysqli_stmt_get_result($stmt_b);
           $book=mysqli_fetch_assoc($sql_b);
-          $subject = "Book Return Reminder";
-          $message = "Dear ".$to['name'].",\n\nThis is a reminder to return the book '".$book['names']."' (Book ID: $bid_m) by the due date: ".$row['return'].".\n\nThank you!\n\n\n@online library management system";
-          $from = "From: tonmoy4451@gmail.com";
 
-          if(mail($to['email'], $subject, $message, $from)) {
-              ?>
-              <script type="text/javascript">
-                  alert("Email sent Successfully");
-              </script>
-              <?php
-          } else {
-              ?>
-              <script type="text/javascript">
-                  alert("Failed to send email.");
-              </script>
-              <?php
-          } 
+          // PHPMailer/use imports and SMTP credentials are loaded once at the
+          // top of this file (see mail_config.php) so this loop can run for
+          // every student without redefining constants/imports each pass.
+
+// ==== Reminder Mail ====
+$subject = "Book Return Reminder";
+$msg = "
+<html>
+  <body style='font-family: Arial, sans-serif; color: #333;'>
+    <p>Dear " . htmlspecialchars($to['name']) . ",</p>
+
+    <p>📚 This is a kind reminder to return the book:</p>
+    <div style='padding: 12px; margin: 10px 0; border: 2px dashed #d9534f;
+                display: inline-block; font-size: 18px; font-weight: bold;
+                background: #f9f9f9; border-radius: 8px;'>
+      " . htmlspecialchars($book['names']) . " (Book ID: " . $bid_m . ")
+    </div>
+
+    <p><b>Due Date:</b> " . htmlspecialchars($row['return']) . "</p>
+
+    <p>Thank you for using our Online Library Management System!</p>
+    <p style='margin-top: 20px; font-weight: bold;'>– Online Library</p>
+  </body>
+</html>
+";
+
+$mail = new PHPMailer(true);
+
+try {
+    $mail->isSMTP();
+    $mail->Host       = 'smtp.gmail.com';
+    $mail->SMTPAuth   = true;
+    $mail->Username   = SMTP_EMAIL;
+    $mail->Password   = SMTP_PASSWORD;
+    $mail->SMTPSecure = 'tls';
+    $mail->Port       = 587;
+
+    $mail->setFrom(SMTP_EMAIL, 'Online Library');
+    $mail->addAddress($to['email'], $to['name']);
+
+    $mail->isHTML(true);
+    $mail->Subject = $subject;
+    $mail->Body    = $msg;
+
+    if ($mail->send()) {
+      ?>
+        <script type="text/javascript">
+                   Swal.fire({
+  title: "Success!",
+  text: "Email sent successfully !",
+  icon: "success",
+  confirmButtonText: "OK",
+  confirmButtonColor: "#3085d6"
+}).then(() => {
+
+
+
+       });
+
+        <?php
+    } else {
+        ?>
+
+<script type="text/javascript">
+           Swal.fire({
+  title: "Error!",
+  text: "Failed to send Email",
+  icon: "error",
+  confirmButtonText: "OK",
+  confirmButtonColor: "#3085d6"
+}).then(() => {
+            window.location = "verify";
+        });
+        </script>
+
+                    <?php
+    }
+} catch (Exception $e) {
+    echo "<script>alert('Mailer Error');</script>";
+}
       }
     }
 }

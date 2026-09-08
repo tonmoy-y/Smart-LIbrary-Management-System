@@ -1,6 +1,7 @@
 <?php
      include "connection.php";
      include "navbar.php";
+     include "csrf.php";
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -10,20 +11,21 @@
     <title>Message</title>
     <style type="text/css">
         body {
-        background-image: url("images/message.png");
-        /* background-color: red; */
-        background-size: cover;
-        background-position: center;
-        background-repeat: no-repeat;
+        background: linear-gradient(150deg, var(--primary) 0%, var(--primary-dark) 100%);
+        min-height: 100vh;
 }
         .wrapper {
            height: 575px;
-           width:500px;
-           background-color: black;
-           opacity: 0.8;
+           max-width: 500px;
+           width: calc(100% - 24px);
+           background-color: rgba(0,0,0,0.35);
+           border: 1px solid rgba(255,255,255,0.12);
+           border-radius: 12px;
+           box-shadow: 0 10px 30px rgba(20,15,40,0.35);
            color:white;
-           margin: 0px auto;
+           margin: 20px auto;
            padding: 20px;
+           box-sizing: border-box;
        display: flex;
        flex-direction: column;
         }
@@ -69,7 +71,7 @@ form.write input.form-control {
 }
 
 .user .chatbox {
-    background-color: red;
+    background-color: var(--accent);
     color: white;
     order: -1;
 }
@@ -100,7 +102,8 @@ form.write input.form-control {
 
 <?php
         if(isset($_POST['submit'])) {
-            $insStmt = mysqli_prepare($db, "INSERT INTO `message` VALUES ('',?,?,'no', 'student')");
+            csrf_verify();
+            $insStmt = mysqli_prepare($db, "INSERT INTO `message` (username, message, status, sender) VALUES (?,?,'no','student')");
             mysqli_stmt_bind_param($insStmt, "ss", $_SESSION['login_user'], $_POST['message']);
             mysqli_stmt_execute($insStmt);
             $selStmt = mysqli_prepare($db, "SELECT * FROM `message` WHERE username=?");
@@ -122,8 +125,8 @@ form.write input.form-control {
     ?>
 
 <div class="wrapper">
-    <div style="height:70px; width:100%; background-color:#fe5d5d; color:white; text-align:center;">
-        <h3 style="padding: 1px auto;">Admin</h3>
+    <div style="height:70px; width:100%; background: linear-gradient(120deg, var(--primary) 0%, var(--primary-dark) 100%); color:white; text-align:center; display:flex; align-items:center; justify-content:center; border-radius: 10px 10px 0 0;">
+        <h3 style="margin:0;">Admin</h3>
 
   
     </div>
@@ -189,6 +192,7 @@ while($row=mysqli_fetch_assoc($res)) {
 
 <div style="height:100px; padding-top:10px;">
     <form action="" method="post" class="write">
+        <?php echo csrf_field(); ?>
         <input type="text" name="message" class="form-control" placeholder="Write Message..." style="float:left;">
         &nbsp; 
         <button class="btn btn-info btn-lg" type="submit" name="submit"><span class="glyphicon glyphicon-send"></span> &nbsp Send</button>

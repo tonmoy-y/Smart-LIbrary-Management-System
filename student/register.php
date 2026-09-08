@@ -1,6 +1,7 @@
 <?php
     include "connection.php";
     include "navbar.php";
+    include "csrf.php";
     ?>
 
 <!DOCTYPE html>
@@ -12,12 +13,42 @@
     <link rel="stylesheet" type="text/css" href="styles.css">
     <style type="text/css" >
     .wapr {
-        
+
         height: 629px !important;
-    
-       
+
+
     }
-    
+
+    .field-check {
+        position: relative;
+        width: 100%;
+        max-width: 300px;
+    }
+    .field-check input {
+        padding-right: 34px !important;
+        width: 100%;
+        max-width: none;
+    }
+    .field-check .check-icon {
+        position: absolute;
+        right: 10px;
+        top: 50%;
+        transform: translateY(-50%);
+        font-size: 15px;
+        font-weight: bold;
+        display: none;
+        pointer-events: none;
+    }
+    .field-check .check-icon.ok { display: block; color: #2fae56; }
+    .field-check .check-icon.taken { display: block; color: #e04b4b; }
+    .field-check .check-icon.checking { display: block; color: rgba(255,255,255,0.7); font-size: 12px; }
+    .field-hint {
+        font-size: 12px;
+        color: #ffb4b4;
+        text-align: left;
+        margin: -6px 0 4px 2px;
+        min-height: 14px;
+    }
     </style>
     <title>Student Registration </title>
 
@@ -40,24 +71,90 @@
             <h1 style= "text-align: center; font-size: 35px; font-family: 'Lucida Console', 'Lucida Sans Typewriter', Monaco, 'Bitstream Vera Sans Mono', monospace;">Library Management</h1>
         <h1 style="text-align: center; font-size: 25px;">Registration Form</h1>
             <form name="Registration" action="" method="post">
+                <?php echo csrf_field(); ?>
                 <div class="reg" class="form-control">
                 <input class="form-control" type="text" id="Name" name="name" placeholder="Full Name" required
        value="<?php echo isset($_POST['name']) ? htmlspecialchars($_POST['name'], ENT_QUOTES) : ''; ?>">
-                <input class="form-control" type="text" id="Roll" name="roll" placeholder="Roll Number: 2103XXX" required
+
+                <div class="field-check">
+                <input class="form-control" type="text" id="Roll" name="roll" placeholder="Roll Number: 2103XXX" required autocomplete="off"
        value="<?php echo isset($_POST['roll']) ? htmlspecialchars($_POST['roll'], ENT_QUOTES) : ''; ?>">
+                <span class="check-icon" id="Roll-icon"></span>
+                </div>
+                <div class="field-hint" id="Roll-hint"></div>
+
                 <input class="form-control" type="text" id="Dept" name="dept" placeholder="Department Name (Ex: CSE)" required
        value="<?php echo isset($_POST['dept']) ? htmlspecialchars($_POST['dept'], ENT_QUOTES) : ''; ?>">
                 <input class="form-control" type="number" id="Phone" name="phone" placeholder="Phone No 017XXXXXXX" required
        value="<?php echo isset($_POST['phone']) ? htmlspecialchars($_POST['phone'], ENT_QUOTES) : ''; ?>">
-                <input class="form-control" type="email" id="email" name="email" placeholder="Email Address" required
+
+                <div class="field-check">
+                <input class="form-control" type="email" id="email" name="email" placeholder="Email Address" required autocomplete="off"
        value="<?php echo isset($_POST['email']) ? htmlspecialchars($_POST['email'], ENT_QUOTES) : ''; ?>">
-                <input class="form-control" type="text" id="username" name="username" placeholder="Username" required
+                <span class="check-icon" id="email-icon"></span>
+                </div>
+                <div class="field-hint" id="email-hint"></div>
+
+                <div class="field-check">
+                <input class="form-control" type="text" id="username" name="username" placeholder="Username" required autocomplete="off"
        value="<?php echo isset($_POST['username']) ? htmlspecialchars($_POST['username'], ENT_QUOTES) : ''; ?>">
+                <span class="check-icon" id="username-icon"></span>
+                </div>
+                <div class="field-hint" id="username-hint"></div>
+
                 <input class="form-control" type="password" id="password" name="password" placeholder="Password" required>
                 <input type="submit" class="btn btn-success" value="Register" name="submit" style="color: rgb(255, 255, 255); width: 120px ; height: 40px; font-weight: 700;">
 
-            </div> 
+            </div>
             </form>
+            <script>
+            (function() {
+                var fields = [
+                    { id: 'username', key: 'username', label: 'Username' },
+                    { id: 'email', key: 'email', label: 'Email' },
+                    { id: 'Roll', key: 'roll', label: 'Roll number' }
+                ];
+                var timers = {};
+
+                fields.forEach(function(f) {
+                    var input = document.getElementById(f.id);
+                    var icon = document.getElementById(f.id + '-icon');
+                    var hint = document.getElementById(f.id + '-hint');
+                    if (!input) return;
+
+                    input.addEventListener('input', function() {
+                        var value = input.value.trim();
+                        icon.className = 'check-icon';
+                        hint.textContent = '';
+                        clearTimeout(timers[f.id]);
+
+                        if (value === '') return;
+
+                        icon.className = 'check-icon checking';
+                        icon.textContent = '…';
+
+                        timers[f.id] = setTimeout(function() {
+                            fetch('check_availability.php?field=' + f.key + '&value=' + encodeURIComponent(value))
+                                .then(function(r) { return r.json(); })
+                                .then(function(data) {
+                                    if (data.available === true) {
+                                        icon.className = 'check-icon ok';
+                                        icon.textContent = '✓';
+                                        hint.textContent = '';
+                                    } else if (data.available === false) {
+                                        icon.className = 'check-icon taken';
+                                        icon.textContent = '✕';
+                                        hint.textContent = f.label + ' is already taken';
+                                    } else {
+                                        icon.className = 'check-icon';
+                                    }
+                                })
+                                .catch(function() { icon.className = 'check-icon'; });
+                        }, 400);
+                    });
+                });
+            })();
+            </script>
          
         </div>
 
@@ -66,6 +163,7 @@
 
      <?php
         if(isset($_POST['submit'])) {
+            csrf_verify();
             $count = 0;
             $dupUsername = false; $dupEmail = false; $dupRoll = false;
             $sql = "SELECT username,email,roll FROM student";

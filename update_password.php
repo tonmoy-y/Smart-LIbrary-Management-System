@@ -1,6 +1,7 @@
 <?php
     include "connection.php";
     include "navbar.php";
+    include "csrf.php";
 ?>
 
 <!DOCTYPE html>
@@ -30,6 +31,7 @@
 <br><br>
 
 <form action="" name="signup" method="post">
+    <?php echo csrf_field(); ?>
     <h2 style="font-size: 24px; font-weight: bold;"> Reset Password</h2> <br>
     <span style="font-size: 20px; font-weight:bold; margin-right:10px;">Reset for:</span>
     
@@ -52,6 +54,7 @@
      <?php
        
     if (isset($_POST['submit1'])) {
+     csrf_verify();
      if (isset($_POST['user']) && $_POST['user'] == 'admin') {
          $_SESSION['admin_reset'] = true;
         $_SESSION['admin_reset_time'] = time();

@@ -2,6 +2,7 @@
 
      include "connection.php";
      include "navbar.php";
+     include "csrf.php";
 
 ?>
 
@@ -48,7 +49,7 @@ body {
   z-index: 1;
   top: 0;
   left: 0;
-  background-color: #c19f9f;
+  background-color: var(--primary);
   overflow-x: hidden;
   transition: 0.5s;
   padding-top: 60px;
@@ -89,14 +90,13 @@ body {
 .h:hover { 
      width:100%;
      height:50px;
-     background-color:#48968f;
+     background-color:var(--accent);
      
 }
 
 .container {
     height: 610px;
-    background-color: black;
-    opacity: 0.7;
+    background-color: rgba(0,0,0,0.75);
     color: white;
     margin-top:-5px
 }
@@ -162,7 +162,7 @@ Swal.fire({
 
 <div id="main">
 
-  <span style="font-size:30px;cursor:pointer" onclick="openNav()">&#9776; open</span> 
+  <button type="button" class="sidenav-toggle" onclick="openNav()" aria-label="Open section menu"><span>&#9776;</span> Menu</button> 
 
 
 <script>
@@ -191,11 +191,11 @@ function closeNav() {
         <button name="submit3" type="submit" class="btn btn-default" style="background-color:red; color:yellow;"> Expired </button>
       </div>
     </form>
-    <div class="srch">
+    <div class="srch" style="clear:both;">
         <form action="" method="post" class="form-inline" style="display:inline-block;">
             <input type="text" name="search" class="form-control" placeholder="username or student name" value="<?php if(isset($_POST['search'])) echo htmlspecialchars($_POST['search']); ?>" required>
             <div>
-              <button class="btn btn-primary" type="submit" name="search_submit" style="background-color:#b8adad; border-color:#b8adad; color:#000;">Search</button>
+              <button class="btn btn-primary" type="submit" name="search_submit" style="background-color:var(--neutral); border-color:var(--neutral); color:#000;">Search</button>
               <button class="btn btn-default" type="submit" name="clear_search" title="Clear search">Reset</button>
             </div>
         </form>
@@ -204,6 +204,7 @@ function closeNav() {
     <?php
 
      if(isset($_POST['submit'])) {
+      csrf_verify();
       $stmt = mysqli_prepare($db, "SELECT * FROM issue_book WHERE username=? AND bid=?");
       mysqli_stmt_bind_param($stmt, "ss", $_POST['username'], $_POST['bid']);
       mysqli_stmt_execute($stmt);
@@ -222,7 +223,7 @@ $fine = 0;
 
   $x= date("Y-m-d");
 
-  $stmt = mysqli_prepare($db, "INSERT INTO `fine` VALUES ('',?,?,?,?,?,'Not Paid')");
+  $stmt = mysqli_prepare($db, "INSERT INTO `fine` (username, bid, returned, days, fine, status) VALUES (?,?,?,?,?,'unpaid')");
   mysqli_stmt_bind_param($stmt, "sssdd", $_POST['username'], $_POST['bid'], $x, $day, $fine);
   mysqli_stmt_execute($stmt);
 
@@ -298,7 +299,7 @@ if(isset($_SESSION['login_admin'])) {
   // single table (header + body) inside scroll so columns align
   echo "<div class='scroll'>";
   echo "<table class='table table-bordered' style='width:98.5%;' > ";
-  echo "<tr style='background-color: #b8adad;'>";
+  echo "<tr style='background-color: var(--neutral);'>";
   echo "<th>"; echo "Username"; echo "</th>"; 
   echo "<th>"; echo "Roll"; echo "</th>"; 
   echo "<th>"; echo "Name"; echo "</th>"; 
@@ -330,6 +331,7 @@ if(isset($_SESSION['login_admin'])) {
       if(strpos($approve_val, 'RETURNED') === false) {
   // show small form and trigger SweetAlert2 confirmation like issue_info
   echo "<form method='post' style='margin:0' class='return-form'>";
+  echo csrf_field();
   echo "<input type='hidden' name='username' value='".htmlspecialchars($row['username'])."'>";
   echo "<input type='hidden' name='bid' value='".htmlspecialchars($row['bid'])."'>";
   echo "<button type='button' class='btn btn-warning btn-sm return-btn' data-username='".htmlspecialchars($row['username'])."' data-bid='".htmlspecialchars($row['bid'])."' data-book='".htmlspecialchars($row['names'])."'>Return</button>";

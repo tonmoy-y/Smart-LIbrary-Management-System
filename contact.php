@@ -2,6 +2,7 @@
 // include database connection file
      include "connection.php";
      include "navbar.php";
+     include "csrf.php";
 ?>
 
 <!DOCTYPE html>
@@ -20,7 +21,9 @@
           background-image: url("images/feedback.jpg");
      }
      .wrap {
-          width: 900px;
+          width: calc(100% - 40px);
+          max-width: 900px;
+          box-sizing: border-box;
           background: linear-gradient(135deg, rgba(10,25,47,0.86), rgba(25,50,80,0.80));
           border: 1px solid rgba(88,156,219,0.14);
           color: #eaf6ff;
@@ -146,6 +149,7 @@ form.write input.form-control {
           <h4>If you have any suggestion or question please write here</h4>
      <div class="input-box">
      <form class="write" action="" method="post">
+          <?php echo csrf_field(); ?>
 
           <textarea class="form-control" name="comment" placeholder="write something...." required style="resize:vertical; height:60px;"></textarea>
 
@@ -160,11 +164,21 @@ form.write input.form-control {
 
      // Ensure comments table has an admin_reply column. If not present, this will fail silently.
      // (Note: ALTER TABLE requires appropriate DB privilege; if not available, run manually.)
-     $ensure_reply_col = "ALTER TABLE `comments` ADD COLUMN IF NOT EXISTS admin_reply TEXT NULL";
-     @mysqli_query($db, $ensure_reply_col);
+     // Checked via SHOW COLUMNS (rather than "ADD COLUMN IF NOT EXISTS") for compatibility with
+     // older MySQL/MariaDB versions, and wrapped in try/catch since PHP 8.1+'s mysqli exception
+     // mode means "@" no longer silences a failed query.
+     try {
+          $col_check = mysqli_query($db, "SHOW COLUMNS FROM `comments` LIKE 'admin_reply'");
+          if ($col_check && mysqli_num_rows($col_check) === 0) {
+               mysqli_query($db, "ALTER TABLE `comments` ADD COLUMN admin_reply TEXT NULL");
+          }
+     } catch (mysqli_sql_exception $e) {
+          // Column check/creation failed (e.g. missing privilege) — safe to ignore.
+     }
 
      // Handle posting a new comment
      if(isset($_POST['submit'])) {
+          csrf_verify();
           // Require login to comment (PHP-side)
           if(!isset($_SESSION['login_user'])) {
                ?>
@@ -229,6 +243,7 @@ form.write input.form-control {
 
      // Handle admin reply submission (only proceed if user is admin)
      if(isset($_POST['reply_submit']) && $is_admin) {
+          csrf_verify();
           $reply = trim($_POST['reply_text'] ?? '');
           $comment_id = intval($_POST['comment_id'] ?? 0);
           if($comment_id > 0 && $reply !== '') {

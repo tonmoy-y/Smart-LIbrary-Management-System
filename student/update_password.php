@@ -1,6 +1,7 @@
 <?php
         include "connection.php";
         include "navbar.php"; // navbar already renders <head> & styles
+        include "csrf.php";
 ?>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
@@ -8,7 +9,10 @@
     body {
         margin:0;
         min-height:100vh;
-        background: url("images/forget1.png") center/cover no-repeat;
+        background: url("images/forget1.png") center bottom/cover no-repeat;
+        /* new block-formatting context: stops .password-wrapper's top margin
+           from collapsing through body and exposing blank space above the bg */
+        overflow: hidden;
     }
     .password-wrapper {
         max-width:400px;
@@ -20,7 +24,7 @@
     }
     .password-wrapper h1 {font-size:30px;font-family:"Lucida Console", monospace;color:#fff;margin:0 0 25px;}
     .password-wrapper .form-control {width:100%;max-width:300px;margin:0 auto;padding:10px 12px;font-size:16px;border-radius:6px;border:none;}
-    .password-wrapper button.btn {background:#7272b6;color:#fff;font-weight:600;border:none;padding:10px 18px;border-radius:8px;transition:.25s;}
+    .password-wrapper button.btn {background:var(--primary-light);color:#fff;font-weight:600;border:none;padding:10px 18px;border-radius:8px;transition:.25s;}
     .password-wrapper button.btn:hover{opacity:.85;}
     html,body {overscroll-behavior:contain;}
     @media (max-width:576px){.password-wrapper{margin:110px 12px 60px;padding:22px 20px 26px;} .password-wrapper h1{font-size:24px;}}
@@ -29,6 +33,7 @@
 <div class="password-wrapper">
     <h1>Change your password</h1>
     <form action="" method="post">
+        <?php echo csrf_field(); ?>
         <input type="text" name="username" placeholder="Enter your username" class="form-control" required><br>
         <input type="text" name="email" placeholder="Enter your email" class="form-control" required><br>
         <input type="text" name="password" placeholder="Enter your New password" class="form-control" required><br>
@@ -37,6 +42,7 @@
 </div>
     <?php
 if(isset($_POST['submit'])) {
+    csrf_verify();
     $stmt = mysqli_prepare($db, "SELECT * FROM `student` WHERE username=? AND email=?");
     mysqli_stmt_bind_param($stmt, "ss", $_POST['username'], $_POST['email']);
     mysqli_stmt_execute($stmt);

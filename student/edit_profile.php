@@ -1,6 +1,7 @@
 <?php
     include "connection.php";
     include "navbar.php";
+    include "csrf.php";
 ?>
 
 
@@ -13,13 +14,15 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style type="text/css">
         form.write {
-            width: 400px; 
+            max-width: 400px;
+            width: calc(100% - 24px);
+            box-sizing: border-box;
           }
 
-form.write input.form-control { 
-            max-width: none;      
-            width: 100%;       
-                
+form.write input.form-control {
+            max-width: none;
+            width: 100%;
+            box-sizing: border-box;
           }
 form {
     margin: 0 auto;
@@ -29,7 +32,7 @@ label {
 }
     </style>
 </head>
-<body style="background-color:#246b74">
+<body style="background-color:var(--primary)">
     
 <h2 style="text-align:center; color: white;"> Edit Information</h2>
    
@@ -69,6 +72,7 @@ label {
 
 
         <form action="" method="post" enctype="multipart/form-data" class="write">
+        <?php echo csrf_field(); ?>
 
         <input type="file" name="file" class="form-control" style="width: 80%; height:40px; margin: 0 auto;">
 
@@ -99,7 +103,9 @@ label {
 
     <?php
     if (isset($_POST['submit'])) {
+        csrf_verify();
 
+        $allowed_ext = array('jpg','jpeg','png','gif','webp');
         if (!empty($_FILES['file']['name'])) {
 
             $original = $_FILES['file']['name'];
@@ -114,7 +120,7 @@ label {
             $pic = $base.'_'.time().'.'.$ext;
 
             $target = "../images/".$pic;
-            if (move_uploaded_file($_FILES['file']['tmp_name'], $target)) {
+            if (in_array($ext, $allowed_ext) && move_uploaded_file($_FILES['file']['tmp_name'], $target)) {
                 // extra integrity check (non-zero size & image signature)
                 $valid = (filesize($target) > 100) && @getimagesize($target);
                 if ($valid) {

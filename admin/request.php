@@ -2,6 +2,7 @@
 
      include "connection.php";
      include "navbar.php";
+     include "csrf.php";
 
 ?>
 
@@ -42,7 +43,7 @@ body {
   z-index: 1;
   top: 0;
   left: 0;
-  background-color: #c19f9f;
+  background-color: var(--primary);
   overflow-x: hidden;
   transition: 0.5s;
   padding-top: 60px;
@@ -83,14 +84,13 @@ body {
 .h:hover { 
      width:100%;
      height:50px;
-     background-color:#48968f;
+     background-color:var(--accent);
      
 }
 
 .container {
     height: 550px;
-    background-color: black;
-    opacity: 0.7;
+    background-color: rgba(0,0,0,0.75);
     color: white;
 }
 
@@ -124,7 +124,7 @@ body {
 
 <div id="main">
 
-  <span id="openNavBtn" style="font-size:30px;cursor:pointer;color:#ffffff" onclick="openNav()">&#9776; open</span>
+  <button type="button" class="sidenav-toggle" onclick="openNav()" aria-label="Open section menu"><span>&#9776;</span> Menu</button>
 
 
 <script>
@@ -164,13 +164,13 @@ if(isset($_SESSION['login_admin'])) {
     
     if( mysqli_num_rows($res) == 0) {                    
         echo "<h2 style='text-align:center;'> <b>";
-        echo "Threre is no pending request";
+        echo "There is no pending request";
         echo "</h2> </b>";
     }
     
     else {
         echo "<table class='table table-bordered ' > ";
-        echo "<tr style='background-color: #b8adad;'>";
+        echo "<tr style='background-color: var(--neutral);'>";
         echo "<th>"; echo "Username"; echo "</th>"; 
         echo "<th>"; echo "Roll"; echo "</th>"; 
         echo "<th>"; echo "Name"; echo "</th>"; 
@@ -195,6 +195,7 @@ if(isset($_SESSION['login_admin'])) {
             // Approve button (posts username and bid and uses existing handler to redirect to approve)
             echo "<td>";
             echo "<form method='post' style='margin:0'>";
+            echo csrf_field();
             echo "<input type='hidden' name='username' value='".htmlspecialchars($row['username'])."'>";
             echo "<input type='hidden' name='bid' value='".htmlspecialchars($row['bid'])."'>";
             echo "<button type='submit' name='submit' class='btn btn-default btn-sm' style='background:#ffffff;color:#000;border:1px solid #ddd;'>Approve</button>";
@@ -223,12 +224,12 @@ if(isset($_SESSION['login_admin'])) {
 $q = mysqli_query($db, "SELECT * FROM issue_book WHERE username LIKE '$_SESSION[login_admin]';");
 if( mysqli_num_rows($q) == 0) {                    
     echo "<h2> <b>";
-    echo "Threre is no pending request";
+    echo "There is no pending request";
     echo "</h2> </b>";
     }
     else {
         echo "<table class='table table-bordered table-hover' > ";
-    echo "<tr style='background-color: #b8adad;'>";
+    echo "<tr style='background-color: var(--neutral);'>";
     echo "<th>"; echo "Book ID"; echo "</th>"; 
     echo "<th>"; echo "Approve Stuatus"; echo "</th>"; 
     echo "<th>"; echo "Issue  Date"; echo "</th>"; 
@@ -253,6 +254,7 @@ if( mysqli_num_rows($q) == 0) {
     */
     
   if(isset($_POST['submit'])) {
+    csrf_verify();
     // If username and bid are posted, this is the Approve button for a row -> redirect to approve
     if(!empty($_POST['username']) && !empty($_POST['bid'])) {
       $_SESSION['st_name'] = $_POST['username'];
@@ -270,4 +272,4 @@ if( mysqli_num_rows($q) == 0) {
 </div>
 
 </body>
-</html>l
+</html>

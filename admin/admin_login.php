@@ -1,7 +1,8 @@
 <?php
     include "connection.php";
     include "navbar.php";
- 
+    include "csrf.php";
+
 ?>
 
 <!DOCTYPE html>
@@ -32,6 +33,7 @@
             <h1 style="text-align: center; font-size: 35px; font-family: 'Lucida Console', 'Lucida Sans Typewriter', Monaco, 'Bitstream Vera Sans Mono', monospace;">Library Management System</h1>
         <h1 style="text-align: center; font-size: 25px;">Admin Login Form</h1>
             <form name="Login" action="" method="post">
+                <?php echo csrf_field(); ?>
                 <div class="login">
                 <input class="form-control" style="width:300px;" type="text" id="username" name="username" placeholder="Username" required>
                 <input class="form-control" style="width:300px;" type="password" id="password" name="password" placeholder="Password" required>
@@ -48,8 +50,9 @@
     </section>
     <?php
     if(isset($_POST['submit'])) {
+        csrf_verify();
         $count = 0;
-        $stmt = mysqli_prepare($db, "SELECT * FROM `admin` WHERE username=?");
+        $stmt = mysqli_prepare($db, "SELECT * FROM `admin` WHERE username=? AND status='Yes'");
         mysqli_stmt_bind_param($stmt, "s", $_POST['username']);
         mysqli_stmt_execute($stmt);
         $res = mysqli_stmt_get_result($stmt);

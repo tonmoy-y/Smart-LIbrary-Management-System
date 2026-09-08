@@ -109,7 +109,7 @@
 
     <style>
     .info-slide {
-        background: linear-gradient(5deg, #610795 0%, #610795 100%) !important;
+        background: linear-gradient(150deg, rgba(var(--primary-rgb), 0.88) 0%, rgba(43, 36, 68, 0.88) 100%) !important;
         color: white;
         padding: 60px 40px;
         text-align: center;
@@ -118,9 +118,10 @@
         flex-direction: column;
         justify-content: center;
         border-radius: 15px;
+        border: 1px solid rgba(255,255,255,0.12);
         box-shadow: 0 4px 15px rgba(0,0,0,0.2);
         margin-top: 120px;
-        opacity: 0.7;
+        backdrop-filter: blur(6px);
     }
 
     .info-slide h2 {
@@ -132,7 +133,7 @@
     .info-slide p {
         font-size: 1.3em;
         margin: 10px 0;
-        opacity: 0.8;
+        text-shadow: 0 1px 3px rgba(0,0,0,0.35);
     }
 
     .slide-btn {

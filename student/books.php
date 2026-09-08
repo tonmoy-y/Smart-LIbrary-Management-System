@@ -2,6 +2,7 @@
 
      include "connection.php";
      include "navbar.php";
+     include "csrf.php";
         if (isset($_SESSION['student_reset'])) {
          unset($_SESSION['student_reset']);
         unset($_SESSION['student_reset_time']);
@@ -106,7 +107,7 @@ body {
   z-index: 1;
   top: 0;
   left: 0;
-  background-color: #c19f9f;
+  background-color: var(--primary);
   overflow-x: hidden;
   transition: 0.5s;
   padding-top: 60px;
@@ -147,7 +148,7 @@ body {
 .h:hover { 
      width:100%;
      height:50px;
-     background-color:#48968f;
+     background-color:var(--accent);
      
 }
 
@@ -181,7 +182,7 @@ body {
 
 <div id="main">
 
-  <span style="font-size:30px;cursor:pointer" onclick="openNav()">&#9776; open</span>
+  <button type="button" class="sidenav-toggle" onclick="openNav()" aria-label="Open section menu"><span>&#9776;</span> Menu</button>
 
 
 <script>
@@ -206,7 +207,7 @@ function closeNav() {
           <form class="navbar-form" action="" method="post" name="form1">
 
                     <input class="form-control" type="text" class="form-control" name="search" placeholder="Search for books..." required>
-                    <button type="submit" name="submit" class="btn btn-default" style="background: #b8adad";> <span class="glyphicon glyphicon-search"></span> Search</button>
+                    <button type="submit" name="submit" class="btn btn-default" style="background: var(--neutral)";> <span class="glyphicon glyphicon-search"></span> Search</button>
 
           </form>
      </div>
@@ -218,7 +219,7 @@ function closeNav() {
 
                <!-- 
           <input class="form-control" type="text" class="form-control" name="bid" placeholder="Enter Book ID to Request book" required>
-               <button type="submit" name="submit1" class="btn btn-default" style="background: #b8adad";>  Request </button>
+               <button type="submit" name="submit1" class="btn btn-default" style="background: var(--neutral)";>  Request </button>
                 -->
 
           </form>
@@ -257,6 +258,7 @@ function closeNav() {
                 </div>
                 <div class='overlay'>
                     <form method='post' action=''>
+                        ".csrf_field()."
                         <input type='hidden' name='bid' value='".$row['bid']."'>
                         <button type='submit' name='submit1' class='btn btn-primary'>Request</button>
                     </form>
@@ -291,7 +293,8 @@ while($row = mysqli_fetch_assoc($res)) {
         </div>
         <div class='overlay'>
             <form method='post' action=''>
-                <input type='hidden' name='bid' value='".$row['bid']."'>
+                ".csrf_field()."
+            <input type='hidden' name='bid' value='".$row['bid']."'>
                 <button type='submit' name='submit1' class='btn btn-primary'>Request</button>
             </form>
         </div>
@@ -302,6 +305,7 @@ echo "</div>";
 }
 
 if(isset($_POST['submit1'])) {
+     csrf_verify();
      if(isset($_SESSION['login_user'])) {
           $stmt1 = mysqli_prepare($db, "SELECT * FROM books WHERE bid = ?");
           mysqli_stmt_bind_param($stmt1, "s", $_POST['bid']);

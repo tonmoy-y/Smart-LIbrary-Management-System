@@ -2,6 +2,7 @@
 
      include "connection.php";
      include "navbar.php";
+     include "csrf.php";
 
 ?>
 <!DOCTYPE html>
@@ -19,7 +20,7 @@
 
 
 body {
-    background-color:#a07fa9;
+    background-color:var(--primary-light);
   font-family: "Lato", sans-serif;
   transition: background-color .5s;
 }
@@ -32,7 +33,7 @@ body {
   z-index: 1;
   top: 0;
   left: 0;
-  background-color: #c19f9f;
+  background-color: var(--primary);
   overflow-x: hidden;
   transition: 0.5s;
   padding-top: 60px;
@@ -73,12 +74,14 @@ body {
 .h:hover { 
      width:100%;
      height:50px;
-     background-color:#48968f;
+     background-color:var(--accent);
      
 }
 
 form.book {
-            width: 400px; 
+            max-width: 400px;
+            width: calc(100% - 24px);
+            box-sizing: border-box;
             margin: 0 auto;
           }
 
@@ -88,8 +91,8 @@ form.book input.form-control {
                 
           }
 .form-control {
-  background-color:rgb(10, 2, 2);
-  color: white;
+  background-color: #fff;
+  color: #222;
   height: 40px;
   border-radius: 8px;
 }
@@ -127,11 +130,12 @@ form.book input.form-control {
 
 <div id="main">
 
-  <span style="font-size:30px;cursor:pointer " onclick="openNav()">&#9776; open</span>
+  <button type="button" class="sidenav-toggle" onclick="openNav()" aria-label="Open section menu"><span>&#9776;</span> Menu</button>
             
   <div class="container"> 
     <h2  style="color:black; font-family: Lucidia Console; text-align:center;"> Add New Books</h2>
-    <form class="book" action="" method="post" enctype="multipart/form-data">   
+    <form class="book" action="" method="post" enctype="multipart/form-data">
+          <?php echo csrf_field(); ?>
           <input  type="text" name="names" class="form-control" placeholder="Book Name" required> <br>
           <input  type="text" name="authors" class="form-control" placeholder="Authors Name" required> <br>
           <input  type="text" name="edition" class="form-control" placeholder="Edition" required> <br>
@@ -147,14 +151,28 @@ form.book input.form-control {
 </div>
 <?php
     if(isset($_POST['submit'])) {
-      
+      csrf_verify();
+
       if(isset($_SESSION['login_admin'])) {
         
                // file upload
-            $imageName = $_FILES['image']['name'];
-            $target = "../images/".basename($imageName);
+            $allowed_ext = array('jpg','jpeg','png','gif','webp');
+            $original = $_FILES['image']['name'];
+            $ext = strtolower(pathinfo($original, PATHINFO_EXTENSION));
+            $base = pathinfo($original, PATHINFO_FILENAME);
+            $base = preg_replace('/[^A-Za-z0-9_-]+/', '_', $base);
+            $base = trim($base, '_');
+            if ($base === '') { $base = 'book'; }
+            $imageName = $base.'_'.time().'.'.$ext;
+            $target = "../images/".$imageName;
 
-             if(move_uploaded_file($_FILES['image']['tmp_name'], $target)) {
+             $uploaded = in_array($ext, $allowed_ext) && move_uploaded_file($_FILES['image']['tmp_name'], $target);
+             if($uploaded && !(filesize($target) > 0 && @getimagesize($target))) {
+                 @unlink($target);
+                 $uploaded = false;
+             }
+
+             if($uploaded) {
 $name = $_POST['names'];
 $author = $_POST['authors'];
 $edition = $_POST['edition'];
@@ -232,7 +250,7 @@ function openNav() {
 function closeNav() {
   document.getElementById("mySidenav").style.width = "0";
   document.getElementById("main").style.marginLeft= "0";
-  document.body.style.backgroundColor = "#a07fa9";
+  document.body.style.backgroundColor = "var(--primary-light)";
 }
 </script>
 

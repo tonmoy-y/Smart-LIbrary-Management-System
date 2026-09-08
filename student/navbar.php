@@ -30,11 +30,11 @@ mysqli_query($db, "DELETE FROM verify WHERE created_at < DATE_SUB(NOW(), INTERVA
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" type="text/css" href="styles.css">
+  <link rel="stylesheet" type="text/css" href="styles.css?v=<?php echo @filemtime(__DIR__.'/styles.css'); ?>">
     <title>Online Library Management</title>
   <!-- bootstrap -->
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
-  <link rel="stylesheet" type="text/css" href="responsive.css">
+  <link rel="stylesheet" type="text/css" href="../responsive.css?v=<?php echo @filemtime(__DIR__.'/../responsive.css'); ?>">
     <link rel="icon" type="image/png" sizes="32x32" href="images/logo.png">
   <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">  

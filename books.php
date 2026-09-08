@@ -30,7 +30,7 @@ body {
   z-index: 1;
   top: 0;
   left: 0;
-  background-color: #c19f9f;
+  background-color: var(--primary);
   overflow-x: hidden;
   transition: 0.5s;
   padding-top: 60px;
@@ -71,7 +71,7 @@ body {
 .h:hover { 
      width:100%;
      height:50px;
-     background-color:#48968f;
+     background-color:var(--accent);
      
 }
 
@@ -130,7 +130,7 @@ function closeNav() {
           <form class="navbar-form" action="" method="post" name="form1">
 
                     <input class="form-control" type="text" class="form-control" name="search" placeholder="Search for books..." required>
-                    <button type="submit" name="submit" class="btn btn-default" style="background: #b8adad";> <span class="glyphicon glyphicon-search"></span> Search</button>
+                    <button type="submit" name="submit" class="btn btn-default" style="background: var(--neutral)";> <span class="glyphicon glyphicon-search"></span> Search</button>
 
           </form>
      </div>
@@ -141,7 +141,7 @@ function closeNav() {
           <form class="navbar-form" action="" method="post" name="form1">
 
                <!-- <input class="form-control" type="text" class="form-control" name="bid" placeholder="Enter Book ID" required>
-               <button type="submit" name="submit1" class="btn btn-default" style="background: #b8adad";>  Request </button> -->
+               <button type="submit" name="submit1" class="btn btn-default" style="background: var(--neutral)";>  Request </button> -->
 
           </form>
      </div>
@@ -161,7 +161,7 @@ function closeNav() {
                     echo "Sorry, no results found for your search.";
                else {
                      echo "<table class='table table-bordered table-hover' > ";
-     echo "<tr style='background-color: #b8adad;'>";
+     echo "<tr style='background-color: var(--neutral);'>";
      echo "<th>"; echo "ID"; echo "</th>"; 
      echo "<th>"; echo "Book Name"; echo "</th>"; 
      echo "<th>"; echo "Authors"; echo "</th>"; 
@@ -192,7 +192,7 @@ else {
      $res=mysqli_query($db,"SELECT * FROM books");
      //table header
      echo "<table class='table table-bordered table-hover' > ";
-     echo "<tr style='background-color: #b8adad;'>";
+     echo "<tr style='background-color: var(--neutral);'>";
      echo "<th>"; echo "ID"; echo "</th>"; 
      echo "<th>"; echo "Book Name"; echo "</th>"; 
      echo "<th>"; echo "Authors"; echo "</th>"; 

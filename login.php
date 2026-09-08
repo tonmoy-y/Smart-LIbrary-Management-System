@@ -1,6 +1,7 @@
 <?php
     include "connection.php";
     include "navbar.php";
+    include "csrf.php";
     ?>
 
 <!DOCTYPE html>
@@ -31,7 +32,8 @@
                     <h1 style="text-align: center; font-size: 35px; font-family: 'Lucida Console', 'Lucida Sans Typewriter', Monaco, 'Bitstream Vera Sans Mono', monospace;">Library Management System</h1>
                     <h1 style="text-align: center; font-size: 25px;">User Login Form</h1>
                     <form name="Login" action="" method="post">
-                        
+                        <?php echo csrf_field(); ?>
+
 
 <div style="text-align:center;">
     <span style="font-weight:bold; margin-right:10px;">Login for:</span>
@@ -62,6 +64,7 @@
             </section>
             <?php
     if(isset($_POST['submit'])) {
+        csrf_verify();
 
         if($_POST['user'] == 'admin') {
 
