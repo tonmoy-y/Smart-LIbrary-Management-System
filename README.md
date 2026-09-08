@@ -1,6 +1,6 @@
 # Smart Library Management System
 
-A production‑ready web-based Library Management application built with vanilla **PHP**, **MySQL**, and **Bootstrap**. It supports complete circulation workflows (registration, verification, issue / return, fines, messaging) for two roles: **Admin** and **Student**. Recent updates include secure password hashing (bcrypt) and OTP‑based verification / password reset.
+A production‑ready web-based Library Management application built with vanilla **PHP**, **MySQL**, and **Bootstrap**. It supports complete circulation workflows (registration, verification, issue / return, fines, messaging) for two roles: **Admin** and **Student**, with bcrypt password hashing, OTP‑based email verification, CSRF-protected forms, and prepared-statement database access throughout.
 
 ## 🎯 Project Overview
 
@@ -11,10 +11,10 @@ This comprehensive library management system digitizes traditional library opera
 **🔹 Why it matters:** Reduces manual workload by 80%, enhances security, and improves user experience through digital transformation  
 
 ### 💼 Technical Excellence
-- **Modern Security**: bcrypt password hashing, OTP email verification, session management
+- **Modern Security**: bcrypt password hashing, OTP email verification, CSRF-protected forms, prepared SQL statements
 - **Responsive Design**: Mobile-first approach with Bootstrap framework for optimal user experience
 - **Scalable Architecture**: Role-based access control supporting hundreds of concurrent users
-- **Production Ready**: Comprehensive error handling, input validation, and secure deployment practices
+- **Production Ready**: Input validation, image-upload allowlisting, and secure deployment practices
 
 ## Developer Contact Information
 
@@ -36,7 +36,7 @@ Check the live demo: https://onlinelibrary.tonmoyy.me/
 
 - **Registration System**: 
   - Email verification with OTP
-  - Username validation
+  - Real-time username/email/roll-number availability check as you type
   - Basic profile setup
   - Student roll number verification
 
@@ -125,10 +125,11 @@ Check the live demo: https://onlinelibrary.tonmoyy.me/
    - Clean and intuitive UI
 
 4. **Security**
-   - Basic SQL injection protection
-   - Input validation
+   - Prepared-statement SQL queries
+   - CSRF-protected forms
+   - Input validation & escaped output
    - Session management
-   - Password protection
+   - Password protection (bcrypt)
 
 5. **Notifications**
    - Email notifications for:
@@ -138,146 +139,148 @@ Check the live demo: https://onlinelibrary.tonmoyy.me/
 
 ## ⚙️ Technical Requirements
 
-- PHP 7.0 or higher
-- MySQL 5.6 or higher
-- Apache Web Server
-- XAMPP/WAMP/MAMP or similar server package
-- Web Browser (Chrome/Firefox/Safari)
+- PHP 8.1 or higher (uses `mysqli_report()`, `str_contains()`; earlier PHP 7.x will run in a more error-tolerant mode but 8.1+ is recommended)
+- MySQL 5.7 or higher / MariaDB 10.3+
+- Apache Web Server with `mod_rewrite` enabled (used by `.htaccess` for clean URLs)
+- A local server stack: XAMPP (Windows/Linux/macOS), WAMP (Windows), MAMP (macOS), or a native LAMP setup (Linux)
+- Web Browser (Chrome/Firefox/Safari/Edge)
+- Composer is **not** required — PHPMailer is vendored directly under `PHPMailer/`, `admin/PHPMailer/`, `student/PHPMailer/`
 
-## 🚀 Quick Start (Local – XAMPP / WAMP)
+## 🚀 Quick Start
 
-1. Clone the repository
+Pick your OS below, then jump to [Database Setup](#database-setup) and [Email / OTP Setup](#-email--otp-setup-phpmailer) — those steps are the same on every platform.
+
+<details>
+<summary><b>🪟 Windows (XAMPP)</b></summary>
+
+1. Install [XAMPP](https://www.apachefriends.org/) and start it, then start **Apache** and **MySQL** from the XAMPP Control Panel.
+2. Clone the repo directly into `htdocs`:
+```bat
+cd C:\xampp\htdocs
+git clone https://github.com/tonmoy-y/Smart-LIbrary-Management-System.git
+```
+3. Open a browser at `http://localhost/Smart-LIbrary-Management-System/`.
+4. PHP/MySQL binaries live under `C:\xampp\php` and `C:\xampp\mysql\bin` — add them to your `PATH` if you want to run `php`/`mysql` from a terminal.
+
+</details>
+
+<details>
+<summary><b>🍎 macOS (MAMP or Homebrew)</b></summary>
+
+**Option A — MAMP** (easiest, GUI-based):
+1. Install [MAMP](https://www.mamp.info/), start it, and set the document root to a folder of your choice.
+2. Clone the repo into that folder:
 ```bash
+cd /Applications/MAMP/htdocs
+git clone https://github.com/tonmoy-y/Smart-LIbrary-Management-System.git
+```
+3. Visit `http://localhost:8888/Smart-LIbrary-Management-System/` (MAMP's default Apache port is 8888, not 80).
+
+**Option B — Homebrew (native PHP + MySQL, no GUI)**:
+```bash
+brew install php mysql
+brew services start mysql
 git clone https://github.com/tonmoy-y/Smart-LIbrary-Management-System.git
 cd Smart-LIbrary-Management-System
+php -S localhost:8000
 ```
-2. Move (or keep) the project folder inside your web root (e.g. `C:/xampp/htdocs/Smart-LIbrary-Management-System`).  
-3. Create a database (example: `library`):
+Since PHP's built-in server doesn't apply `.htaccess` rewrite rules, add a tiny router so clean URLs (e.g. `/login` instead of `/login.php`) still work:
+```bash
+cat > router.php << 'EOF'
+<?php
+$path = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+$file = __DIR__ . $path;
+if ($path !== '/' && !is_file($file) && is_file($file . '.php')) {
+    require $file . '.php';
+    return true;
+}
+return false;
+EOF
+php -S localhost:8000 router.php
+```
+Then visit `http://localhost:8000/`.
+
+</details>
+
+<details>
+<summary><b>🐧 Linux (LAMP)</b></summary>
+
+Debian/Ubuntu example:
+```bash
+sudo apt update
+sudo apt install apache2 mysql-server php php-mysqli libapache2-mod-php
+sudo a2enmod rewrite
+sudo systemctl restart apache2
+
+cd /var/www/html
+sudo git clone https://github.com/tonmoy-y/Smart-LIbrary-Management-System.git
+sudo chown -R www-data:www-data Smart-LIbrary-Management-System
+```
+Make sure your Apache vhost/`.htaccess` has `AllowOverride All` so the project's `.htaccess` rewrite rules take effect. Then visit `http://localhost/Smart-LIbrary-Management-System/`.
+
+Fedora/RHEL: swap the install commands for `sudo dnf install httpd mariadb-server php php-mysqlnd` and use `systemctl` the same way.
+
+</details>
+
+### Database Setup
+
+Works the same on every OS — from a terminal (`mysql` CLI) or phpMyAdmin:
 ```sql
 CREATE DATABASE library CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 ```
-4. Import the provided schema file:
-```sql
--- In phpMyAdmin or mysql CLI
-SOURCE path/to/library (4).sql;
-```
-5. Open `connection.php` (and `admin/connection.php`, `student/connection.php`) and confirm credentials:
-```php
-$db = mysqli_connect("localhost","root","","library");
-```
-6. Start Apache + MySQL in XAMPP.  
-7. Visit: `http://localhost/Smart-LIbrary-Management-System/login.php` or `index.php`.
-8. Register an Admin account first (admin registration page).  
-9. Register a Student, complete OTP email verification (or configure email—see below).  
-10. Login and explore dashboards.
-
-## 🛠 Full Setup Guide (From Git Clone to Working OTP Email)
-
-### 1. Clone Repository
+Import the provided schema file (adjust the path to wherever you cloned the repo):
 ```bash
-git clone https://github.com/tonmoy-y/Smart-LIbrary-Management-System.git
-cd Smart-LIbrary-Management-System
+mysql -u root library < "library (4).sql"
 ```
 
-### 2. Place in Web Root (Windows XAMPP)
-Copy or move the project folder to:  
-`C:/xampp/htdocs/Smart-LIbrary-Management-System`
+### Configure the Database Connection
 
-Then browse: `http://localhost/Smart-LIbrary-Management-System/`
-
-### 3. Create Database
-Use phpMyAdmin or MySQL CLI:
-```sql
-CREATE DATABASE library CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-```
-Import schema using the provided SQL file:
-```sql
-SOURCE /path/to/Smart-LIbrary-Management-System/library (4).sql;
-```
-
-### 4. Configure Database Connection
-Open ALL of these (root `connection.php`, plus `admin/connection.php`, `student/connection.php` if duplicated) and ensure:
+Open `connection.php`, `admin/connection.php`, and `student/connection.php` and set your local credentials:
 ```php
+mysqli_report(MYSQLI_REPORT_OFF); // keep this line — restores classic mysqli error handling on PHP 8.1+
 $db = mysqli_connect("localhost","root","","library");
 ```
-Restart Apache if you changed PHP extensions.
+- **Windows (XAMPP)**: default is `root` with an **empty** password.
+- **macOS (MAMP)**: default is `root` / `root`, and MAMP's MySQL often runs on port `8889` — use `mysqli_connect("localhost:8889","root","root","library")` if you hit a connection error.
+- **Linux**: use whatever user/password you configured when installing `mysql-server`/`mariadb-server`.
 
-### 5. Ensure Password Columns Are Large Enough
+### Run It
+
+1. Visit the project URL for your OS (see above) and register an **Admin** account first via the registration flow.
+2. Register a **Student** account, complete OTP email verification (see [Email / OTP Setup](#-email--otp-setup-phpmailer) below to make this actually send).
+3. Log in as either role and explore the dashboards.
+
+## 📧 Email / OTP Setup (PHPMailer)
+
+Registration, password reset, and admin due-date reminders all send email through **PHPMailer** (vendored under `PHPMailer/`, `admin/PHPMailer/`, `student/PHPMailer/` — no Composer needed) over an authenticated Gmail SMTP connection.
+
+1. Copy each `mail_config.example.php` to `mail_config.php` in the same folder:
+```bash
+cp mail_config.example.php mail_config.php
+cp admin/mail_config.example.php admin/mail_config.php
+cp student/mail_config.example.php student/mail_config.php
+```
+   (On Windows, use `copy` instead of `cp`, or just duplicate the files in File Explorer and rename them.)
+
+2. Edit each `mail_config.php` with a real Gmail address and an **App Password** (not your normal Gmail password — generate one at [myaccount.google.com/apppasswords](https://myaccount.google.com/apppasswords), which requires 2-Step Verification to be enabled):
+```php
+define('SMTP_EMAIL', 'your-email@gmail.com');
+define('SMTP_PASSWORD', 'your-16-character-app-password');
+```
+
+3. `mail_config.php` is listed in `.gitignore` — it's meant to hold a real secret locally and should never be committed.
+
+4. Test it by registering a new student account; you should receive an OTP email within a few seconds. If it fails, check:
+   - The app password is correct and 2-Step Verification is enabled on the Gmail account.
+   - Outbound port `587` isn't blocked by your firewall/network (common on some corporate or school networks).
+   - PHP's `openssl` extension is enabled (`php -m | grep openssl` on macOS/Linux, or check `php.ini` on Windows).
+
+### Password Column Length (upgrading from an older schema)
+If you're importing an older database dump that predates bcrypt hashing, make sure the password columns can hold a 60-character hash:
 ```sql
 ALTER TABLE admin   MODIFY password VARCHAR(255) NOT NULL;
 ALTER TABLE student MODIFY password VARCHAR(255) NOT NULL;
 ```
-
-### 6. (Optional) Migrate Legacy Plain Passwords
-See migration snippet below (Legacy Plain Password Migration) if coming from older version.
-
-### 7. Configure Email (SMTP) for OTP (XAMPP on Windows)
-The project currently uses `mail()`; configure XAMPP's built‑in sendmail relay or replace with PHPMailer.
-
-#### 7.1 Enable OpenSSL in PHP
-Edit `C:/xampp/php/php.ini` and ensure:
-```
-extension=openssl
-```
-Restart Apache.
-
-#### 7.2 Configure sendmail (Using Gmail Example)
-Edit: `C:/xampp/sendmail/sendmail.ini`
-```
-smtp_server=smtp.gmail.com
-smtp_port=587
-smtp_ssl=auto
-auth_username=YOUR_GMAIL_ADDRESS@gmail.com
-auth_password=YOUR_APP_PASSWORD
-force_sender=YOUR_GMAIL_ADDRESS@gmail.com
-```
-Gmail now requires 2FA + App Password (NOT your normal password).
-
-#### 7.3 Link PHP to sendmail
-In `php.ini`, find and set:
-```
-[mail function]
-SMTP=smtp.gmail.com
-smtp_port=587
-sendmail_path="C:\xampp\sendmail\sendmail.exe -t"
-```
-Save and restart Apache.
-
-#### 7.4 Test Mail
-Create `mail_test.php` in the project root:
-```php
-<?php
-var_dump(mail('your_destination_email@example.com','Test Mail','If this is true, mail works.'));
-```
-Visit: `http://localhost/Smart-LIbrary-Management-System/mail_test.php`  
-If `bool(true)` and you received the email, OTP sending should work.
-
-### 8. Adjust From Address (Optional)
-In `send_otp.php` (student/admin versions) you can set a custom header:
-```php
-$headers = "From: Library System <YOUR_GMAIL_ADDRESS@gmail.com>\r\n";
-```
-
-### 9. Register Accounts
-1. Register Admin (for management).  
-2. Register Student → check email for OTP → verify → login.  
-
-### 10. Common Email Issues
-| Symptom | Cause | Fix |
-|--------|-------|-----|
-| `bool(false)` from mail() | Misconfigured sendmail | Recheck sendmail.ini paths |
-| No email, no error | Gmail blocked | Verify app password & less secure off (not used) |
-| Timeout | Firewall blocking 587 | Allow outbound SMTP or switch network |
-| Truncated OTP email | HTML header missing | Ensure correct `$headers` formatting |
-
-### 11. (Optional) Switch to PHPMailer Later
-PHPMailer gives better error messages and TLS handling.
-
-### 12. Backup & Security Checklist
-- Change default admin password immediately.  
-- Remove any test scripts (`mail_test.php`, migrations).  
-- Keep `password_hash()` usage; never downgrade to MD5.  
-- Regularly export the database.
 
 ---
 
@@ -288,11 +291,6 @@ PHPMailer gives better error messages and TLS handling.
 | VPS (LAMP) | Place under `/var/www/html/Smart-LIbrary-Management-System`; set correct ownership (`www-data`). |
 | Nginx + PHP-FPM | Root to `/var/www/html/Smart-LIbrary-Management-System`; ensure `index.php` forwarding; configure `fastcgi_pass`. |
 | SSL | Use Certbot (Let’s Encrypt) – not required locally but recommended live. |
-
-### Optional: Email / OTP Sending
-Current code uses PHP's `mail()`; on Windows/XAMPP this may fail without SMTP configuration. For reliable delivery:
-- Use an SMTP relay (Gmail / SendGrid / Mailgun).  
-- Replace simple `mail()` calls with PHPMailer (future improvement).  
 
 ### Legacy Plain Password Migration (If upgrading an old DB)
 If older rows stored plaintext (not 60‑char bcrypt hashes), run a one‑time migration:
@@ -329,9 +327,10 @@ Remove the script afterward for security.
 | DB Connection | `connection.php` (root, `admin/`, `student/`) | Set host/user/pass/db |
 | OTP Expiry / Cleanup | `verify.php` (student/admin) | Uses DB timestamp deletion | 
 | Password Hashing | Registration, verify, edit_profile, login | Uses `password_hash()` & `password_verify()` |
-| Email sending | `send_otp.php` (student/admin) | Configure SMTP or adapt mail() |
+| Email sending | `mail_config.php` (root, `admin/`, `student/`) | Set `SMTP_EMAIL` / `SMTP_PASSWORD` — see [Email / OTP Setup](#-email--otp-setup-phpmailer) |
+| CSRF Protection | `csrf.php` (root, `admin/`, `student/`) | Included automatically on every page with a state-changing form |
 
-Keep passwords columns as `VARCHAR(255)` to avoid hash truncation.
+Keep password columns as `VARCHAR(255)` to avoid hash truncation.
 
 ## 📘 Usage Flow
 
@@ -355,20 +354,21 @@ Keep passwords columns as `VARCHAR(255)` to avoid hash truncation.
 - Pay attention to fines / notifications.  
 - Update profile & reset password if required.
 
-## 🔐 Security Features (Current)
+## 🔐 Security Features
 - Bcrypt password hashing (`password_hash`, `password_verify`).
 - Session-based auth segregation (student vs admin namespaces).
-- OTP-based email verification & password reset (with server-side expiry + DB cleanup).
-- Basic SQL protection (manual escaping—future refactor: prepared statements recommended).
-- Limited exposure of sensitive data (password hashes not displayed in profiles anymore).
+- OTP-based email verification & password reset (with server-side expiry + DB cleanup), sent via authenticated SMTP through PHPMailer.
+- SQL queries built with `mysqli` prepared statements and bound parameters throughout, rather than raw string interpolation.
+- CSRF tokens on every state-changing form, verified server-side before the request is processed.
+- File uploads (book covers, profile pictures) are restricted to an image-extension allowlist and validated with `getimagesize()` before being accepted.
+- Output escaped with `htmlspecialchars()` where user-supplied data is rendered back into HTML.
+- Limited exposure of sensitive data (password hashes not displayed in profiles).
 
 ### Recommended Future Hardening
-- Use prepared statements (`mysqli_stmt` / PDO) everywhere.
-- Add CSRF tokens to forms.
 - Rate-limit OTP resend & login attempts.
-- Switch to PHPMailer + SMTP with authenticated sending.
-- Enforce stronger password policy (length / complexity / haveibeenpwned check optional).
-- Add audit log (issues, returns, admin actions).
+- Enforce a stronger password policy (length / complexity / breached-password check).
+- Add an audit log for issues, returns, and admin actions.
+- Add automated tests around the circulation/fine workflows.
 
 ## 🗂 Project Structure (Key Files)
 ```
@@ -384,11 +384,15 @@ Smart-LIbrary-Management-System/
 ├─ connection.php
 ├─ navbar.php
 ├─ footer.php
+├─ csrf.php
+├─ mail_config.example.php  # copy to mail_config.php and fill in real credentials
 ├─ styles.css
 ├─ responsive.css
 ├─ .htaccess
+├─ .gitignore
 ├─ library (4).sql          # Database schema file
 ├─ LICENSE.txt
+├─ PHPMailer/               # Vendored PHPMailer library
 ├─ images/                  # Shared image resources
 ├─ admin/
 │  ├─ admin_login.php
@@ -409,15 +413,19 @@ Smart-LIbrary-Management-System/
 │  ├─ message.php
 │  ├─ request.php
 │  ├─ contact.php
+│  ├─ check_availability.php  # AJAX endpoint for live username/email checks
 │  ├─ connection.php
 │  ├─ navbar.php
 │  ├─ sidenav.php
 │  ├─ footer.php
+│  ├─ csrf.php
+│  ├─ mail_config.example.php
 │  ├─ styles.css
 │  ├─ responsive.css
 │  ├─ logout.php
 │  ├─ session_destroy.php
 │  ├─ expired.php
+│  ├─ PHPMailer/
 │  └─ images/              # Admin-specific images
 ├─ student/
 │  ├─ index.php
@@ -429,20 +437,23 @@ Smart-LIbrary-Management-System/
 │  ├─ edit_profile.php
 │  ├─ profile.php
 │  ├─ books.php
-│  ├─ books_old.php
 │  ├─ request.php
 │  ├─ issue_info.php
 │  ├─ fine.php
 │  ├─ message.php
 │  ├─ contact.php
+│  ├─ check_availability.php
 │  ├─ connection.php
 │  ├─ navbar.php
 │  ├─ footer.php
+│  ├─ csrf.php
+│  ├─ mail_config.example.php
 │  ├─ styles.css
 │  ├─ responsive.css
 │  ├─ logout.php
 │  ├─ session_destroy.php
-│  └─ expired.php
+│  ├─ expired.php
+│  └─ PHPMailer/
 └─ README.md
 ```
 
@@ -456,10 +467,10 @@ Smart-LIbrary-Management-System/
 | UI | Bootstrap 3 + custom CSS | Quick responsive layout |
 
 ## 🚧 Known Limitations / Next Steps
-- No comprehensive prepared statement layer yet.
-- No queue / cron for periodic cleanup (handled ad-hoc on page hits).
-- Email deliverability depends on PHP mail() configuration.
+- No queue / cron for periodic cleanup (expired OTPs and overdue-book checks run ad-hoc on page hits, not on a schedule).
+- No login/OTP-resend rate limiting yet.
 - Limited audit / reporting exports.
+- Email deliverability depends on the Gmail SMTP app-password configured in `mail_config.php`.
 
 ## 🤝 Contributing
 PRs welcome. Please open an Issue first for significant changes.
