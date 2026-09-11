@@ -170,7 +170,7 @@ if(isset($_SESSION['login_user'])) {
                       else {
                     ?>
                     <a href="login" class="nav-btn student"> <i class="fa fa-sign-in-alt"></i>  Login</a>
-           
+
                     <?php
                       }
                     ?>

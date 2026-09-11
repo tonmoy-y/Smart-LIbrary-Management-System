@@ -2,6 +2,8 @@
 
 A production‑ready web-based Library Management application built with vanilla **PHP**, **MySQL**, and **Bootstrap**. It supports complete circulation workflows (registration, verification, issue / return, fines, messaging) for two roles: **Admin** and **Student**, with bcrypt password hashing, OTP‑based email verification, CSRF-protected forms, and prepared-statement database access throughout.
 
+🔗 **Live Demo:** [https://onlinelibrary.tonmoyy.dev/](https://onlinelibrary.tonmoyy.dev/)
+
 ## 🎯 Project Overview
 
 This comprehensive library management system digitizes traditional library operations through modern web technologies, providing an intuitive and secure platform for both library administrators and students. The application demonstrates full-stack development expertise while solving real-world challenges in educational institutions.
@@ -19,12 +21,14 @@ This comprehensive library management system digitizes traditional library opera
 ## Developer Contact Information
 
 ### Tonmoy Sarker Sourav
+Department of CSE
 
 [![LinkedIn](https://img.shields.io/badge/LinkedIn-0077B5?style=flat&logo=linkedin)](https://www.linkedin.com/in/tonmoyy/) <br>
 [![Facebook](https://img.shields.io/badge/Facebook-1877F2?style=flat&logo=facebook&logoColor=white)](https://www.facebook.com/realtonmoysarker) <br>
-[![Email](https://img.shields.io/badge/Email-D14836?style=flat&logo=gmail&logoColor=white)](mailto:tonmoy4451@gmail.com)  tonmoy4451@gmail.com
+[![Email](https://img.shields.io/badge/Email-D14836?style=flat&logo=gmail&logoColor=white)](mailto:tonmoy4451@gmail.com)  tonmoy4451@gmail.com <br>
+[![Website](https://img.shields.io/badge/Website-000000?style=flat&logo=googlechrome&logoColor=white)](https://onlinelibrary.tonmoyy.dev/)  onlinelibrary.tonmoyy.dev
 
-Check the live demo: https://onlinelibrary.tonmoyy.me/
+Check the live demo: https://onlinelibrary.tonmoyy.dev/
 
 ## ✨ Key Features
 

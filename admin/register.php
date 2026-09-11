@@ -29,7 +29,10 @@
     .field-check .check-icon.ok { display: block; color: #2fae56; }
     .field-check .check-icon.taken { display: block; color: #e04b4b; }
     .field-check .check-icon.checking { display: block; color: rgba(255,255,255,0.7); font-size: 12px; }
-    .field-hint { font-size: 12px; color: #ffb4b4; text-align: left; margin: -6px 0 4px 2px; min-height: 14px; }
+    .field-hint { font-size: 12px; color: #ffb4b4; text-align: left; width: 100%; max-width: 300px; }
+    .field-hint:empty { display: none; }
+    #register-error { width: 100%; max-width: 300px; text-align: center; color: #ffb4b4; font-size: 14px; font-weight: 600; }
+    #register-error:empty { display: none; }
 </style>
 </head>
 <body>
@@ -65,6 +68,7 @@
 
 
                 <input type="submit" class="btn btn-success" value="Register" name="submit" style="color: rgb(255, 255, 255); width: 200px ; height: 40px; font-weight: 1000;">
+                <div id="register-error"></div>
 
             </div>
             </form>
@@ -158,6 +162,7 @@ Swal.fire({
             else {
                 ?>
                            <script type="text/javascript">
+document.getElementById('register-error').textContent = "Username already exists! Please choose another username.";
 Swal.fire({
     title: "Error!",
     text: "Username already exists! Please choose another username.",

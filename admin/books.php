@@ -81,6 +81,24 @@
   background: #e68900;
 }
 
+.qty-adjust {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+.qty-adjust form {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.qty-input {
+  width: 64px !important;
+  height: 32px !important;
+  text-align: center;
+  padding: 0 4px !important;
+}
+
 
 
           .sarch {
@@ -250,11 +268,19 @@ if(isset($_POST['submit'])) {
                     <p><b>Status:</b> ".htmlspecialchars($row['status'])." | <b>Qty:</b> ".htmlspecialchars($row['quantity'])."</p>
                 </div>
                 <div class='overlay'>
-                    <form method='post' action=''>
-                        ".csrf_field()."
-                        <input type='hidden' name='bid' value='".htmlspecialchars($row['bid'])."'>
-                        <button type='submit' name='submit1' class='btn btn-danger'>Delete</button>
-                    </form>
+                    <div class='qty-adjust'>
+                        <form method='post' action=''>
+                            ".csrf_field()."
+                            <input type='hidden' name='bid' value='".htmlspecialchars($row['bid'])."'>
+                            <input type='number' name='quantity' min='0' value='".htmlspecialchars($row['quantity'])."' class='form-control qty-input'>
+                            <button type='submit' name='submit2' class='btn btn-default btn-sm'>Update Qty</button>
+                        </form>
+                        <form method='post' action=''>
+                            ".csrf_field()."
+                            <input type='hidden' name='bid' value='".htmlspecialchars($row['bid'])."'>
+                            <button type='submit' name='submit1' class='btn btn-danger btn-sm'>Delete</button>
+                        </form>
+                    </div>
                 </div>
             </div>
             ";
@@ -288,6 +314,47 @@ if(isset($_POST['submit'])) {
         ";
     }
     echo "</div>";
+}
+
+// ----------------- quantity update query -------------------
+if(isset($_POST['submit2'])) {
+     csrf_verify();
+     if(isset($_SESSION['login_admin'])) {
+
+          $newQty = max(0, (int)$_POST['quantity']);
+          $newStatus = $newQty > 0 ? 'Available' : 'Not Available';
+          $stmt = mysqli_prepare($db, "UPDATE books SET quantity=?, status=? WHERE bid=?");
+          mysqli_stmt_bind_param($stmt, "sss", $newQty, $newStatus, $_POST['bid']);
+          mysqli_stmt_execute($stmt);
+          ?>
+             <script type="text/javascript">
+Swal.fire({
+    title: "Success!",
+    text: "Book quantity updated successfully.",
+    icon: "success",
+    confirmButtonText: "OK",
+    confirmButtonColor: "#589cdbff"
+}).then(() => {
+    window.location = "books";
+});
+</script>
+          <?php
+
+     } else {
+          ?>
+          <script type="text/javascript">
+Swal.fire({
+    title: "Error!",
+    text: "Please login to manage books.",
+    icon: "error",
+    confirmButtonText: "OK",
+    confirmButtonColor: "#589cdbff"
+}).then(() => {
+    window.location = "../login";
+});
+</script>
+          <?php
+     }
 }
 
 // ----------------- delete query -------------------

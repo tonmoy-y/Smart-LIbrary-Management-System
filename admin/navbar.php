@@ -118,7 +118,7 @@ if(isset($_SESSION['login_admin'])) {
                       else {
                     ?>
                     <a href="../login" class="nav-btn admin"><i class="fa fa-sign-in-alt"></i>  Login</a>
-                    
+
                     <?php
                       }
                     ?>

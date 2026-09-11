@@ -99,7 +99,7 @@ hr {
    premium accent for CTAs/highlights; accent = interactive blue (kept,
    already the dominant SweetAlert color); neutral = secondary buttons.
 -------------------------------------------------------------- */
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700&family=Inter:wght@400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700&family=Inter:wght@400;500;600&family=Space+Mono:wght@700&display=swap');
 
 :root {
     --primary: #443a68;
@@ -117,6 +117,7 @@ hr {
     --shadow-lift: 0 14px 34px rgba(20, 15, 40, 0.45);
     --font-heading: 'Poppins', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     --font-body: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    --font-display: 'Space Mono', 'Poppins', monospace;
 }
 
 h1, h2, h3, h4, h5, h6 {
@@ -167,6 +168,17 @@ html,body {
     flex-direction: column;
 }
 
+body {
+    background-color: #faf8f4;
+    background-image: repeating-linear-gradient(
+        135deg,
+        rgba(68, 58, 104, 0.05) 0px,
+        rgba(68, 58, 104, 0.05) 1px,
+        transparent 1px,
+        transparent 14px
+    );
+}
+
 .wrapper {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     font-size: 16px;
@@ -183,11 +195,15 @@ html,body {
 
 header {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    height: 100px;
+    min-height: 100px;
     width: 100% ;
     background-color: var(--primary);
     /* contain the floated logo/title so .navbar always flows below it
-       instead of beside it (was overlapping page content at tablet widths) */
+       instead of beside it (was overlapping page content at tablet widths).
+       min-height (not a fixed height) lets the box grow when the navbar's
+       own content — extra links, badges, the timer — wraps to more rows
+       than the 100px logo row alone; a fixed height let the navbar overflow
+       past the header box and overlap the section below it. */
     display: flow-root !important;
 }
 
@@ -348,7 +364,7 @@ section::before {
     margin: 30px auto;
     color: rgb(248, 242, 242);
     border-radius: 20px;
-    border: 1px solid rgba(255,255,255,0.12);
+    border: 2px solid rgba(212, 166, 86, 0.55);
     text-shadow: 0 1px 3px rgba(0, 0, 0, 0.45);
     box-shadow: var(--shadow-soft);
     backdrop-filter: blur(6px);
@@ -367,13 +383,17 @@ section::before {
     margin: 30px auto;
     color: rgb(248, 242, 242);
     border-radius: 20px;
-    border: 1px solid rgba(255,255,255,0.12);
+    border: 2px solid rgba(212, 166, 86, 0.55);
     text-shadow: 0 1px 3px rgba(0, 0, 0, 0.45);
     box-shadow: var(--shadow-soft);
     backdrop-filter: blur(6px);
 }
 
 
+
+.box h1, .box1 h1, .box2 h1 {
+    font-family: var(--font-display);
+}
 
 form .login {
     display: flex;
@@ -481,4 +501,81 @@ form .reg {
 .log_img label {
     display: inline-block;
     margin-left: 10px;
+}
+
+/* -------------------- site-wide consistency pass --------------------
+   Admin/student action tables were built page-by-page over time and ended
+   up mixing raw Bootstrap defaults (grey btn-default, blue btn-primary,
+   teal btn-info) and one-off inline colors into an otherwise indigo/gold
+   themed app. These broad, tag/class-level overrides pull every page onto
+   the same button, table, and badge language without having to rewrite
+   each page's markup individually. !important is needed because several
+   pages set conflicting colors via inline style="" attributes.
+-------------------------------------------------------------------- */
+
+.btn-default, .btn-primary, .btn-info, .btn-submit {
+    background: var(--primary) !important;
+    background-image: none !important;
+    color: #fff !important;
+    border: none !important;
+    border-radius: 8px !important;
+    font-weight: 600 !important;
+    box-shadow: 0 4px 12px rgba(20, 15, 40, 0.22);
+    transition: transform .18s ease, box-shadow .18s ease, background .18s ease !important;
+}
+.btn-default:hover, .btn-primary:hover, .btn-info:hover, .btn-submit:hover,
+input[type="submit"].btn:hover, button.btn:hover {
+    background: var(--gold) !important;
+    color: #2b2444 !important;
+    transform: translateY(-2px);
+}
+.btn-danger {
+    background: #c0392b !important;
+    background-image: none !important;
+    color: #fff !important;
+    border: none !important;
+    border-radius: 8px !important;
+    font-weight: 600 !important;
+}
+.btn-success {
+    background: linear-gradient(135deg, var(--gold) 0%, var(--gold-dark) 100%) !important;
+    color: #2b2444 !important;
+    border: none !important;
+    border-radius: 8px !important;
+    font-weight: 600 !important;
+}
+
+/* Data tables: one consistent header/row language across every admin &
+   student listing page instead of each page's own ad hoc table styling. */
+table {
+    width: 100%;
+    border-radius: 12px;
+    overflow: hidden;
+    border-collapse: separate !important;
+    border-spacing: 0;
+}
+table thead th, table th {
+    background: linear-gradient(120deg, var(--primary) 0%, var(--primary-dark) 100%) !important;
+    color: #fff !important;
+    font-weight: 600;
+    text-align: left;
+    padding: 10px 12px;
+}
+table td {
+    padding: 8px 12px;
+    border-bottom: 1px solid rgba(20, 15, 40, 0.08);
+}
+table tbody tr:hover td {
+    background: rgba(var(--primary-rgb), 0.06);
+}
+
+/* Status labels (Approved/Pending/Expired/Paid/Unpaid, etc.) — consistent
+   pill shape everywhere, color kept semantic (red=bad, green=good). */
+span[style*="color: red"], span[style*="color:red"],
+span[style*="color: green"], span[style*="color:green"] {
+    display: inline-block;
+    padding: 3px 12px;
+    border-radius: 999px;
+    font-weight: 600;
+    font-size: 13px;
 }

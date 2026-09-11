@@ -38,18 +38,27 @@ header nav.navbar .nav-links { display: flex; gap: 20px; flex-wrap: wrap; align-
   .menu-toggle .bar::before { top: -6px; }
   .menu-toggle .bar::after { top: 6px; }
 
-  /* When the drawer is open hide the three bars (mobile only). They will reappear when closed. */
-  body.nav-open .menu-toggle .bar,
-  body.nav-open .menu-toggle .bar::before,
+  /* When the drawer is open, morph the three bars into an X so there's
+     always a visible affordance for closing the menu (previously they just
+     faded to nothing, leaving no close icon at all). */
+  body.nav-open .menu-toggle .bar {
+    background: transparent;
+  }
+  body.nav-open .menu-toggle .bar::before {
+    top: 0;
+    transform: rotate(45deg);
+  }
   body.nav-open .menu-toggle .bar::after {
-    opacity: 0;
-    transform: translateX(6px);
-    pointer-events: none;
+    top: 0;
+    transform: rotate(-45deg);
   }
 
-  /* Also hide the button's colored background while the drawer is open so no colored square remains visible */
+  /* Keep the button's colored background visible (as an obvious close button)
+     while the drawer is open, above the drawer's own z-index. */
   body.nav-open .menu-toggle {
-    background: transparent !important;
+    position: relative;
+    z-index: 1101;
+    background: var(--primary-light);
     box-shadow: none;
   }
 

@@ -46,8 +46,22 @@
         font-size: 12px;
         color: #ffb4b4;
         text-align: left;
-        margin: -6px 0 4px 2px;
-        min-height: 14px;
+        width: 100%;
+        max-width: 300px;
+    }
+    .field-hint:empty {
+        display: none;
+    }
+    #register-error {
+        width: 100%;
+        max-width: 300px;
+        text-align: center;
+        color: #ffb4b4;
+        font-size: 14px;
+        font-weight: 600;
+    }
+    #register-error:empty {
+        display: none;
     }
     </style>
     <title>Student Registration </title>
@@ -104,6 +118,7 @@
 
                 <input class="form-control" type="password" id="password" name="password" placeholder="Password" required>
                 <input type="submit" class="btn btn-success" value="Register" name="submit" style="color: rgb(255, 255, 255); width: 120px ; height: 40px; font-weight: 700;">
+                <div id="register-error"></div>
 
             </div>
             </form>
@@ -238,18 +253,20 @@ else {
                 // Show specific popup based on which field conflicts (priority: Roll, Email, Username)
                 if ($dupRoll) { ?>
                 <script type="text/javascript">
+                  document.getElementById('register-error').textContent = "Roll number already exists!";
                   Swal.fire({
                     title: "Error!",
                     text: "Roll number already exists!",
                     icon: "error",
                     confirmButtonText: "I Understand",
                     confirmButtonColor: "#468ed2ff"
-                  }).then(() => { // window.location = "register"; 
+                  }).then(() => { // window.location = "register";
 
                   });
                 </script>
                 <?php } else if ($dupEmail) { ?>
                 <script type="text/javascript">
+                  document.getElementById('register-error').textContent = "Email already exists!";
                   Swal.fire({
                     title: "Error!",
                     text: "Email already exists!",
@@ -262,13 +279,14 @@ else {
                 </script>
                 <?php } else if ($dupUsername) { ?>
                 <script type="text/javascript">
+                  document.getElementById('register-error').textContent = "Username already exists!";
                   Swal.fire({
                     title: "Error!",
                     text: "Username already exists!",
                     icon: "error",
                     confirmButtonText: "I Understand",
                     confirmButtonColor: "#468ed2ff"
-                  }).then(() => { // window.location = "register"; 
+                  }).then(() => { // window.location = "register";
 
                   });
                 </script>
